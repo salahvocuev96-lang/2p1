@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Расписание пар</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        .timer-box {
+            background-color: #1c1c1e;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .status { font-size: 18px; color: #8e8e93; margin-bottom: 10px; }
+        .time-left { font-size: 48px; font-weight: bold; color: #0a84ff; margin-bottom: 10px; }
+        .next-info { font-size: 16px; color: #8e8e93; }
+        .schedule {
+            width: 100%;
+            max-width: 350px;
+        }
+        .lesson {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #1c1c1e;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .lesson.active { background-color: #0a84ff; color: #fff; }
+        .lesson-time { font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Мои пары</h1>
+
+    <div class="timer-box">
+        <div class="status" id="status">Загрузка...</div>
+        <div class="time-left" id="timer">--:--</div>
+        <div class="next-info" id="next-info"></div>
+    </div>
+
+    <div class="schedule" id="schedule-list">
+    </div>
+
+    <script>
+        // --- ТВОЁ РАСПИСАНИЕ ---
+        const schedule = [
+            { start: "09:00", end: "10:30", name: "1 пара" },
+            { start: "10:35", end: "12:05", name: "2 пара" },
+            { start: "12:35", end: "14:05", name: "3 пара" },
+            { start: "14:15", end: "15:45", name: "4 пара" },
+            { start: "15:55", end: "17:25", name: "5 пара" },
+            { start: "17:30", end: "19:00", name: "6 пара" }
+        ];
+
+        function getTimeInMinutes(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function updateApp() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentSeconds = now.getSeconds();
+            
+            let activeLesson = null;
+            let nextLesson = null;
+            let timeLeftSeconds = 0;
+
+            for (let i = 0; i < schedule.length; i++) {
+                const startMin = getTimeInMinutes(schedule[i].start);
+                const endMin = getTimeInMinutes(schedule[i].end);
+
+                if (currentMinutes >= startMin && currentMinutes < endMin) {
+                    activeLesson = schedule[i];
+                    timeLeftSeconds = (endMin - currentMinutes) * 60 - currentSeconds;
+                    break;
+                } else if (currentMinutes < startMin) {
+                    nextLesson = schedule[i];
+                    timeLeftSeconds = (startMin - currentMinutes) * 60 - currentSeconds;
+                    break;
+                }
+            }
+
+            const statusEl = document.getElementById('status');
+            const timerEl = document.getElementById('timer');
+            const nextInfoEl = document.getElementById('next-info');
+
+            const hours = Math.floor(timeLeftSeconds / 3600);
+            const mins = Math.floor((timeLeftSeconds % 3600) / 60);
+            const secs = timeLeftSeconds % 60;
+            const timeStr = `${hours > 0 ? hours + 'ч ' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            if (activeLesson) {
+                statusEl.innerText = `Идет: ${activeLesson.name}`;
+                timerEl.innerText = timeStr;
+                nextInfoEl.innerText = "до конца";
+            } else if (nextLesson) {
+                statusEl.innerText = `Следующая: ${nextLesson.name}`;
+                timerEl.innerText = timeStr;
+                nextInfoEl.innerText = "до начала";
+            } else {
+                statusEl.innerText = "Пары закончились";
+                timerEl.innerText = "Отдыхай!";
+                nextInfoEl.innerText = "Увидимся завтра";
+            }
+
+            const listEl = document.getElementById('schedule-list');
+            listEl.innerHTML = '';
+            schedule.forEach(lesson => {
+                const div = document.createElement('div');
+                div.className = `lesson ${activeLesson && activeLesson.name === lesson.name ? 'active' : ''}`;
+                div.innerHTML = `<span>${lesson.name}</span><span class="lesson-time">${lesson.start} - ${lesson.end}</span>`;
+                listEl.appendChild(div);
+            });
+        }
+
+        setInterval(updateApp, 1000);
+        updateApp();
+    </script>
+</body>
+</html>
