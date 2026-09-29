@@ -219,6 +219,7 @@
                 document.getElementById('status').innerText = 'Идет: ' + active.subject;
                 document.getElementById('timer').innerText = t;
                 document.getElementById('info').innerText = 'до конца';
+                document.querySelector('.timer').style.display = 'block';
             } else if (activeBreak) {
                 document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
                 document.getElementById('timer').innerText = t;
@@ -231,6 +232,7 @@
                 document.getElementById('status').innerText = '';
                 document.getElementById('timer').innerText = '';
                 document.getElementById('info').innerText = '';
+                document.querySelector('.timer').style.display = 'none';
             }
 
             const sch = document.getElementById('schedule');
