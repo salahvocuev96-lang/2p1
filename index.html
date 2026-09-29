@@ -84,7 +84,7 @@
 <body>
     <h1>Расписание 2П1</h1>
     <div class="day-selector" id="daySelector"></div>
-    <div class="timer">
+    <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
         <div class="time" id="timer">--:--</div>
         <div class="info" id="info"></div>
@@ -154,7 +154,6 @@
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
-        const dayIndexMap = { "Понедельник": 0, "Вторник": 1, "Среда": 2, "Четверг": 3, "Пятница": 4, "Суббота": 5 };
 
         let selectedDay = dayMap[new Date().getDay()];
 
@@ -165,35 +164,30 @@
 
         function update() {
             const now = new Date();
-            const todayWeekday = now.getDay(); // 0=Вс, 1=Пн, ..., 6=Сб
+            const todayWeekday = now.getDay();
             const todayName = dayMap[todayWeekday === 0 ? 6 : todayWeekday - 1];
             
             const todayLessons = schedule[selectedDay];
-            let active = null, activeBreak = null, next = null, leftMs = 0;
+            const isToday = (selectedDay === todayName);
+            
+            let active = null, activeBreak = null, next = null, left = 0;
 
-            // Вычисляем, сколько дней до выбранного дня
-            const selectedDayIdx = dayIndexMap[selectedDay];
-            const todayIdx = dayIndexMap[todayName];
-            let daysDiff = selectedDayIdx - todayIdx;
-            if (daysDiff < 0) daysDiff += 7; // Если день уже прошёл на этой неделе, считаем на следующую
-
-            // Ищем активную пару (только если выбран сегодня)
-            if (selectedDay === todayName) {
+            // Считаем таймер ТОЛЬКО если выбран сегодня
+            if (isToday) {
                 const cur = now.getHours() * 60 + now.getMinutes();
                 const sec = now.getSeconds();
-                
+
                 for (let lesson of todayLessons) {
                     if (lesson.subject === "—") continue;
                     const slot = timeSlots[lesson.slot - 1];
                     const s = toMin(slot.start), e = toMin(slot.end);
                     if (cur >= s && cur < e) {
                         active = { ...lesson, time: `${slot.start}-${slot.end}` };
-                        leftMs = ((e - cur) * 60 - sec) * 1000;
+                        left = (e - cur) * 60 - sec;
                         break;
                     }
                 }
 
-                // Ищем активную перемену (только если выбран сегодня)
                 if (!active) {
                     for (let i = 0; i < todayLessons.length - 1; i++) {
                         if (todayLessons[i].subject === "—" || todayLessons[i+1].subject === "—") continue;
@@ -202,80 +196,53 @@
                         const s = toMin(slot1.end), e = toMin(slot2.start);
                         if (cur >= s && cur < e) {
                             activeBreak = { after: todayLessons[i].subject, dur: e - s };
-                            leftMs = ((e - cur) * 60 - sec) * 1000;
+                            left = (e - cur) * 60 - sec;
                             break;
                         }
                     }
                 }
-            }
 
-            // Ищем следующую пару (если выбран сегодня или будущий день)
-            if (!active && !activeBreak) {
-                // Если выбран сегодня — ищем следующую пару сегодня
-                if (selectedDay === todayName) {
-                    const cur = now.getHours() * 60 + now.getMinutes();
-                    const sec = now.getSeconds();
+                if (!active && !activeBreak) {
                     for (let lesson of todayLessons) {
                         if (lesson.subject === "—") continue;
                         const slot = timeSlots[lesson.slot - 1];
                         if (cur < toMin(slot.start)) {
                             next = { ...lesson, time: `${slot.start}-${slot.end}` };
-                            leftMs = ((toMin(slot.start) - cur) * 60 - sec) * 1000;
+                            left = (toMin(slot.start) - cur) * 60 - sec;
                             break;
                         }
                     }
                 }
-                // Если выбран будущий день — ищем первую пару этого дня
-                else if (daysDiff > 0) {
-                    for (let lesson of todayLessons) {
-                        if (lesson.subject === "—") continue;
-                        const slot = timeSlots[lesson.slot - 1];
-                        next = { ...lesson, time: `${slot.start}-${slot.end}` };
-                        // Считаем: дни до выбранного дня + время до начала пары
-                        const endOfDay = (24 - now.getHours()) * 60 - now.getMinutes() - now.getSeconds()/60;
-                        const daysInMinutes = (daysDiff - 1) * 24 * 60;
-                        const startMin = toMin(slot.start);
-                        leftMs = (daysInMinutes * 60 + startMin * 60) * 1000;
-                        break;
-                    }
+            }
+
+            const h = Math.floor(left / 3600);
+            const m = Math.floor((left % 3600) / 60);
+            const s = left % 60;
+            const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+
+            const timerBlock = document.getElementById('timerBlock');
+
+            if (isToday) {
+                // Сегодня — показываем таймер
+                timerBlock.style.display = 'block';
+                if (active) {
+                    document.getElementById('status').innerText = 'Идет: ' + active.subject;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до конца';
+                } else if (activeBreak) {
+                    document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
+                } else if (next) {
+                    document.getElementById('status').innerText = 'Следующая: ' + next.subject;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до начала';
+                } else {
+                    timerBlock.style.display = 'none';
                 }
-            }
-
-            // Форматируем время
-            const totalSeconds = Math.floor(leftMs / 1000);
-            const daysLeft = Math.floor(totalSeconds / 86400);
-            const hours = Math.floor((totalSeconds % 86400) / 3600);
-            const mins = Math.floor((totalSeconds % 3600) / 60);
-            const secs = totalSeconds % 60;
-            
-            let t = '';
-            if (daysLeft > 0) {
-                t = `${daysLeft}д ${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
             } else {
-                t = `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            }
-
-            if (active) {
-                document.getElementById('status').innerText = 'Идет: ' + active.subject;
-                document.getElementById('timer').innerText = t;
-                document.getElementById('info').innerText = 'до конца';
-                document.querySelector('.timer').style.display = 'block';
-            } else if (activeBreak) {
-                document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
-                document.getElementById('timer').innerText = t;
-                document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
-                document.querySelector('.timer').style.display = 'block';
-            } else if (next) {
-                const dayPrefix = daysDiff > 0 ? ` (${daysDiff} дн.)` : '';
-                document.getElementById('status').innerText = 'Следующая: ' + next.subject + dayPrefix;
-                document.getElementById('timer').innerText = t;
-                document.getElementById('info').innerText = 'до начала';
-                document.querySelector('.timer').style.display = 'block';
-            } else {
-                document.getElementById('status').innerText = '';
-                document.getElementById('timer').innerText = '';
-                document.getElementById('info').innerText = '';
-                document.querySelector('.timer').style.display = 'none';
+                // Другой день — прячем таймер
+                timerBlock.style.display = 'none';
             }
 
             const sch = document.getElementById('schedule');
