@@ -43,9 +43,23 @@
             padding: 15px;
             background-color: #1c1c1e;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .lesson.active { background-color: #0a84ff; color: #fff; }
+        .lesson-time { font-weight: bold; }
+        .break {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background-color: #2c2c2e;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        .break.active { background-color: #ff9500; color: #fff; }
+        .break-duration { font-weight: bold; color: #ff9500; }
+        .break.active .break-duration { color: #fff; }
         .lesson-time { font-weight: bold; }
     </style>
 </head>
@@ -69,74 +83,4 @@
             { start: "10:35", end: "12:05", name: "2 пара" },
             { start: "12:35", end: "14:05", name: "3 пара" },
             { start: "14:15", end: "15:45", name: "4 пара" },
-            { start: "15:55", end: "17:25", name: "5 пара" },
-            { start: "17:30", end: "19:00", name: "6 пара" }
-        ];
-
-        function getTimeInMinutes(timeStr) {
-            const [h, m] = timeStr.split(':').map(Number);
-            return h * 60 + m;
-        }
-
-        function updateApp() {
-            const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const currentSeconds = now.getSeconds();
-            
-            let activeLesson = null;
-            let nextLesson = null;
-            let timeLeftSeconds = 0;
-
-            for (let i = 0; i < schedule.length; i++) {
-                const startMin = getTimeInMinutes(schedule[i].start);
-                const endMin = getTimeInMinutes(schedule[i].end);
-
-                if (currentMinutes >= startMin && currentMinutes < endMin) {
-                    activeLesson = schedule[i];
-                    timeLeftSeconds = (endMin - currentMinutes) * 60 - currentSeconds;
-                    break;
-                } else if (currentMinutes < startMin) {
-                    nextLesson = schedule[i];
-                    timeLeftSeconds = (startMin - currentMinutes) * 60 - currentSeconds;
-                    break;
-                }
-            }
-
-            const statusEl = document.getElementById('status');
-            const timerEl = document.getElementById('timer');
-            const nextInfoEl = document.getElementById('next-info');
-
-            const hours = Math.floor(timeLeftSeconds / 3600);
-            const mins = Math.floor((timeLeftSeconds % 3600) / 60);
-            const secs = timeLeftSeconds % 60;
-            const timeStr = `${hours > 0 ? hours + 'ч ' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-            if (activeLesson) {
-                statusEl.innerText = `Идет: ${activeLesson.name}`;
-                timerEl.innerText = timeStr;
-                nextInfoEl.innerText = "до конца";
-            } else if (nextLesson) {
-                statusEl.innerText = `Следующая: ${nextLesson.name}`;
-                timerEl.innerText = timeStr;
-                nextInfoEl.innerText = "до начала";
-            } else {
-                statusEl.innerText = "Пары закончились";
-                timerEl.innerText = "Отдыхай!";
-                nextInfoEl.innerText = "Увидимся завтра";
-            }
-
-            const listEl = document.getElementById('schedule-list');
-            listEl.innerHTML = '';
-            schedule.forEach(lesson => {
-                const div = document.createElement('div');
-                div.className = `lesson ${activeLesson && activeLesson.name === lesson.name ? 'active' : ''}`;
-                div.innerHTML = `<span>${lesson.name}</span><span class="lesson-time">${lesson.start} - ${lesson.end}</span>`;
-                listEl.appendChild(div);
-            });
-        }
-
-        setInterval(updateApp, 1000);
-        updateApp();
-    </script>
-</body>
-</html>
+            {
