@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Расписание</title>
+    <title>Расписание 2П1</title>
     <style>
         body {
             font-family: -apple-system, sans-serif;
@@ -29,8 +29,14 @@
             margin: 8px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .lesson.active { background: #0a84ff; }
+        .lesson-info { text-align: left; flex: 1; }
+        .lesson-subject { font-weight: bold; font-size: 14px; }
+        .lesson-details { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+        .lesson.active .lesson-details { color: #fff; }
+        .lesson-time { font-weight: bold; margin-left: 10px; }
         .break {
             background: #2c2c2e;
             padding: 10px;
@@ -38,12 +44,32 @@
             margin: 8px 0;
             font-size: 14px;
             color: #8e8e93;
+            display: flex;
+            justify-content: space-between;
         }
         .break.active { background: #ff9500; color: #fff; }
+        .day-selector {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .day-btn {
+            background: #1c1c1e;
+            border: none;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 2px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .day-btn.active { background: #0a84ff; }
     </style>
 </head>
 <body>
-    <h1>Мои пары</h1>
+    <h1>Расписание 2П1</h1>
+    <div class="day-selector" id="daySelector"></div>
     <div class="timer">
         <div class="status" id="status">Загрузка...</div>
         <div class="time" id="timer">--:--</div>
@@ -52,7 +78,7 @@
     <div id="schedule"></div>
 
     <script>
-        const lessons = [
+        const timeSlots = [
             { name: "1 пара", start: "09:00", end: "10:30" },
             { name: "2 пара", start: "10:35", end: "12:05" },
             { name: "3 пара", start: "12:35", end: "14:05" },
@@ -61,13 +87,61 @@
             { name: "6 пара", start: "17:30", end: "19:00" }
         ];
 
-        const breaks = [
-            { after: "1 пара", duration: 5 },
-            { after: "2 пара", duration: 30 },
-            { after: "3 пара", duration: 10 },
-            { after: "4 пара", duration: 10 },
-            { after: "5 пара", duration: 5 }
-        ];
+        const schedule = {
+            "Понедельник": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 3, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 4, subject: "Математическое моделирование", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 5, subject: "Численные методы", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 6, subject: "Час куратора", teacher: "Наумова Е.М.", room: "—" }
+            ],
+            "Вторник": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Электронная высшая математика", teacher: "—", room: "—" },
+                { slot: 3, subject: "Электронная высшая математика", teacher: "—", room: "—" },
+                { slot: 4, subject: "Информационные технологии", teacher: "Новиков В.С.", room: "217" },
+                { slot: 5, subject: "История России", teacher: "Неменов Б.В.", room: "210" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Среда": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "—", teacher: "", room: "" },
+                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "—" },
+                { slot: 4, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Четверг": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Разработка программных модулей", teacher: "Альбатша А.М.Х.", room: "203" },
+                { slot: 3, subject: "Иностранный язык в проф. деятельности", teacher: "Марфина Л.А.", room: "221" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Пятница": [
+                { slot: 1, subject: "Основы алгоритмизации и программирования (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
+                { slot: 2, subject: "Основы проектирования баз данных (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
+                { slot: 3, subject: "—", teacher: "", room: "" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Суббота": [
+                { slot: 1, subject: "МДК 04.01 Внедрение и поддержка комп. систем", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 2, subject: "Компьютерные сети", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 3, subject: "Архитектура аппаратных средств", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ]
+        };
+
+        const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+        const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
+
+        let selectedDay = dayMap[new Date().getDay()];
 
         function toMin(t) {
             const [h, m] = t.split(':').map(Number);
@@ -79,22 +153,28 @@
             const cur = now.getHours() * 60 + now.getMinutes();
             const sec = now.getSeconds();
             
+            const todayLessons = schedule[selectedDay];
             let active = null, activeBreak = null, next = null, left = 0;
 
-            for (let l of lessons) {
-                const s = toMin(l.start), e = toMin(l.end);
+            for (let lesson of todayLessons) {
+                if (lesson.subject === "—") continue;
+                const slot = timeSlots[lesson.slot - 1];
+                const s = toMin(slot.start), e = toMin(slot.end);
                 if (cur >= s && cur < e) {
-                    active = l;
+                    active = { ...lesson, time: `${slot.start}-${slot.end}` };
                     left = (e - cur) * 60 - sec;
                     break;
                 }
             }
 
             if (!active) {
-                for (let i = 0; i < lessons.length - 1; i++) {
-                    const s = toMin(lessons[i].end), e = toMin(lessons[i+1].start);
+                for (let i = 0; i < todayLessons.length - 1; i++) {
+                    if (todayLessons[i].subject === "—" || todayLessons[i+1].subject === "—") continue;
+                    const slot1 = timeSlots[todayLessons[i].slot - 1];
+                    const slot2 = timeSlots[todayLessons[i+1].slot - 1];
+                    const s = toMin(slot1.end), e = toMin(slot2.start);
                     if (cur >= s && cur < e) {
-                        activeBreak = { after: lessons[i].name, dur: breaks[i].duration };
+                        activeBreak = { after: todayLessons[i].subject, dur: e - s };
                         left = (e - cur) * 60 - sec;
                         break;
                     }
@@ -102,10 +182,12 @@
             }
 
             if (!active && !activeBreak) {
-                for (let l of lessons) {
-                    if (cur < toMin(l.start)) {
-                        next = l;
-                        left = (toMin(l.start) - cur) * 60 - sec;
+                for (let lesson of todayLessons) {
+                    if (lesson.subject === "—") continue;
+                    const slot = timeSlots[lesson.slot - 1];
+                    if (cur < toMin(slot.start)) {
+                        next = { ...lesson, time: `${slot.start}-${slot.end}` };
+                        left = (toMin(slot.start) - cur) * 60 - sec;
                         break;
                     }
                 }
@@ -117,7 +199,7 @@
             const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
 
             if (active) {
-                document.getElementById('status').innerText = 'Идет: ' + active.name;
+                document.getElementById('status').innerText = 'Идет: ' + active.subject;
                 document.getElementById('timer').innerText = t;
                 document.getElementById('info').innerText = 'до конца';
             } else if (activeBreak) {
@@ -125,7 +207,7 @@
                 document.getElementById('timer').innerText = t;
                 document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
             } else if (next) {
-                document.getElementById('status').innerText = 'Следующая: ' + next.name;
+                document.getElementById('status').innerText = 'Следующая: ' + next.subject;
                 document.getElementById('timer').innerText = t;
                 document.getElementById('info').innerText = 'до начала';
             } else {
@@ -136,11 +218,39 @@
 
             const sch = document.getElementById('schedule');
             sch.innerHTML = '';
-            lessons.forEach((l, i) => {
-                sch.innerHTML += '<div class="lesson ' + (active && active.name === l.name ? 'active' : '') + '"><span>' + l.name + '</span><span>' + l.start + ' - ' + l.end + '</span></div>';
-                if (i < breaks.length) {
-                    sch.innerHTML += '<div class="break ' + (activeBreak && activeBreak.after === l.name ? 'active' : '') + '"><span>Перемена</span><span>' + breaks[i].duration + ' мин</span></div>';
+            todayLessons.forEach(lesson => {
+                if (lesson.subject === "—") return;
+                const slot = timeSlots[lesson.slot - 1];
+                const isActive = active && active.subject === lesson.subject;
+                const isBreak = activeBreak && activeBreak.after === lesson.subject;
+                
+                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
+                    <div class="lesson-info">
+                        <div class="lesson-subject">${lesson.subject}</div>
+                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                    </div>
+                    <div class="lesson-time">${slot.start}-${slot.end}</div>
+                </div>`;
+                
+                const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
+                if (nextLesson) {
+                    const nextSlot = timeSlots[nextLesson.slot - 1];
+                    const breakDur = toMin(nextSlot.start) - toMin(slot.end);
+                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}">
+                        <span>Перемена</span>
+                        <span>${breakDur} мин</span>
+                    </div>`;
                 }
+            });
+
+            const selector = document.getElementById('daySelector');
+            selector.innerHTML = '';
+            days.forEach(day => {
+                const btn = document.createElement('button');
+                btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
+                btn.innerText = day.substring(0, 2);
+                btn.onclick = () => { selectedDay = day; update(); };
+                selector.appendChild(btn);
             });
         }
 
