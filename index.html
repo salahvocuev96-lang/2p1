@@ -98,7 +98,7 @@
             { name: "3 пара", start: "12:35", end: "14:05" },
             { name: "4 пара", start: "14:15", end: "15:45" },
             { name: "5 пара", start: "15:55", end: "17:25" },
-            { name: "6 пара", start: "17:30", end: "19:00" }
+            { name: "6 пара", start: "17:40", end: "19:10" }
         ];
 
         const schedule = {
@@ -112,8 +112,8 @@
             ],
             "Вторник": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Электронная высшая математика", teacher: "—", room: "—" },
-                { slot: 3, subject: "Электронная высшая математика", teacher: "—", room: "—" },
+                { slot: 2, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 3, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
                 { slot: 4, subject: "Информационные технологии", teacher: "Новиков В.С.", room: "217" },
                 { slot: 5, subject: "История России", teacher: "Неменов Б.В.", room: "210" },
                 { slot: 6, subject: "—", teacher: "", room: "" }
@@ -121,10 +121,10 @@
             "Среда": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
                 { slot: 2, subject: "—", teacher: "", room: "" },
-                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "—" },
-                { slot: 4, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" },
+                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "спортзал" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
                 { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
+                { slot: 6, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" }
             ],
             "Четверг": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
@@ -172,7 +172,6 @@
             
             let active = null, activeBreak = null, next = null, left = 0;
 
-            // Считаем таймер ТОЛЬКО если выбран сегодня
             if (isToday) {
                 const cur = now.getHours() * 60 + now.getMinutes();
                 const sec = now.getSeconds();
@@ -223,7 +222,6 @@
             const timerBlock = document.getElementById('timerBlock');
 
             if (isToday) {
-                // Сегодня — показываем таймер
                 timerBlock.style.display = 'block';
                 if (active) {
                     document.getElementById('status').innerText = 'Идет: ' + active.subject;
@@ -241,7 +239,6 @@
                     timerBlock.style.display = 'none';
                 }
             } else {
-                // Другой день — прячем таймер
                 timerBlock.style.display = 'none';
             }
 
