@@ -98,13 +98,13 @@
             { name: "3 пара", start: "12:35", end: "14:05" },
             { name: "4 пара", start: "14:15", end: "15:45" },
             { name: "5 пара", start: "15:55", end: "17:25" },
-            { name: "6 пара", start: "17:30", end: "19:00" }
+            { name: "6 пара", start: "17:40", end: "19:10" }
         ];
 
         const schedule = {
             "Понедельник": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 2, subject: "Операционные systems", teacher: "Альбатша А.М.Х.", room: "217" },
                 { slot: 3, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
                 { slot: 4, subject: "Математическое моделирование", teacher: "Кудинова С.Л.", room: "201" },
                 { slot: 5, subject: "Численные методы", teacher: "Кудинова С.Л.", room: "201" },
@@ -202,13 +202,11 @@
             const sec = now.getSeconds();
 
             if (isToday) {
-                // Ищем текущую пару или перерыв
                 for (let i = 0; i < timeSlots.length; i++) {
                     const slot = timeSlots[i];
                     const s = toMin(slot.start);
                     const e = toMin(slot.end);
 
-                    // Проверяем саму пару
                     if (curMin >= s && curMin < e) {
                         activeSlot = i + 1;
                         statusText = `Идет ${slot.name}`;
@@ -218,7 +216,6 @@
                         break;
                     }
 
-                    // Проверяем перерыв между парами
                     if (i < timeSlots.length - 1) {
                         const nextSlot = timeSlots[i + 1];
                         const nextStart = toMin(nextSlot.start);
@@ -232,3 +229,5 @@
                     }
                 }
 
+                const firstSlotStart = toMin(timeSlots[0].start);
+                if (curMin < firstSlotStart) {
