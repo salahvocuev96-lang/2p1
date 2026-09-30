@@ -112,8 +112,8 @@
             ],
             "Вторник": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Электронная высшая математика", teacher: "—", room: "—" },
-                { slot: 3, subject: "Электронная высшая математика", teacher: "—", room: "—" },
+                { slot: 2, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 3, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
                 { slot: 4, subject: "Информационные технологии", teacher: "Новиков В.С.", room: "217" },
                 { slot: 5, subject: "История России", teacher: "Неменов Б.В.", room: "210" },
                 { slot: 6, subject: "—", teacher: "", room: "" }
@@ -121,10 +121,10 @@
             "Среда": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
                 { slot: 2, subject: "—", teacher: "", room: "" },
-                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "—" },
-                { slot: 4, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" },
+                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "Спортзал" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
                 { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
+                { slot: 6, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" }
             ],
             "Четверг": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
@@ -153,7 +153,7 @@
         };
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-        const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
+        const dayMap = { 1: "Понедельник", 2: "Вторник", 3: "Среда", 4: "Четверг", 5: "Пятница", 6: "Суббота", 0: "Понедельник" };
 
         let selectedDay = dayMap[new Date().getDay()];
 
@@ -162,132 +162,73 @@
             return h * 60 + m;
         }
 
-        function update() {
-            const now = new Date();
-            const todayWeekday = now.getDay();
-            const todayName = dayMap[todayWeekday === 0 ? 6 : todayWeekday - 1];
-            
-            const todayLessons = schedule[selectedDay];
-            const isToday = (selectedDay === todayName);
-            
-            let active = null, activeBreak = null, next = null, left = 0;
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
 
-            // Считаем таймер ТОЛЬКО если выбран сегодня
-            if (isToday) {
-                const cur = now.getHours() * 60 + now.getMinutes();
-                const sec = now.getSeconds();
-
-                for (let lesson of todayLessons) {
-                    if (lesson.subject === "—") continue;
-                    const slot = timeSlots[lesson.slot - 1];
-                    const s = toMin(slot.start), e = toMin(slot.end);
-                    if (cur >= s && cur < e) {
-                        active = { ...lesson, time: `${slot.start}-${slot.end}` };
-                        left = (e - cur) * 60 - sec;
-                        break;
-                    }
-                }
-
-                if (!active) {
-                    for (let i = 0; i < todayLessons.length - 1; i++) {
-                        if (todayLessons[i].subject === "—" || todayLessons[i+1].subject === "—") continue;
-                        const slot1 = timeSlots[todayLessons[i].slot - 1];
-                        const slot2 = timeSlots[todayLessons[i+1].slot - 1];
-                        const s = toMin(slot1.end), e = toMin(slot2.start);
-                        if (cur >= s && cur < e) {
-                            activeBreak = { after: todayLessons[i].subject, dur: e - s };
-                            left = (e - cur) * 60 - sec;
-                            break;
-                        }
-                    }
-                }
-
-                if (!active && !activeBreak) {
-                    for (let lesson of todayLessons) {
-                        if (lesson.subject === "—") continue;
-                        const slot = timeSlots[lesson.slot - 1];
-                        if (cur < toMin(slot.start)) {
-                            next = { ...lesson, time: `${slot.start}-${slot.end}` };
-                            left = (toMin(slot.start) - cur) * 60 - sec;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            const h = Math.floor(left / 3600);
-            const m = Math.floor((left % 3600) / 60);
-            const s = left % 60;
-            const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
-
-            const timerBlock = document.getElementById('timerBlock');
-
-            if (isToday) {
-                // Сегодня — показываем таймер
-                timerBlock.style.display = 'block';
-                if (active) {
-                    document.getElementById('status').innerText = 'Идет: ' + active.subject;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до конца';
-                } else if (activeBreak) {
-                    document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
-                } else if (next) {
-                    document.getElementById('status').innerText = 'Следующая: ' + next.subject;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до начала';
-                } else {
-                    timerBlock.style.display = 'none';
-                }
-            } else {
-                // Другой день — прячем таймер
-                timerBlock.style.display = 'none';
-            }
-
-            const sch = document.getElementById('schedule');
-            sch.innerHTML = '';
-            todayLessons.forEach(lesson => {
-                if (lesson.subject === "—") return;
-                const slot = timeSlots[lesson.slot - 1];
-                const isActive = active && active.subject === lesson.subject;
-                const isBreak = activeBreak && activeBreak.after === lesson.subject;
-                
-                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
-                    <div class="lesson-info">
-                        <div class="lesson-subject">${lesson.subject}</div>
-                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
-                    </div>
-                    <div class="lesson-time">
-                        <span class="lesson-num">${lesson.slot} пара</span>
-                        <span>${slot.start}-${slot.end}</span>
-                    </div>
-                </div>`;
-                
-                const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
-                if (nextLesson) {
-                    const nextSlot = timeSlots[nextLesson.slot - 1];
-                    const breakDur = toMin(nextSlot.start) - toMin(slot.end);
-                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}">
-                        <span>Перемена</span>
-                        <span>${breakDur} мин</span>
-                    </div>`;
-                }
-            });
-
+        function renderSelector() {
             const selector = document.getElementById('daySelector');
             selector.innerHTML = '';
             days.forEach(day => {
                 const btn = document.createElement('button');
                 btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
-                btn.innerText = day.substring(0, 2);
-                btn.onclick = () => { selectedDay = day; update(); };
+                btn.innerText = day;
+                btn.onclick = () => {
+                    selectedDay = day;
+                    renderSelector();
+                    update();
+                };
                 selector.appendChild(btn);
             });
         }
 
-        setInterval(update, 1000);
-        update();
-    </script>
-</body>
-</html>
+        function update() {
+            const now = new Date();
+            let currentDayIdx = now.getDay();
+            const todayName = dayMap[currentDayIdx];
+            
+            const todayLessons = schedule[selectedDay];
+            const isToday = (selectedDay === todayName);
+            
+            let activeSlot = null;
+            let activeBreak = null;
+            let timerText = "--:--";
+            let statusText = "Нет пар";
+            let infoText = "";
+
+            const curMin = now.getHours() * 60 + now.getMinutes();
+            const sec = now.getSeconds();
+
+            if (isToday) {
+                // Ищем текущую пару или перерыв
+                for (let i = 0; i < timeSlots.length; i++) {
+                    const slot = timeSlots[i];
+                    const s = toMin(slot.start);
+                    const e = toMin(slot.end);
+
+                    // Проверяем саму пару
+                    if (curMin >= s && curMin < e) {
+                        activeSlot = i + 1;
+                        statusText = `Идет ${slot.name}`;
+                        timerText = formatTime((e - curMin) * 60 - sec);
+                        const lesson = todayLessons.find(l => l.slot === activeSlot);
+                        infoText = lesson && lesson.subject !== "—" ? lesson.subject : "Окно / Самостоятельно";
+                        break;
+                    }
+
+                    // Проверяем перерыв между парами
+                    if (i < timeSlots.length - 1) {
+                        const nextSlot = timeSlots[i + 1];
+                        const nextStart = toMin(nextSlot.start);
+                        if (curMin >= e && curMin < nextStart) {
+                            activeBreak = i + 1;
+                            statusText = "Перерыв";
+                            timerText = formatTime((nextStart - curMin) * 60 - sec);
+                            infoText = `Следующая: ${nextSlot.name}`;
+                            break;
+                        }
+                    }
+                }
+
