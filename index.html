@@ -104,7 +104,7 @@
         const schedule = {
             "Понедельник": [
                 { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Операционные systems", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 2, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
                 { slot: 3, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
                 { slot: 4, subject: "Математическое моделирование", teacher: "Кудинова С.Л.", room: "201" },
                 { slot: 5, subject: "Численные методы", teacher: "Кудинова С.Л.", room: "201" },
@@ -158,6 +158,7 @@
         let selectedDay = dayMap[new Date().getDay()];
 
         function toMin(t) {
+            if (!t) return 0;
             const [h, m] = t.split(':').map(Number);
             return h * 60 + m;
         }
@@ -202,6 +203,8 @@
             const sec = now.getSeconds();
 
             if (isToday) {
+                let foundStatus = false;
+
                 for (let i = 0; i < timeSlots.length; i++) {
                     const slot = timeSlots[i];
                     const s = toMin(slot.start);
@@ -213,6 +216,7 @@
                         timerText = formatTime((e - curMin) * 60 - sec);
                         const lesson = todayLessons.find(l => l.slot === activeSlot);
                         infoText = lesson && lesson.subject !== "—" ? lesson.subject : "Окно / Самостоятельно";
+                        foundStatus = true;
                         break;
                     }
 
@@ -224,10 +228,7 @@
                             statusText = "Перерыв";
                             timerText = formatTime((nextStart - curMin) * 60 - sec);
                             infoText = `Следующая: ${nextSlot.name}`;
+                            foundStatus = true;
                             break;
                         }
                     }
-                }
-
-                const firstSlotStart = toMin(timeSlots[0].start);
-                if (curMin < firstSlotStart) {
