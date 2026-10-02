@@ -300,9 +300,9 @@
         // 3. Функция загрузки расписания из JSON
         async function loadGroupSchedule(groupCode) {
             try {
-                const response = await fetch(`data/${groupCode}.json`);
-                const data = await response.json();
-                return data.schedule;
+                const response = await fetch('all-groups.json');
+                const allData = await response.json();
+                return allData[groupCode].schedule;
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
                 return null;
