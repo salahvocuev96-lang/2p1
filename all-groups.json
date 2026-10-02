@@ -1,6 +1,6 @@
 {
   "2p1": {
-    "groupName": "2П-1",
+    "groupName": "2П1",
     "schedule": {
       "Понедельник": [
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
@@ -53,7 +53,7 @@
     }
   },
   "1p1": {
-    "groupName": "1П-1",
+    "groupName": "1П1",
     "schedule": {
       "Понедельник": [
         { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
