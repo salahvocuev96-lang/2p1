@@ -289,6 +289,53 @@
             });
         }
 
+        // ===== ШАГ 2: Выбор группы =====
+        
+        // 1. Загружаем сохраненную группу (если есть)
+        let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
+        
+        // 2. Устанавливаем значение в списке
+        document.getElementById('groupSelect').value = currentGroup;
+        
+        // 3. Функция загрузки расписания из JSON
+        async function loadGroupSchedule(groupCode) {
+            try {
+                const response = await fetch(`data/${groupCode}.json`);
+                const data = await response.json();
+                return data.schedule;
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                return null;
+            }
+        }
+        
+        // 4. Функция смены группы
+        async function changeGroup(groupCode) {
+            localStorage.setItem('selectedGroup', groupCode);
+            const newSchedule = await loadGroupSchedule(groupCode);
+            if (newSchedule) {
+                // Заменяем расписание
+                Object.keys(schedule).forEach(day => {
+                    schedule[day] = newSchedule[day] || schedule[day];
+                });
+                // Обновляем заголовок
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П');
+                update();
+            }
+        }
+        
+        // 5. Слушаем изменения в списке
+        document.getElementById('groupSelect').addEventListener('change', function() {
+            changeGroup(this.value);
+        });
+        
+        // 6. Загружаем расписание при старте
+        if (currentGroup !== '2p1') {
+            changeGroup(currentGroup);
+        }
+        
+        // ===== КОНЕЦ ШАГА 2 =====   
+        
         setInterval(update, 1000);
         update();
     </script>
