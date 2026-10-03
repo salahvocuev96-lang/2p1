@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Расписание 2П1</title>
     <style>
         body {
@@ -85,8 +85,10 @@
     <h1>Расписание 2П1</h1>
     <div style="margin: 15px 0; text-align: center;">
         <select id="groupSelect" style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
-   <option value="2p1">2П1</option>
+            <option value="2p1">2П1</option>
             <option value="1p1">1П1</option>
+            <option value="1l1">1Л1</option>
+            <option value="1l2">1Л2</option>
         </select>
     </div>
     <div class="day-selector" id="daySelector"></div>
@@ -144,7 +146,7 @@
                 { slot: 1, subject: "Основы алгоритмизации и программирования (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
                 { slot: 2, subject: "Основы проектирования баз данных (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
                 { slot: 3, subject: "—", teacher: "", room: "" },
-                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 4, subject: "—", teacher: "", "room": "" },
                 { slot: 5, subject: "—", teacher: "", room: "" },
                 { slot: 6, subject: "—", teacher: "", room: "" }
             ],
@@ -291,6 +293,11 @@
 
         // ===== ШАГ 2: Выбор группы =====
         
+        // Маппинг групп с одинаковым расписанием
+        const groupMapping = {
+            '1l2': '1l1'
+        };
+        
         // 1. Загружаем сохраненную группу (если есть)
         let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
         
@@ -300,9 +307,10 @@
         // 3. Функция загрузки расписания из JSON
         async function loadGroupSchedule(groupCode) {
             try {
+                const actualGroup = groupMapping[groupCode] || groupCode;
                 const response = await fetch('all-groups.json');
                 const allData = await response.json();
-                return allData[groupCode].schedule;
+                return allData[actualGroup].schedule;
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
                 return null;
@@ -319,7 +327,7 @@
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
                 // Обновляем заголовок
-                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П');
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л');
                 update();
             }
         }
