@@ -79,19 +79,89 @@
             font-size: 12px;
         }
         .day-btn.active { background: #0a84ff; }
+        
+        /* Кастомный dropdown */
+        .custom-select {
+            position: relative;
+            width: 90%;
+            max-width: 300px;
+            margin: 15px auto;
+        }
+        .select-trigger {
+            background: #1c1c1e;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .select-trigger::after {
+            content: '▼';
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1c1c1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+        .select-dropdown.show {
+            display: block;
+        }
+        .search-input {
+            width: 100%;
+            background: #2c2c2e;
+            color: #fff;
+            border: none;
+            padding: 12px 15px;
+            font-size: 14px;
+            outline: none;
+            border-radius: 12px 12px 0 0;
+            box-sizing: border-box;
+        }
+        .search-input::placeholder {
+            color: #8e8e93;
+        }
+        .group-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #2c2c2e;
+        }
+        .group-option:hover {
+            background: #2c2c2e;
+        }
+        .group-option.selected {
+            background: #0a84ff;
+        }
+        .group-option:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
     <h1>Расписание 2П1</h1>
-    <div style="margin: 15px 0; text-align: center;">
-        <input list="groupsList" id="groupSelect" placeholder="Выбери группу..." style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
-        <datalist id="groupsList">
-            <option value="2П1">
-            <option value="1П1">
-            <option value="1Л1">
-            <option value="1Л2">
-        </datalist>
+    
+    <div class="custom-select">
+        <div class="select-trigger" id="selectTrigger">2П1</div>
+        <div class="select-dropdown" id="selectDropdown">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Поиск группы...">
+            <div id="groupList"></div>
+        </div>
     </div>
+    
     <div class="day-selector" id="daySelector"></div>
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
@@ -170,6 +240,9 @@
         const groupMapping = {
             '1Л2': '1Л1'
         };
+
+        // Список всех групп
+        const allGroups = ['2П1', '1П1', '1Л1', '1Л2'];
 
         function toMin(t) {
             const [h, m] = t.split(':').map(Number);
@@ -297,12 +370,53 @@
             });
         }
 
-        // ===== Выбор группы =====
+        // ===== Кастомный dropdown с поиском =====
         
-        const groupSelect = document.getElementById('groupSelect');
+        const selectTrigger = document.getElementById('selectTrigger');
+        const selectDropdown = document.getElementById('selectDropdown');
+        const searchInput = document.getElementById('searchInput');
+        const groupList = document.getElementById('groupList');
+        
         let currentGroup = localStorage.getItem('selectedGroup') || '2П1';
-        groupSelect.value = currentGroup;
-        document.querySelector('h1').innerText = 'Расписание ' + currentGroup;
+        selectTrigger.innerText = currentGroup;
+        
+        function renderGroups(filter = '') {
+            groupList.innerHTML = '';
+            const filtered = allGroups.filter(g => g.toLowerCase().includes(filter.toLowerCase()));
+            filtered.forEach(group => {
+                const div = document.createElement('div');
+                div.className = 'group-option' + (group === currentGroup ? ' selected' : '');
+                div.innerText = group;
+                div.onclick = () => {
+                    currentGroup = group;
+                    selectTrigger.innerText = group;
+                    selectDropdown.classList.remove('show');
+                    searchInput.value = '';
+                    localStorage.setItem('selectedGroup', group);
+                    changeGroup(group);
+                };
+                groupList.appendChild(div);
+            });
+        }
+        
+        selectTrigger.onclick = () => {
+            selectDropdown.classList.toggle('show');
+            if (selectDropdown.classList.contains('show')) {
+                searchInput.focus();
+                renderGroups();
+            }
+        };
+        
+        searchInput.addEventListener('input', (e) => {
+            renderGroups(e.target.value);
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select')) {
+                selectDropdown.classList.remove('show');
+                searchInput.value = '';
+            }
+        });
         
         async function loadGroupSchedule(groupCode) {
             try {
@@ -318,7 +432,6 @@
         }
         
         async function changeGroup(groupCode) {
-            localStorage.setItem('selectedGroup', groupCode);
             const newSchedule = await loadGroupSchedule(groupCode);
             if (newSchedule) {
                 Object.keys(schedule).forEach(day => {
@@ -328,16 +441,6 @@
                 update();
             }
         }
-        
-        groupSelect.addEventListener('change', function() {
-            const val = this.value;
-            if (val) {
-                // Нормализуем ввод (например, "2п1" -> "2П1")
-                const normalized = val.toUpperCase().replace('P', 'П').replace('L', 'Л');
-                this.value = normalized;
-                changeGroup(normalized);
-            }
-        });
         
         if (currentGroup !== '2П1') {
             changeGroup(currentGroup);
