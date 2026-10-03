@@ -1,162 +1,351 @@
-{
-  "2p1": {
-    "groupName": "2П1",
-    "schedule": {
-      "Понедельник": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "Операционные системы", "teacher": "Альбатша А.М.Х.", "room": "217" },
-        { "slot": 3, "subject": "Операционные системы", "teacher": "Альбатша А.М.Х.", "room": "217" },
-        { "slot": 4, "subject": "Математическое моделирование", "teacher": "Кудинова С.Л.", "room": "201" },
-        { "slot": 5, "subject": "Численные методы", "teacher": "Кудинова С.Л.", "room": "201" },
-        { "slot": 6, "subject": "Час куратора", "teacher": "Наумова Е.М.", "room": "—" }
-      ],
-      "Вторник": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "Электронная высшая математика", "teacher": "Кудинова С.Л.", "room": "201" },
-        { "slot": 3, "subject": "Электронная высшая математика", "teacher": "Кудинова С.Л.", "room": "201" },
-        { "slot": 4, "subject": "Информационные технологии", "teacher": "Новиков В.С.", "room": "217" },
-        { "slot": 5, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Среда": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "Физкультура", "teacher": "Наумова", "room": "спортзал" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "История России (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
-      ],
-      "Четверг": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "Разработка программных модулей", "teacher": "Альбатша А.М.Х.", "room": "203" },
-        { "slot": 3, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Пятница": [
-        { "slot": 1, "subject": "Основы алгоритмизации и программирования (дистант)", "teacher": "Голеусов Р.О.", "room": "онлайн" },
-        { "slot": 2, "subject": "Основы проектирования баз данных (дистант)", "teacher": "Голеусов Р.О.", "room": "онлайн" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Суббота": [
-        { "slot": 1, "subject": "МДК 04.01 Внедрение и поддержка комп. систем", "teacher": "Малькова Е.В.", "room": "217" },
-        { "slot": 2, "subject": "Компьютерные сети", "teacher": "Малькова Е.В.", "room": "217" },
-        { "slot": 3, "subject": "Архитектура аппаратных средств", "teacher": "Малькова Е.В.", "room": "217" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ]
-    }
-  },
-  "1p1": {
-    "groupName": "1П1",
-    "schedule": {
-      "Понедельник": [
-        { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
-        { "slot": 2, "subject": "Русский язык", "teacher": "Милуш А.С.", "room": "213" },
-        { "slot": 3, "subject": "Индивидуальный проект", "teacher": "Кирюхин К.В.", "room": "210" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Вторник": [
-        { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
-        { "slot": 2, "subject": "История", "teacher": "Неменов Б.В.", "room": "210" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Среда": [
-        { "slot": 1, "subject": "Информатика", "teacher": "Новиков В.С.", "room": "217" },
-        { "slot": 2, "subject": "Литература", "teacher": "Милуш А.С.", "room": "202" },
-        { "slot": 3, "subject": "Иностранный язык", "teacher": "Марфина Л.А.", "room": "202" },
-        { "slot": 4, "subject": "Химия", "teacher": "Паршукова Э.В.", "room": "210" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Четверг": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "ОБЗиРФ", "teacher": "Наумова Е.М.", "room": "213" },
-        { "slot": 3, "subject": "Физика", "teacher": "Хохленкова И.Л.", "room": "216а" },
-        { "slot": 4, "subject": "Час куратора", "teacher": "Титлова И.И.", "room": "—" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Пятница": [
-        { "slot": 1, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "История (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" },
-        { "slot": 6, "subject": "Обществознание (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
-      ],
-      "Суббота": [
-        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ]
-    }
-  }
-}
-,
-  "1l1": {
-    "groupName": "1Л1",
-    "schedule": {
-      "Понедельник": [
-        { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
-        { "slot": 2, "subject": "Русский язык", "teacher": "Милуш А.С.", "room": "213" },
-        { "slot": 3, "subject": "Индивидуальный проект", "teacher": "Кирюхин К.В.", "room": "210" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Вторник": [
-        { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
-        { "slot": 2, "subject": "История", "teacher": "Неменов Б.В.", "room": "210" },
-        { "slot": 3, "subject": "Час куратора", "teacher": "Магомедова П.А.", "room": "—" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Среда": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "Химия", "teacher": "Паршукова Э.В.", "room": "215" },
-        { "slot": 3, "subject": "Литература", "teacher": "Милуш А.С.", "room": "215" },
-        { "slot": 4, "subject": "Информатика", "teacher": "Новиков В.С.", "room": "217" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Четверг": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "ОБЗиРФ", "teacher": "Наумова Е.М.", "room": "213" },
-        { "slot": 3, "subject": "Физика", "teacher": "Хохленкова И.Л.", "room": "216а" },
-        { "slot": 4, "subject": "Иностранный язык", "teacher": "Марфина Л.А.", "room": "221" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
-      "Пятница": [
-        { "slot": 1, "subject": "Физическая культура", "teacher": "", "room": "спортзал" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "История (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" },
-        { "slot": 6, "subject": "Обществознание (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
-      ],
-      "Суббота": [
-        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ]
-    }
-  }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Расписание 2П1</title>
+    <style>
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .timer {
+            background: #1c1c1e;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .status { font-size: 18px; color: #8e8e93; }
+        .time { font-size: 48px; font-weight: bold; color: #fff; margin: 10px 0; }
+        .info { font-size: 16px; color: #8e8e93; }
+        .lesson {
+            background: #1c1c1e;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .lesson.active { background: #0a84ff; }
+        .lesson-info { text-align: left; flex: 1; }
+        .lesson-subject { font-weight: bold; font-size: 14px; }
+        .lesson-details { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+        .lesson.active .lesson-details { color: #fff; }
+        .lesson-time { 
+            font-weight: bold; 
+            margin-left: 10px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .lesson-num {
+            font-size: 13px;
+            color: #0a84ff;
+            margin-bottom: 2px;
+            font-weight: 800;
+        }
+        .lesson.active .lesson-num { color: #fff; }
+        .break {
+            background: #2c2c2e;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-size: 14px;
+            color: #8e8e93;
+            display: flex;
+            justify-content: space-between;
+        }
+        .break.active { background: #ff9500; color: #fff; }
+        .day-selector {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .day-btn {
+            background: #1c1c1e;
+            border: none;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 2px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .day-btn.active { background: #0a84ff; }
+    </style>
+</head>
+<body>
+    <h1>Расписание 2П1</h1>
+    <div style="margin: 15px 0; text-align: center;">
+        <select id="groupSelect" style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
+            <option value="2p1">2П1</option>
+            <option value="1p1">1П1</option>
+            <option value="1l1">1Л1</option>
+            <option value="1l2">1Л2</option>
+        </select>
+    </div>
+    <div class="day-selector" id="daySelector"></div>
+    <div class="timer" id="timerBlock">
+        <div class="status" id="status">Загрузка...</div>
+        <div class="time" id="timer">--:--</div>
+        <div class="info" id="info"></div>
+    </div>
+    <div id="schedule"></div>
+
+    <script>
+        const timeSlots = [
+            { name: "1 пара", start: "09:00", end: "10:30" },
+            { name: "2 пара", start: "10:35", end: "12:05" },
+            { name: "3 пара", start: "12:35", end: "14:05" },
+            { name: "4 пара", start: "14:15", end: "15:45" },
+            { name: "5 пара", start: "15:55", end: "17:25" },
+            { name: "6 пара", start: "17:40", end: "19:10" }
+        ];
+
+        const schedule = {
+            "Понедельник": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 3, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
+                { slot: 4, subject: "Математическое моделирование", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 5, subject: "Численные методы", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 6, subject: "Час куратора", teacher: "Наумова Е.М.", room: "—" }
+            ],
+            "Вторник": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 3, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
+                { slot: 4, subject: "Информационные технологии", teacher: "Новиков В.С.", room: "217" },
+                { slot: 5, subject: "История России", teacher: "Неменов Б.В.", room: "210" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Среда": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "—", teacher: "", room: "" },
+                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "спортзал" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" }
+            ],
+            "Четверг": [
+                { slot: 1, subject: "—", teacher: "", room: "" },
+                { slot: 2, subject: "Разработка программных модулей", teacher: "Альбатша А.М.Х.", room: "203" },
+                { slot: 3, subject: "Иностранный язык в проф. деятельности", teacher: "Марфина Л.А.", room: "221" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Пятница": [
+                { slot: 1, subject: "Основы алгоритмизации и программирования (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
+                { slot: 2, subject: "Основы проектирования баз данных (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
+                { slot: 3, subject: "—", teacher: "", room: "" },
+                { slot: 4, subject: "—", teacher: "", "room": "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ],
+            "Суббота": [
+                { slot: 1, subject: "МДК 04.01 Внедрение и поддержка комп. систем", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 2, subject: "Компьютерные сети", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 3, subject: "Архитектура аппаратных средств", teacher: "Малькова Е.В.", room: "217" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
+                { slot: 5, subject: "—", teacher: "", room: "" },
+                { slot: 6, subject: "—", teacher: "", room: "" }
+            ]
+        };
+
+        const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+        const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
+
+        let selectedDay = dayMap[new Date().getDay()];
+
+        function toMin(t) {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function update() {
+            const now = new Date();
+            const todayWeekday = now.getDay();
+            const todayName = dayMap[todayWeekday === 0 ? 6 : todayWeekday - 1];
+            
+            const todayLessons = schedule[selectedDay];
+            const isToday = (selectedDay === todayName);
+            
+            let active = null, activeBreak = null, next = null, left = 0;
+
+            if (isToday) {
+                const cur = now.getHours() * 60 + now.getMinutes();
+                const sec = now.getSeconds();
+
+                for (let lesson of todayLessons) {
+                    if (lesson.subject === "—") continue;
+                    const slot = timeSlots[lesson.slot - 1];
+                    const s = toMin(slot.start), e = toMin(slot.end);
+                    if (cur >= s && cur < e) {
+                        active = { ...lesson, time: `${slot.start}-${slot.end}` };
+                        left = (e - cur) * 60 - sec;
+                        break;
+                    }
+                }
+
+                if (!active) {
+                    for (let i = 0; i < todayLessons.length - 1; i++) {
+                        if (todayLessons[i].subject === "—" || todayLessons[i+1].subject === "—") continue;
+                        const slot1 = timeSlots[todayLessons[i].slot - 1];
+                        const slot2 = timeSlots[todayLessons[i+1].slot - 1];
+                        const s = toMin(slot1.end), e = toMin(slot2.start);
+                        if (cur >= s && cur < e) {
+                            activeBreak = { after: todayLessons[i].subject, dur: e - s };
+                            left = (e - cur) * 60 - sec;
+                            break;
+                        }
+                    }
+                }
+
+                if (!active && !activeBreak) {
+                    for (let lesson of todayLessons) {
+                        if (lesson.subject === "—") continue;
+                        const slot = timeSlots[lesson.slot - 1];
+                        if (cur < toMin(slot.start)) {
+                            next = { ...lesson, time: `${slot.start}-${slot.end}` };
+                            left = (toMin(slot.start) - cur) * 60 - sec;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const h = Math.floor(left / 3600);
+            const m = Math.floor((left % 3600) / 60);
+            const s = left % 60;
+            const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+
+            const timerBlock = document.getElementById('timerBlock');
+
+            if (isToday) {
+                timerBlock.style.display = 'block';
+                if (active) {
+                    document.getElementById('status').innerText = 'Идет: ' + active.subject;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до конца';
+                } else if (activeBreak) {
+                    document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
+                } else if (next) {
+                    document.getElementById('status').innerText = 'Следующая: ' + next.subject;
+                    document.getElementById('timer').innerText = t;
+                    document.getElementById('info').innerText = 'до начала';
+                } else {
+                    timerBlock.style.display = 'none';
+                }
+            } else {
+                timerBlock.style.display = 'none';
+            }
+
+            const sch = document.getElementById('schedule');
+            sch.innerHTML = '';
+            todayLessons.forEach(lesson => {
+                if (lesson.subject === "—") return;
+                const slot = timeSlots[lesson.slot - 1];
+                const isActive = active && active.subject === lesson.subject;
+                const isBreak = activeBreak && activeBreak.after === lesson.subject;
+                
+                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
+                    <div class="lesson-info">
+                        <div class="lesson-subject">${lesson.subject}</div>
+                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                    </div>
+                    <div class="lesson-time">
+                        <span class="lesson-num">${lesson.slot} пара</span>
+                        <span>${slot.start}-${slot.end}</span>
+                    </div>
+                </div>`;
+                
+                const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
+                if (nextLesson) {
+                    const nextSlot = timeSlots[nextLesson.slot - 1];
+                    const breakDur = toMin(nextSlot.start) - toMin(slot.end);
+                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}">
+                        <span>Перемена</span>
+                        <span>${breakDur} мин</span>
+                    </div>`;
+                }
+            });
+
+            const selector = document.getElementById('daySelector');
+            selector.innerHTML = '';
+            days.forEach(day => {
+                const btn = document.createElement('button');
+                btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
+                btn.innerText = day.substring(0, 2);
+                btn.onclick = () => { selectedDay = day; update(); };
+                selector.appendChild(btn);
+            });
+        }
+
+        // ===== ШАГ 2: Выбор группы =====
+        
+        // Маппинг групп с одинаковым расписанием
+        const groupMapping = {
+            '1l2': '1l1'
+        };
+        
+        // 1. Загружаем сохраненную группу (если есть)
+        let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
+        
+        // 2. Устанавливаем значение в списке
+        document.getElementById('groupSelect').value = currentGroup;
+        
+        // 3. Функция загрузки расписания из JSON
+        async function loadGroupSchedule(groupCode) {
+            try {
+                const actualGroup = groupMapping[groupCode] || groupCode;
+                const response = await fetch('all-groups.json');
+                const allData = await response.json();
+                return allData[actualGroup].schedule;
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                return null;
+            }
+        }
+        
+        // 4. Функция смены группы
+        async function changeGroup(groupCode) {
+            localStorage.setItem('selectedGroup', groupCode);
+            const newSchedule = await loadGroupSchedule(groupCode);
+            if (newSchedule) {
+                // Заменяем расписание
+                Object.keys(schedule).forEach(day => {
+                    schedule[day] = newSchedule[day] || schedule[day];
+                });
+                // Обновляем заголовок
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л');
+                update();
+            }
+        }
+        
+        // 5. Слушаем изменения в списке
+        document.getElementById('groupSelect').addEventListener('change', function() {
+            changeGroup(this.value);
+        });
+        
+        // 6. Загружаем расписание при старте
+        if (currentGroup !== '2p1') {
+            changeGroup(currentGroup);
+        }
+        
+        // ===== КОНЕЦ ШАГА 2 =====   
+        
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
