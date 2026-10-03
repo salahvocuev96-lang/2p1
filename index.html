@@ -79,37 +79,19 @@
             font-size: 12px;
         }
         .day-btn.active { background: #0a84ff; }
-        .search-box {
-            background: #1c1c1e;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 12px 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            width: 90%;
-            max-width: 300px;
-            outline: none;
-            margin-bottom: 10px;
-        }
-        .search-box:focus {
-            border-color: #0a84ff;
-        }
     </style>
 </head>
 <body>
     <h1>Расписание 2П1</h1>
-    
     <div style="margin: 15px 0; text-align: center;">
-        <input type="text" id="groupSearch" class="search-box" placeholder="🔍 Поиск группы...">
-        <br>
-        <select id="groupSelect" style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
-            <option value="2p1">2П1</option>
-            <option value="1p1">1П1</option>
-            <option value="1l1">1Л1</option>
-            <option value="1l2">1Л2</option>
-        </select>
+        <input list="groupsList" id="groupSelect" placeholder="Выбери группу..." style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
+        <datalist id="groupsList">
+            <option value="2П1">
+            <option value="1П1">
+            <option value="1Л1">
+            <option value="1Л2">
+        </datalist>
     </div>
-    
     <div class="day-selector" id="daySelector"></div>
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
@@ -183,6 +165,11 @@
         const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
 
         let selectedDay = dayMap[new Date().getDay()];
+
+        // Маппинг групп с одинаковым расписанием
+        const groupMapping = {
+            '1Л2': '1Л1'
+        };
 
         function toMin(t) {
             const [h, m] = t.split(':').map(Number);
@@ -280,7 +267,7 @@
                 sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
                     <div class="lesson-info">
                         <div class="lesson-subject">${lesson.subject}</div>
-                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} |  ${lesson.room}</div>
+                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                     </div>
                     <div class="lesson-time">
                         <span class="lesson-num">${lesson.slot} пара</span>
@@ -310,85 +297,51 @@
             });
         }
 
-        // ===== ШАГ 2: Выбор группы =====
+        // ===== Выбор группы =====
         
-        // Маппинг групп с одинаковым расписанием
-        const groupMapping = {
-            '1l2': '1l1'
-        };
+        const groupSelect = document.getElementById('groupSelect');
+        let currentGroup = localStorage.getItem('selectedGroup') || '2П1';
+        groupSelect.value = currentGroup;
+        document.querySelector('h1').innerText = 'Расписание ' + currentGroup;
         
-        // 1. Загружаем сохраненную группу (если есть)
-        let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
-        
-        // 2. Устанавливаем значение в списке
-        document.getElementById('groupSelect').value = currentGroup;
-        
-        // 3. Функция загрузки расписания из JSON
         async function loadGroupSchedule(groupCode) {
             try {
                 const actualGroup = groupMapping[groupCode] || groupCode;
+                const code = actualGroup.toLowerCase().replace('П', 'p').replace('Л', 'l');
                 const response = await fetch('all-groups.json');
                 const allData = await response.json();
-                return allData[actualGroup].schedule;
+                return allData[code].schedule;
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
                 return null;
             }
         }
         
-        // 4. Функция смены группы
         async function changeGroup(groupCode) {
             localStorage.setItem('selectedGroup', groupCode);
             const newSchedule = await loadGroupSchedule(groupCode);
             if (newSchedule) {
-                // Заменяем расписание
                 Object.keys(schedule).forEach(day => {
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
-                // Обновляем заголовок
-                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л');
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode;
                 update();
             }
         }
         
-        // 5. Слушаем изменения в списке
-        document.getElementById('groupSelect').addEventListener('change', function() {
-            changeGroup(this.value);
-        });
-        
-        // 6. Поиск группы по названию
-        document.getElementById('groupSearch').addEventListener('input', function() {
-            const searchText = this.value.toLowerCase();
-            const select = document.getElementById('groupSelect');
-            const options = select.options;
-            
-            for (let i = 0; i < options.length; i++) {
-                const optionText = options[i].text.toLowerCase();
-                if (optionText.includes(searchText)) {
-                    options[i].style.display = '';
-                } else {
-                    options[i].style.display = 'none';
-                }
-            }
-            
-            // Если нашли точное совпадение - выбираем его
-            if (searchText.length > 0) {
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].text.toLowerCase() === searchText) {
-                        select.value = options[i].value;
-                        changeGroup(options[i].value);
-                        break;
-                    }
-                }
+        groupSelect.addEventListener('change', function() {
+            const val = this.value;
+            if (val) {
+                // Нормализуем ввод (например, "2п1" -> "2П1")
+                const normalized = val.toUpperCase().replace('P', 'П').replace('L', 'Л');
+                this.value = normalized;
+                changeGroup(normalized);
             }
         });
         
-        // 7. Загружаем расписание при старте
-        if (currentGroup !== '2p1') {
+        if (currentGroup !== '2П1') {
             changeGroup(currentGroup);
         }
-        
-        // ===== КОНЕЦ ШАГА 2 =====   
         
         setInterval(update, 1000);
         update();
