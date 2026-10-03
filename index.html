@@ -79,11 +79,29 @@
             font-size: 12px;
         }
         .day-btn.active { background: #0a84ff; }
+        .search-box {
+            background: #1c1c1e;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            width: 90%;
+            max-width: 300px;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        .search-box:focus {
+            border-color: #0a84ff;
+        }
     </style>
 </head>
 <body>
     <h1>Расписание 2П1</h1>
+    
     <div style="margin: 15px 0; text-align: center;">
+        <input type="text" id="groupSearch" class="search-box" placeholder="🔍 Поиск группы...">
+        <br>
         <select id="groupSelect" style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
             <option value="2p1">2П1</option>
             <option value="1p1">1П1</option>
@@ -91,6 +109,7 @@
             <option value="1l2">1Л2</option>
         </select>
     </div>
+    
     <div class="day-selector" id="daySelector"></div>
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
@@ -146,7 +165,7 @@
                 { slot: 1, subject: "Основы алгоритмизации и программирования (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
                 { slot: 2, subject: "Основы проектирования баз данных (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
                 { slot: 3, subject: "—", teacher: "", room: "" },
-                { slot: 4, subject: "—", teacher: "", "room": "" },
+                { slot: 4, subject: "—", teacher: "", room: "" },
                 { slot: 5, subject: "—", teacher: "", room: "" },
                 { slot: 6, subject: "—", teacher: "", room: "" }
             ],
@@ -261,7 +280,7 @@
                 sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
                     <div class="lesson-info">
                         <div class="lesson-subject">${lesson.subject}</div>
-                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} |  ${lesson.room}</div>
                     </div>
                     <div class="lesson-time">
                         <span class="lesson-num">${lesson.slot} пара</span>
@@ -337,7 +356,34 @@
             changeGroup(this.value);
         });
         
-        // 6. Загружаем расписание при старте
+        // 6. Поиск группы по названию
+        document.getElementById('groupSearch').addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const select = document.getElementById('groupSelect');
+            const options = select.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                const optionText = options[i].text.toLowerCase();
+                if (optionText.includes(searchText)) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+            
+            // Если нашли точное совпадение - выбираем его
+            if (searchText.length > 0) {
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].text.toLowerCase() === searchText) {
+                        select.value = options[i].value;
+                        changeGroup(options[i].value);
+                        break;
+                    }
+                }
+            }
+        });
+        
+        // 7. Загружаем расписание при старте
         if (currentGroup !== '2p1') {
             changeGroup(currentGroup);
         }
