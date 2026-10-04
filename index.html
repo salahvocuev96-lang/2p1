@@ -287,15 +287,7 @@
                     timerBlock.style.display = 'none';
                 }
             } else {
-                // ИСПРАВЛЕНИЕ 4: Специальная надпись для воскресенья
-                if (todayWeekday === 0 && selectedDay === "Понедельник") {
-                    document.getElementById('status').innerText = 'Сегодня выходной';
-                    document.getElementById('timer').innerText = '—';
-                    document.getElementById('info').innerText = 'Завтра: Понедельник';
-                    timerBlock.style.display = 'block';
-                } else {
-                    timerBlock.style.display = 'none';
-                }
+                timerBlock.style.display = 'none';
             }
 
             const sch = document.getElementById('schedule');
