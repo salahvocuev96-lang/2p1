@@ -108,7 +108,8 @@
             <option value="1l1">1Л1</option>
             <option value="1l2">1Л2</option>
             <option value="1b1">1Б1</option>
-            <option value="1bd1">1БД1</option>            
+            <option value="1bd1">1БД1</option>
+            <option value="1yu1">1Ю1</option>
         </select>
     </div>
     
@@ -366,7 +367,7 @@
                 Object.keys(schedule).forEach(day => {
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
-                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б');
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 update();
             }
         }
