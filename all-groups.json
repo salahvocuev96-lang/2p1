@@ -320,4 +320,58 @@
       ]
     }
   }
+,
+  "1yu2": {
+    "groupName": "1Ю2",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "Час куратора", "teacher": "Ханкина А.Р.", "room": "216А" },
+        { "slot": 2, "subject": "Цифровая грамотность", "teacher": "Маханова Т.А.", "room": "210" },
+        { "slot": 3, "subject": "Математика", "teacher": "Кудинова С.Л.", "room": "202" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Математика", "teacher": "Кудинова С.Л.", "room": "216А" },
+        { "slot": 2, "subject": "Индивидуальный проект", "teacher": "Бурдин С.С.", "room": "216А" },
+        { "slot": 3, "subject": "История", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "Иностранный язык", "teacher": "Марфина Л.А.", "room": "216А" },
+        { "slot": 2, "subject": "Информатика", "teacher": "Новиков В.С.", "room": "217" },
+        { "slot": 3, "subject": "Химия", "teacher": "Паршукова Э.В.", "room": "216А" },
+        { "slot": 4, "subject": "Литература", "teacher": "Милуш А.С.", "room": "213" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "Физика", "teacher": "Хохленкова И.Л.", "room": "210" },
+        { "slot": 2, "subject": "Русский язык", "teacher": "Милуш А.С.", "room": "210" },
+        { "slot": 3, "subject": "ОБЗиРФ", "teacher": "Наумова Е.М.", "room": "216" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "История (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" },
+        { "slot": 6, "subject": "Обществознание (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
