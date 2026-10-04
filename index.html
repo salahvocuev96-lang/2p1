@@ -180,9 +180,23 @@
         };
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-        const dayMap = { 0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота", 6: "Понедельник" };
+        
+        // ИСПРАВЛЕНИЕ 1: Правильная карта дней недели
+        const dayMap = { 
+            1: "Понедельник", 
+            2: "Вторник", 
+            3: "Среда", 
+            4: "Четверг", 
+            5: "Пятница", 
+            6: "Суббота", 
+            0: "Воскресенье" 
+        };
 
-        let selectedDay = dayMap[new Date().getDay()];
+        // ИСПРАВЛЕНИЕ 2: Если воскресенье, показываем расписание на понедельник
+        let selectedDay = (() => {
+            const d = new Date().getDay();
+            return d === 0 ? "Понедельник" : dayMap[d];
+        })();
 
         function toMin(t) {
             const [h, m] = t.split(':').map(Number);
@@ -192,10 +206,14 @@
         function update() {
             const now = new Date();
             const todayWeekday = now.getDay();
-            const todayName = dayMap[todayWeekday === 0 ? 6 : todayWeekday - 1];
+            
+            // ИСПРАВЛЕНИЕ 3: Правильное определение имени сегодняшнего дня
+            const todayName = dayMap[todayWeekday];
             
             const todayLessons = schedule[selectedDay];
-            const isToday = (selectedDay === todayName);
+            
+            // ИСПРАВЛЕНИЕ 3 (продолжение): Таймер работает только если день совпадает И это не воскресенье
+            const isToday = (selectedDay === todayName && todayWeekday !== 0);
             
             let active = null, activeBreak = null, next = null, left = 0;
 
@@ -266,7 +284,15 @@
                     timerBlock.style.display = 'none';
                 }
             } else {
-                timerBlock.style.display = 'none';
+                // ИСПРАВЛЕНИЕ 4: Специальная надпись для воскресенья
+                if (todayWeekday === 0 && selectedDay === "Понедельник") {
+                    document.getElementById('status').innerText = 'Сегодня выходной';
+                    document.getElementById('timer').innerText = '—';
+                    document.getElementById('info').innerText = 'Завтра: Понедельник';
+                    timerBlock.style.display = 'block';
+                } else {
+                    timerBlock.style.display = 'none';
+                }
             }
 
             const sch = document.getElementById('schedule');
@@ -280,7 +306,7 @@
                 sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
                     <div class="lesson-info">
                         <div class="lesson-subject">${lesson.subject}</div>
-                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} |  ${lesson.room}</div>
+                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                     </div>
                     <div class="lesson-time">
                         <span class="lesson-num">${lesson.slot} пара</span>
@@ -312,18 +338,13 @@
 
         // ===== ШАГ 2: Выбор группы =====
         
-        // Маппинг групп с одинаковым расписанием
         const groupMapping = {
             '1l2': '1l1'
         };
         
-        // 1. Загружаем сохраненную группу (если есть)
         let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
-        
-        // 2. Устанавливаем значение в списке
         document.getElementById('groupSelect').value = currentGroup;
         
-        // 3. Функция загрузки расписания из JSON
         async function loadGroupSchedule(groupCode) {
             try {
                 const actualGroup = groupMapping[groupCode] || groupCode;
@@ -336,27 +357,22 @@
             }
         }
         
-        // 4. Функция смены группы
         async function changeGroup(groupCode) {
             localStorage.setItem('selectedGroup', groupCode);
             const newSchedule = await loadGroupSchedule(groupCode);
             if (newSchedule) {
-                // Заменяем расписание
                 Object.keys(schedule).forEach(day => {
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
-                // Обновляем заголовок
                 document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л');
                 update();
             }
         }
         
-        // 5. Слушаем изменения в списке
         document.getElementById('groupSelect').addEventListener('change', function() {
             changeGroup(this.value);
         });
         
-        // 6. Поиск группы по названию
         document.getElementById('groupSearch').addEventListener('input', function() {
             const searchText = this.value.toLowerCase();
             const select = document.getElementById('groupSelect');
@@ -371,7 +387,6 @@
                 }
             }
             
-            // Если нашли точное совпадение - выбираем его
             if (searchText.length > 0) {
                 for (let i = 0; i < options.length; i++) {
                     if (options[i].text.toLowerCase() === searchText) {
@@ -383,12 +398,9 @@
             }
         });
         
-        // 7. Загружаем расписание при старте
         if (currentGroup !== '2p1') {
             changeGroup(currentGroup);
         }
-        
-        // ===== КОНЕЦ ШАГА 2 =====   
         
         setInterval(update, 1000);
         update();
