@@ -366,7 +366,7 @@
                 Object.keys(schedule).forEach(day => {
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
-                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л');
+                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б');
                 update();
             }
         }
