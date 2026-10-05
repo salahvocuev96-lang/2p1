@@ -374,4 +374,58 @@
       ]
     }
   }
+,
+  "2b1": {
+    "groupName": "2Б1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Основы финансовой грамотности", "teacher": "Бурдин С.С.", "room": "204" },
+        { "slot": 3, "subject": "Основы бухгалтерского учета", "teacher": "Мощицкая З.В.", "room": "204" },
+        { "slot": 4, "subject": "Основы бухгалтерского учета", "teacher": "Мощицкая З.В.", "room": "202" },
+        { "slot": 5, "subject": "Час куратора", "teacher": "Шагидаева А.Б.", "room": "—" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
+        { "slot": 2, "subject": "МДК.01.01 Практические основы бух. учета и имущества и источников его формирования", "teacher": "Мерзликина З.З.", "room": "217" },
+        { "slot": 3, "subject": "МДК.01.01 Практические основы бух. учета и имущества и источников его формирования", "teacher": "Мерзликина З.З.", "room": "215" },
+        { "slot": 4, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "История России (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Бухгалтерский учет с применением цифровых технологий", "teacher": "Таманова Т.Н.", "room": "217" },
+        { "slot": 4, "subject": "Бухгалтерский учет с применением цифровых технологий", "teacher": "Таманова Т.Н.", "room": "217" },
+        { "slot": 5, "subject": "БЖД", "teacher": "Наумова Е.М.", "room": "213" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "Экономика организации", "teacher": "Бурдин С.С.", "room": "213" },
+        { "slot": 5, "subject": "Экономика организации", "teacher": "Бурдин С.С.", "room": "213" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
