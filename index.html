@@ -297,7 +297,7 @@
             todayLessons.forEach(lesson => {
                 if (lesson.subject === "—") return;
                 const slot = timeSlots[lesson.slot - 1];
-                const isActive = active && active.subject === lesson.subject;
+                const isActive = active && active.slot === lesson.slot;
                 const isBreak = activeBreak && activeBreak.after === lesson.subject;
                 
                 sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
