@@ -206,10 +206,20 @@
             0: "Воскресенье" 
         };
 
-        // ИСПРАВЛЕНИЕ 2: Если воскресенье, показываем расписание на понедельник
+        // Определяем день: если воскресенье или после 19:00 — показываем следующий день
         let selectedDay = (() => {
-            const d = new Date().getDay();
-            return d === 0 ? "Понедельник" : dayMap[d];
+            const now = new Date();
+            const d = now.getDay();
+            const hours = now.getHours();
+            
+            if (d === 0) return "Понедельник"; // Воскресенье -> Понедельник
+            
+            if (hours >= 19) { // Если сейчас 19:00 или позже
+                const nextDay = d === 6 ? 0 : d + 1; // После субботы (6) идет воскресенье (0)
+                return nextDay === 0 ? "Понедельник" : dayMap[nextDay];
+            }
+            
+            return dayMap[d];
         })();
 
         function toMin(t) {
