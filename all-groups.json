@@ -112,7 +112,7 @@
         { "slot": 1, "subject": "Математика", "teacher": "Пащенко В.П.", "room": "202" },
         { "slot": 2, "subject": "Русский язык", "teacher": "Милуш А.С.", "room": "213" },
         { "slot": 3, "subject": "Индивидуальный проект", "teacher": "Кирюхин К.В.", "room": "210" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "Цифровая грамотность", "teacher": "Маханова Т.А.", "room": "210" },
         { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
