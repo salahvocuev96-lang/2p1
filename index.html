@@ -246,7 +246,7 @@
                         const slot2 = timeSlots[todayLessons[i+1].slot - 1];
                         const s = toMin(slot1.end), e = toMin(slot2.start);
                         if (cur >= s && cur < e) {
-                            activeBreak = { after: todayLessons[i].subject, dur: e - s };
+                            activeBreak = { afterSlot: todayLessons[i].slot, dur: e - s };
                             left = (e - cur) * 60 - sec;
                             break;
                         }
@@ -280,7 +280,9 @@
                     document.getElementById('timer').innerText = t;
                     document.getElementById('info').innerText = 'до конца';
                 } else if (activeBreak) {
-                    document.getElementById('status').innerText = 'Перемена после ' + activeBreak.after;
+                    const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
+                    const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
+                    document.getElementById('status').innerText = 'Перемена после ' + prevSubject;
                     document.getElementById('timer').innerText = t;
                     document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
                 } else if (next) {
@@ -300,7 +302,7 @@
                 if (lesson.subject === "—") return;
                 const slot = timeSlots[lesson.slot - 1];
                 const isActive = active && active.slot === lesson.slot;
-                const isBreak = activeBreak && activeBreak.after === lesson.subject;
+                const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
                 
                 sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
                     <div class="lesson-info">
