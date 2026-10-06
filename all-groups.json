@@ -536,4 +536,58 @@
       ]
     }
   }
+,
+  "2yu2": {
+    "groupName": "2Ю2",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "БЖД", "teacher": "Наумова Е.М.", "room": "213" },
+        { "slot": 4, "subject": "Основы бережливого производства", "teacher": "Шагидаева А.Б.", "room": "213" },
+        { "slot": 5, "subject": "Основы финансовой грамотности", "teacher": "Бурдин С.С.", "room": "213" },
+        { "slot": 6, "subject": "Час куратора", "teacher": "Наумова Е.М.", "room": "—" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
+        { "slot": 3, "subject": "Информационные технологии в проф. деятельности", "teacher": "Новиков В.С.", "room": "217" },
+        { "slot": 4, "subject": "Теория государства и права", "teacher": "Широкова Ю.Н.", "room": "213" },
+        { "slot": 5, "subject": "Теория государства и права", "teacher": "Широкова Ю.Н.", "room": "213" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "История России (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Конституционное право России", "teacher": "Москвичева Ф.О.", "room": "202" },
+        { "slot": 3, "subject": "Конституционное право России", "teacher": "Москвичева Ф.О.", "room": "202" },
+        { "slot": 4, "subject": "МДК.02.01 Судоустройство и правоохранительные органы", "teacher": "Шебалкин И.В.", "room": "202" },
+        { "slot": 5, "subject": "МДК.02.01 Судоустройство и правоохранительные органы", "teacher": "Шебалкин И.В.", "room": "202" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 4, "subject": "Теория государства и права", "teacher": "Широкова Ю.Н.", "room": "210" },
+        { "slot": 5, "subject": "Теория государства и права", "teacher": "Широкова Ю.Н.", "room": "210" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
