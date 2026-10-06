@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: -apple-system, sans-serif;
-            background: #000;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #fff;
             padding: 20px;
             text-align: center;
@@ -30,6 +30,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .lesson.active { background: #0a84ff; }
         .lesson-info { text-align: left; flex: 1; }
@@ -60,6 +61,7 @@
             color: #8e8e93;
             display: flex;
             justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .break.active { background: #ff9500; color: #fff; }
         .day-selector {
@@ -77,8 +79,12 @@
             margin: 2px;
             cursor: pointer;
             font-size: 12px;
+            transition: transform 0.2s ease, background 0.2s ease;
         }
         .day-btn.active { background: #0a84ff; }
+        .day-btn:hover {
+            transform: scale(1.05);
+        }
         .search-box {
             background: #1c1c1e;
             color: #fff;
@@ -104,7 +110,12 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }    
+        }
+        /* Эффект при наведении на карточку пары или перемены */
+        .lesson:hover, .break:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -236,7 +247,6 @@
             return h * 60 + m;
         }
 
-        // Переменные для отслеживания, нужно ли перерисовывать расписание
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
 
@@ -321,7 +331,6 @@
                 timerBlock.style.display = 'none';
             }
 
-            // ПЕРЕРИСОВКА РАСПИСАНИЯ ТОЛЬКО ПРИ СМЕНЕ ДНЯ ИЛИ ГРУППЫ
             if (selectedDay !== lastRenderedDay || currentGroup !== lastRenderedGroup) {
                 lastRenderedDay = selectedDay;
                 lastRenderedGroup = currentGroup;
@@ -336,7 +345,6 @@
                     const isActive = active && active.slot === lesson.slot;
                     const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
                     
-                    // Добавлен data-slot для безопасного обновления подсветки каждую секунду
                     sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
                         <div class="lesson-info">
                             <div class="lesson-subject">${lesson.subject}</div>
@@ -370,7 +378,6 @@
                     selector.appendChild(btn);
                 });
             } else {
-                // Если день и группа не менялись, просто обновляем синюю/оранжевую подсветку без перерисовки
                 document.querySelectorAll('.lesson').forEach(div => {
                     const slotNum = parseInt(div.getAttribute('data-slot'));
                     if (active && active.slot === slotNum) {
