@@ -315,13 +315,14 @@
 
             const sch = document.getElementById('schedule');
             sch.innerHTML = '';
+            let delay = 0;
             todayLessons.forEach(lesson => {
                 if (lesson.subject === "—") return;
                 const slot = timeSlots[lesson.slot - 1];
                 const isActive = active && active.slot === lesson.slot;
                 const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
                 
-                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}">
+                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms">
                     <div class="lesson-info">
                         <div class="lesson-subject">${lesson.subject}</div>
                         <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
@@ -336,11 +337,12 @@
                 if (nextLesson) {
                     const nextSlot = timeSlots[nextLesson.slot - 1];
                     const breakDur = toMin(nextSlot.start) - toMin(slot.end);
-                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}">
+                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" style="animation-delay: ${delay}ms">
                         <span>Перемена</span>
                         <span>${breakDur} мин</span>
                     </div>`;
                 }
+                delay += 50;
             });
 
             const selector = document.getElementById('daySelector');
