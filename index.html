@@ -8,9 +8,9 @@
     <style>
         body {
             font-family: -apple-system, sans-serif;
-            background: #000000; /* Строгий черный фон, как в реальных приложениях */
+            background: #000000;
             color: #fff;
-            padding: 20px 20px 60px 20px; /* 60px снизу, чтобы экран не обрезался в конце */
+            padding: 20px 20px 60px 20px;
             text-align: center;
             min-height: 100vh;
         }
@@ -21,7 +21,13 @@
             margin: 20px 0;
         }
         .status { font-size: 18px; color: #8e8e93; }
-        .time { font-size: 48px; font-weight: bold; color: #fff; margin: 10px 0; }
+        .time { 
+            font-size: 48px; 
+            font-weight: bold; 
+            color: #fff; 
+            margin: 10px 0;
+            transition: opacity 0.2s ease;
+        }
         .info { font-size: 16px; color: #8e8e93; }
         .lesson {
             background: #1c1c1e;
@@ -112,7 +118,6 @@
                 transform: translateY(0);
             }
         }
-        /* Эффект при наведении на карточку пары или перемены */
         .lesson:hover, .break:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(10, 132, 255, 0.15);
@@ -248,6 +253,16 @@
             return h * 60 + m;
         }
 
+        function fadeText(elementId, newText) {
+            const element = document.getElementById(elementId);
+            if (element.innerText === newText) return;
+            element.style.opacity = '0';
+            setTimeout(() => {
+                element.innerText = newText;
+                element.style.opacity = '1';
+            }, 200);
+        }
+
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
 
@@ -312,19 +327,19 @@
             if (isToday) {
                 timerBlock.style.display = 'block';
                 if (active) {
-                    document.getElementById('status').innerText = 'Идет: ' + active.subject;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до конца';
+                    fadeText('status', 'Идет: ' + active.subject);
+                    fadeText('timer', t);
+                    fadeText('info', 'до конца');
                 } else if (activeBreak) {
                     const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
                     const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
-                    document.getElementById('status').innerText = 'Перемена после ' + prevSubject;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до конца (' + activeBreak.dur + ' мин)';
+                    fadeText('status', 'Перемена после ' + prevSubject);
+                    fadeText('timer', t);
+                    fadeText('info', 'до конца (' + activeBreak.dur + ' мин)');
                 } else if (next) {
-                    document.getElementById('status').innerText = 'Следующая: ' + next.subject;
-                    document.getElementById('timer').innerText = t;
-                    document.getElementById('info').innerText = 'до начала';
+                    fadeText('status', 'Следующая: ' + next.subject);
+                    fadeText('timer', t);
+                    fadeText('info', 'до начала');
                 } else {
                     timerBlock.style.display = 'none';
                 }
@@ -349,7 +364,7 @@
                     sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
                         <div class="lesson-info">
                             <div class="lesson-subject">${lesson.subject}</div>
-                            <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                            <div class="lesson-details">👨🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                         </div>
                         <div class="lesson-time">
                             <span class="lesson-num">${lesson.slot} пара</span>
