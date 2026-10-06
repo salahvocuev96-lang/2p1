@@ -644,4 +644,58 @@
       ]
     }
   }
+,
+  "2l1": {
+    "groupName": "2Л1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "Моделирование логистических систем", "teacher": "Кудинова С.Л.", "room": "215" },
+        { "slot": 2, "subject": "Моделирование логистических систем", "teacher": "Кудинова С.Л.", "room": "215" },
+        { "slot": 3, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
+        { "slot": 4, "subject": "Статистика", "teacher": "Бурдин С.С.", "room": "215" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Информационное обеспечение логистических процессов", "teacher": "Новиков В.С.", "room": "218" },
+        { "slot": 3, "subject": "Экономика организации", "teacher": "Бурдин С.С.", "room": "216А" },
+        { "slot": 4, "subject": "БЖД", "teacher": "Наумова Е.М.", "room": "201" },
+        { "slot": 5, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "Финансы, денежное обращение и кредит", "teacher": "Малышева М.В.", "room": "221" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "История России (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Экономика организации", "teacher": "Бурдин С.С.", "room": "218" },
+        { "slot": 4, "subject": "Складская логистика", "teacher": "Бурдин С.С.", "room": "215" },
+        { "slot": 5, "subject": "Час куратора", "teacher": "Бурдин С.С.", "room": "—" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
