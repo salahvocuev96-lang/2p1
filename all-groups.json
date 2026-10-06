@@ -698,4 +698,58 @@
       ]
     }
   }
+,
+  "1p3": {
+    "groupName": "1П3",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Операционные системы и среды", "teacher": "Альбатша А.М.Х.", "room": "217" },
+        { "slot": 3, "subject": "Операционные системы и среды", "teacher": "Альбатша А.М.Х.", "room": "217" },
+        { "slot": 4, "subject": "Основы информационной безопасности", "teacher": "Альбатша А.М.Х.", "room": "217" },
+        { "slot": 5, "subject": "Основы информационной безопасности", "teacher": "Альбатша А.М.Х.", "room": "217" },
+        { "slot": 6, "subject": "Час куратора", "teacher": "Наумова Е.М.", "room": "—" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "Информационные технологии", "teacher": "Новиков В.С.", "room": "217" },
+        { "slot": 5, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Физическая культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "История России (дистант)", "teacher": "Неменов Б.В.", "room": "онлайн" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Управление ИТ-проектами", "teacher": "Альбатша А.М.Х.", "room": "203" },
+        { "slot": 4, "subject": "Управление ИТ-проектами", "teacher": "Альбатша А.М.Х.", "room": "203" },
+        { "slot": 5, "subject": "Основы работы с информацией", "teacher": "Альбатша А.М.Х.", "room": "203" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "Основы алгоритмизации и программирования (дистант)", "teacher": "Голеусов Р.О.", "room": "онлайн" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Компьютерные сети", "teacher": "Малькова Е.В.", "room": "217" },
+        { "slot": 3, "subject": "Архитектура аппаратных средств", "teacher": "Малькова Е.В.", "room": "217" },
+        { "slot": 4, "subject": "Математический аппарат в отрасли информационных технологий", "teacher": "Малькова Е.В.", "room": "217" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
