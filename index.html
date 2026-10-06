@@ -206,7 +206,6 @@
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         
-        // ИСПРАВЛЕНИЕ 1: Правильная карта дней недели
         const dayMap = { 
             1: "Понедельник", 
             2: "Вторник", 
@@ -217,16 +216,15 @@
             0: "Воскресенье" 
         };
 
-        // Определяем день: если воскресенье или после 19:00 — показываем следующий день
         let selectedDay = (() => {
             const now = new Date();
             const d = now.getDay();
             const hours = now.getHours();
             
-            if (d === 0) return "Понедельник"; // Воскресенье -> Понедельник
+            if (d === 0) return "Понедельник";
             
-            if (hours >= 19) { // Если сейчас 19:00 или позже
-                const nextDay = d === 6 ? 0 : d + 1; // После субботы (6) идет воскресенье (0)
+            if (hours >= 19) {
+                const nextDay = d === 6 ? 0 : d + 1;
                 return nextDay === 0 ? "Понедельник" : dayMap[nextDay];
             }
             
@@ -238,16 +236,15 @@
             return h * 60 + m;
         }
 
+        // Переменные для отслеживания, нужно ли перерисовывать расписание
+        let lastRenderedDay = null;
+        let lastRenderedGroup = null;
+
         function update() {
             const now = new Date();
             const todayWeekday = now.getDay();
-            
-            // ИСПРАВЛЕНИЕ 3: Правильное определение имени сегодняшнего дня
             const todayName = dayMap[todayWeekday];
-            
             const todayLessons = schedule[selectedDay];
-            
-            // ИСПРАВЛЕНИЕ 3 (продолжение): Таймер работает только если день совпадает И это не воскресенье
             const isToday = (selectedDay === todayName && todayWeekday !== 0);
             
             let active = null, activeBreak = null, next = null, left = 0;
@@ -324,50 +321,75 @@
                 timerBlock.style.display = 'none';
             }
 
-            const sch = document.getElementById('schedule');
-            sch.innerHTML = '';
-            let delay = 0;
-            todayLessons.forEach(lesson => {
-                if (lesson.subject === "—") return;
-                const slot = timeSlots[lesson.slot - 1];
-                const isActive = active && active.slot === lesson.slot;
-                const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
+            // ПЕРЕРИСОВКА РАСПИСАНИЯ ТОЛЬКО ПРИ СМЕНЕ ДНЯ ИЛИ ГРУППЫ
+            if (selectedDay !== lastRenderedDay || currentGroup !== lastRenderedGroup) {
+                lastRenderedDay = selectedDay;
+                lastRenderedGroup = currentGroup;
                 
-                sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms">
-                    <div class="lesson-info">
-                        <div class="lesson-subject">${lesson.subject}</div>
-                        <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
-                    </div>
-                    <div class="lesson-time">
-                        <span class="lesson-num">${lesson.slot} пара</span>
-                        <span>${slot.start}-${slot.end}</span>
-                    </div>
-                </div>`;
+                const sch = document.getElementById('schedule');
+                sch.innerHTML = '';
+                let delay = 0;
                 
-                const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
-                if (nextLesson) {
-                    const nextSlot = timeSlots[nextLesson.slot - 1];
-                    const breakDur = toMin(nextSlot.start) - toMin(slot.end);
-                    sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" style="animation-delay: ${delay}ms">
-                        <span>Перемена</span>
-                        <span>${breakDur} мин</span>
+                todayLessons.forEach(lesson => {
+                    if (lesson.subject === "—") return;
+                    const slot = timeSlots[lesson.slot - 1];
+                    const isActive = active && active.slot === lesson.slot;
+                    const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
+                    
+                    // Добавлен data-slot для безопасного обновления подсветки каждую секунду
+                    sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
+                        <div class="lesson-info">
+                            <div class="lesson-subject">${lesson.subject}</div>
+                            <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                        </div>
+                        <div class="lesson-time">
+                            <span class="lesson-num">${lesson.slot} пара</span>
+                            <span>${slot.start}-${slot.end}</span>
+                        </div>
                     </div>`;
-                }
-                delay += 50;
-            });
+                    
+                    const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
+                    if (nextLesson) {
+                        const nextSlot = timeSlots[nextLesson.slot - 1];
+                        const breakDur = toMin(nextSlot.start) - toMin(slot.end);
+                        sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
+                            <span>Перемена</span>
+                            <span>${breakDur} мин</span>
+                        </div>`;
+                    }
+                    delay += 50;
+                });
 
-            const selector = document.getElementById('daySelector');
-            selector.innerHTML = '';
-            days.forEach(day => {
-                const btn = document.createElement('button');
-                btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
-                btn.innerText = day.substring(0, 2);
-                btn.onclick = () => { selectedDay = day; update(); };
-                selector.appendChild(btn);
-            });
+                const selector = document.getElementById('daySelector');
+                selector.innerHTML = '';
+                days.forEach(day => {
+                    const btn = document.createElement('button');
+                    btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
+                    btn.innerText = day.substring(0, 2);
+                    btn.onclick = () => { selectedDay = day; update(); };
+                    selector.appendChild(btn);
+                });
+            } else {
+                // Если день и группа не менялись, просто обновляем синюю/оранжевую подсветку без перерисовки
+                document.querySelectorAll('.lesson').forEach(div => {
+                    const slotNum = parseInt(div.getAttribute('data-slot'));
+                    if (active && active.slot === slotNum) {
+                        div.classList.add('active');
+                    } else {
+                        div.classList.remove('active');
+                    }
+                });
+                document.querySelectorAll('.break').forEach(div => {
+                    const slotNum = parseInt(div.getAttribute('data-slot'));
+                    if (activeBreak && activeBreak.afterSlot === slotNum) {
+                        div.classList.add('active');
+                    } else {
+                        div.classList.remove('active');
+                    }
+                });
+            }
         }
 
-        // ===== ШАГ 2: Выбор группы =====
         const groupMapping = {
             '1l2': '1l1',
             '1l3': '2l1',
