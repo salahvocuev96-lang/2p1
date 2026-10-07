@@ -167,8 +167,8 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        /* Убрал transform из hover, чтобы не конфликтовал с 3D-наклоном */
         .lesson:hover, .break:hover {
+            transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(10, 132, 255, 0.15);
         }
     </style>
@@ -483,11 +483,11 @@
             }
         }
 
-        // === 3D ЭФФЕКТ ===
+        // === 3D ЭФФЕКТ (Вынесен из update(), чтобы не дублироваться каждую секунду) ===
         const scheduleContainer = document.getElementById('schedule');
 
-        const handleTilt = (clientX, clientY) => {
-            const card = document.elementFromPoint(clientX, clientY)?.closest('.lesson');
+        const handleTilt = (e, clientX, clientY) => {
+            const card = e.target.closest('.lesson');
             if (!card) return;
             
             const rect = card.getBoundingClientRect();
@@ -505,19 +505,20 @@
             card.style.setProperty('--glow', '1');
         };
 
-        const handleReset = () => {
-            document.querySelectorAll('.lesson').forEach(card => {
-                card.style.transform = 'rotateX(0) rotateY(0)';
-                card.style.setProperty('--glow', '0');
-            });
+        const handleReset = (e) => {
+            const card = e.target.closest('.lesson');
+            if (!card) return;
+            card.style.transform = 'rotateX(0) rotateY(0)';
+            card.style.setProperty('--glow', '0');
         };
 
-        scheduleContainer.addEventListener('mousemove', (e) => handleTilt(e.clientX, e.clientY));
+        scheduleContainer.addEventListener('mousemove', (e) => handleTilt(e, e.clientX, e.clientY));
         scheduleContainer.addEventListener('mouseleave', handleReset);
-        scheduleContainer.addEventListener('touchstart', (e) => handleTilt(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-        scheduleContainer.addEventListener('touchmove', (e) => handleTilt(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+        scheduleContainer.addEventListener('touchstart', (e) => handleTilt(e, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+        scheduleContainer.addEventListener('touchmove', (e) => handleTilt(e, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         scheduleContainer.addEventListener('touchend', handleReset);
         scheduleContainer.addEventListener('touchcancel', handleReset);
+        scheduleContainer.addEventListener('click', handleReset); // Гарантирует сброс при одиночном нажатии
 
         const groupMapping = {
             '1l2': '1l1',
