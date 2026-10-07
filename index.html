@@ -388,14 +388,15 @@
             const strip = document.getElementById(elementId);
             if (strip) strip.style.transform = `translateY(-${value * DIGIT_HEIGHT}px)`;
         }
-        function displayOdometer(totalSeconds) {
-            const mins = Math.floor(totalSeconds / 60);
-            const secs = totalSeconds % 60;
-            setDigit('min1', Math.floor(mins / 10));
-            setDigit('min2', mins % 10);
-            setDigit('sec1', Math.floor(secs / 10));
-            setDigit('sec2', secs % 10);
-        }
+function displayOdometer(totalSeconds) {
+    if (totalSeconds < 0) totalSeconds = 0;
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    setDigit('min1', Math.floor(mins / 10));
+    setDigit('min2', mins % 10);
+    setDigit('sec1', Math.floor(secs / 10));
+    setDigit('sec2', secs % 10);
+}
         createStrip('min1'); createStrip('min2'); createStrip('sec1'); createStrip('sec2');
 
         let lastRenderedDay = null;
@@ -439,17 +440,18 @@
                     }
                 }
 
-                if (!active && !activeBreak) {
-                    for (let lesson of todayLessons) {
-                        if (lesson.subject === "—") continue;
-                        const slot = timeSlots[lesson.slot - 1];
-                        if (cur < toMin(slot.start)) {
-                            next = { ...lesson, time: `${slot.start}-${slot.end}` };
-                            left = (toMin(slot.start) - cur) * 60 - sec;
-                            break;
-                        }
-                    }
-                }
+if (!active && !activeBreak) {
+    for (let lesson of todayLessons) {
+        if (lesson.subject === "—") continue;
+        const slot = timeSlots[lesson.slot - 1];
+        if (cur < toMin(slot.start)) {
+            next = { ...lesson, time: `${slot.start}-${slot.end}` };
+            left = (toMin(slot.start) - cur) * 60 - sec;
+            if (left < 0) left = 0;
+            break;
+        }
+    }
+}
             }
 
             const progressBar = document.getElementById('progressBar');
@@ -471,28 +473,34 @@
             const timerBlock = document.getElementById('timerBlock');
 
             // ИСПРАВЛЕНО: убран дублирующийся if (isToday)
-            if (isToday) {
-                timerBlock.style.display = 'block';
-                if (active) {
-                    fadeText('status', 'Идет: ' + active.subject);
-                    displayOdometer(left);
-                    fadeText('info', 'до конца');
-                } else if (activeBreak) {
-                    const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
-                    const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
-                    fadeText('status', 'Перемена после ' + prevSubject);
-                    displayOdometer(left);
-                    fadeText('info', 'до конца (' + activeBreak.dur + ' мин)');
-                } else if (next) {
-                    fadeText('status', 'Следующая: ' + next.subject);
-                    displayOdometer(left);
-                    fadeText('info', 'до начала');
-                } else {
-                    timerBlock.style.display = 'none';
-                }
-            } else {
-                timerBlock.style.display = 'none';
-            }
+if (isToday) {
+
+    if (active) {
+        const slot = timeSlots[active.slot - 1];
+        const duration = toMin(slot.end) - toMin(slot.start);
+        fadeText('status', 'Идет: ' + active.subject);
+        displayOdometer(left);
+        fadeText('info', 'до конца (длится ' + duration + ' мин)');
+    } else if (activeBreak) {
+        const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
+        const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
+        fadeText('status', 'Перемена после ' + prevSubject);
+        displayOdometer(left);
+        fadeText('info', 'до конца (длится ' + activeBreak.dur + ' мин)');
+    } else if (next) {
+        const slot = timeSlots[next.slot - 1];
+        const duration = toMin(slot.end) - toMin(slot.start);
+        fadeText('status', 'Следующая: ' + next.subject);
+        displayOdometer(left);
+        fadeText('info', 'до начала (длится ' + duration + ' мин)');
+    } else {
+        fadeText('status', 'Пары закончились');
+        displayOdometer(0);
+        fadeText('info', 'до завтра');
+    }
+} else {
+    timerBlock.style.display = 'none';
+}
 
             if (selectedDay !== lastRenderedDay || currentGroup !== lastRenderedGroup) {
                 lastRenderedDay = selectedDay;
