@@ -514,17 +514,6 @@
                 });
                 card.addEventListener('mouseleave', reset);
 
-                // Тач (телефон) — добавили touchstart!
-                card.addEventListener('touchstart', (e) => {
-                    const touch = e.touches[0];
-                    tilt(touch.clientX - card.getBoundingClientRect().left, touch.clientY - card.getBoundingClientRect().top);
-                }, { passive: true });
-                card.addEventListener('touchmove', (e) => {
-                    const touch = e.touches[0];
-                    tilt(touch.clientX - card.getBoundingClientRect().left, touch.clientY - card.getBoundingClientRect().top);
-                }, { passive: true });
-                card.addEventListener('touchend', reset);
-            });
                 // Тач (телефон)
                 card.addEventListener('touchmove', (e) => {
                     const touch = e.touches[0];
