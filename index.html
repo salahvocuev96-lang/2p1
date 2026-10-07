@@ -378,7 +378,7 @@
         function createStrip(elementId) {
             const strip = document.getElementById(elementId);
             if (!strip) return;
-            strip.innerHTML = ''; // Гарантируем чистоту перед созданием
+            strip.innerHTML = '';
             for (let i = 0; i <= 9; i++) {
                 const span = document.createElement('span');
                 span.textContent = i;
@@ -389,21 +389,17 @@
         function setDigit(elementId, value) {
             const strip = document.getElementById(elementId);
             if (strip) {
-                // Гарантируем, что значение от 0 до 9, чтобы первая рамка не пустовала
                 const safeValue = Math.max(0, Math.min(9, Math.floor(value)));
                 strip.style.transform = `translateY(-${safeValue * DIGIT_HEIGHT}px)`;
             }
         }
 
         function displayOdometer(totalSeconds) {
-            // Защита от NaN или отрицательных значений
             if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
                 totalSeconds = 0;
             }
             const mins = Math.floor(totalSeconds / 60);
             const secs = totalSeconds % 60;
-            
-            // Жестко задаем ведущие нули (01, 02, 09 и т.д.)
             setDigit('min1', Math.floor(mins / 10));
             setDigit('min2', mins % 10);
             setDigit('sec1', Math.floor(secs / 10));
@@ -488,27 +484,22 @@
 
             const timerBlock = document.getElementById('timerBlock');
 
-            // Реальный таймер: показывает статус, время и длительность
             if (isToday) {
                 timerBlock.style.display = 'block';
                 if (active) {
-                    const slot = timeSlots[active.slot - 1];
-                    const duration = toMin(slot.end) - toMin(slot.start);
                     fadeText('status', 'Идет: ' + active.subject);
                     displayOdometer(left);
-                    fadeText('info', 'до конца (длится ' + duration + ' мин)');
+                    fadeText('info', 'до конца');
                 } else if (activeBreak) {
                     const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
                     const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
                     fadeText('status', 'Перемена после ' + prevSubject);
                     displayOdometer(left);
-                    fadeText('info', 'до конца (длится ' + activeBreak.dur + ' мин)');
+                    fadeText('info', 'до конца (' + activeBreak.dur + ' мин)');
                 } else if (next) {
-                    const slot = timeSlots[next.slot - 1];
-                    const duration = toMin(slot.end) - toMin(slot.start);
                     fadeText('status', 'Следующая: ' + next.subject);
                     displayOdometer(left);
-                    fadeText('info', 'до начала (длится ' + duration + ' мин)');
+                    fadeText('info', 'до начала');
                 } else {
                     fadeText('status', 'Пары закончились');
                     displayOdometer(0);
@@ -535,7 +526,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨‍ ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -555,7 +546,6 @@
                     }
                 });
 
-                // Запускаем Blur Cascade анимацию
                 setTimeout(() => {
                     const elements = sch.querySelectorAll('.lesson, .break');
                     elements.forEach((el, index) => {
