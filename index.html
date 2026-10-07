@@ -23,12 +23,65 @@
             margin: 20px 0;
         }
         .status { font-size: 18px; color: #8e8e93; }
-        .time { 
-            font-size: 48px; 
-            font-weight: bold; 
-            color: #fff; 
+        .odometer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             margin: 10px 0;
-            transition: opacity 0.2s ease;
+        }
+        .digit-wrapper {
+            position: relative;
+            width: 50px;
+            height: 70px;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #0a0a0a;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+        .digit-wrapper::before,
+        .digit-wrapper::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 25px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .digit-wrapper::before {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+        }
+        .digit-wrapper::after {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+        .digit-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .digit-strip span {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 300;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+        .separator {
+            font-size: 48px;
+            font-weight: 300;
+            color: #0a84ff;
+            animation: blink 1s ease infinite;
+            margin: 0 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         .info { font-size: 16px; color: #8e8e93; }
         .progress-track {
@@ -153,12 +206,16 @@
         }
         .lesson, .break {
             opacity: 0;
-            transform: translateY(20px);
-            animation: slideUp 0.4s ease forwards;
+            filter: blur(8px);
+            transform: translateY(-15px);
         }
-        @keyframes slideUp {
+        .lesson.animate, .break.animate {
+            animation: blurIn 0.5s ease forwards;
+        }
+        @keyframes blurIn {
             to {
                 opacity: 1;
+                filter: blur(0);
                 transform: translateY(0);
             }
         }
@@ -204,7 +261,13 @@
     <div class="day-selector" id="daySelector"></div>
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
-        <div class="time" id="timer">--:--</div>
+        <div class="odometer">
+            <div class="digit-wrapper"><div class="digit-strip" id="min1"></div></div>
+            <div class="digit-wrapper"><div class="digit-strip" id="min2"></div></div>
+            <div class="separator">:</div>
+            <div class="digit-wrapper"><div class="digit-strip" id="sec1"></div></div>
+            <div class="digit-wrapper"><div class="digit-strip" id="sec2"></div></div>
+        </div>
         <div class="progress-track">
             <div class="progress-fill" id="progressBar"></div>
         </div>
@@ -314,6 +377,36 @@
                 element.style.opacity = '1';
             }, 200);
         }
+                const DIGIT_HEIGHT = 70;
+        
+        function createStrip(elementId) {
+            const strip = document.getElementById(elementId);
+            for (let i = 0; i <= 9; i++) {
+                const span = document.createElement('span');
+                span.textContent = i;
+                strip.appendChild(span);
+            }
+        }
+
+        function setDigit(elementId, value) {
+            const strip = document.getElementById(elementId);
+            strip.style.transform = `translateY(-${value * DIGIT_HEIGHT}px)`;
+        }
+
+        function displayOdometer(totalSeconds) {
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            setDigit('min1', Math.floor(mins / 10));
+            setDigit('min2', mins % 10);
+            setDigit('sec1', Math.floor(secs / 10));
+            setDigit('sec2', secs % 10);
+        }
+
+        // Создаем барабаны при загрузке
+        createStrip('min1');
+        createStrip('min2');
+        createStrip('sec1');
+        createStrip('sec2');
 
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
@@ -393,20 +486,21 @@
             const timerBlock = document.getElementById('timerBlock');
 
             if (isToday) {
+            if (isToday) {
                 timerBlock.style.display = 'block';
                 if (active) {
                     fadeText('status', 'Идет: ' + active.subject);
-                    fadeText('timer', t);
+                    displayOdometer(left);
                     fadeText('info', 'до конца');
                 } else if (activeBreak) {
                     const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
                     const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
                     fadeText('status', 'Перемена после ' + prevSubject);
-                    fadeText('timer', t);
+                    displayOdometer(left);
                     fadeText('info', 'до конца (' + activeBreak.dur + ' мин)');
                 } else if (next) {
                     fadeText('status', 'Следующая: ' + next.subject);
-                    fadeText('timer', t);
+                    displayOdometer(left);
                     fadeText('info', 'до начала');
                 } else {
                     timerBlock.style.display = 'none';
@@ -429,11 +523,11 @@
                     const isActive = active && active.slot === lesson.slot;
                     const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
                     
-                    sch.innerHTML += `<div class="lesson-wrapper" style="animation-delay: ${delay}ms">
+                    sch.innerHTML += `<div class="lesson-wrapper">
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -446,13 +540,22 @@
                     if (nextLesson) {
                         const nextSlot = timeSlots[nextLesson.slot - 1];
                         const breakDur = toMin(nextSlot.start) - toMin(slot.end);
-                        sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
+                        sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" data-slot="${lesson.slot}">
                             <span>Перемена</span>
                             <span>${breakDur} мин</span>
                         </div>`;
                     }
-                    delay += 50;
                 });
+
+                // Запускаем Blur Cascade анимацию
+                setTimeout(() => {
+                    const elements = sch.querySelectorAll('.lesson, .break');
+                    elements.forEach((el, index) => {
+                        setTimeout(() => {
+                            el.classList.add('animate');
+                        }, index * 80);
+                    });
+                }, 100);
 
                 const selector = document.getElementById('daySelector');
                 selector.innerHTML = '';
