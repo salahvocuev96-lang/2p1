@@ -23,6 +23,8 @@
             margin: 20px 0;
         }
         .status { font-size: 18px; color: #8e8e93; }
+        
+        /* Барабанный эффект (Odometer) */
         .odometer {
             display: flex;
             align-items: center;
@@ -83,6 +85,7 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+
         .info { font-size: 16px; color: #8e8e93; }
         .progress-track {
             width: 100%;
@@ -204,6 +207,8 @@
         .search-box:focus {
             border-color: #0a84ff;
         }
+        
+        /* Blur Cascade анимация */
         .lesson, .break {
             opacity: 0;
             filter: blur(8px);
@@ -219,13 +224,13 @@
                 transform: translateY(0);
             }
         }
+        
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
         .lesson:hover, .break:hover {
-            transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(10, 132, 255, 0.15);
         }
     </style>
@@ -259,6 +264,7 @@
     </div>
     
     <div class="day-selector" id="daySelector"></div>
+    
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
         <div class="odometer">
@@ -273,6 +279,7 @@
         </div>
         <div class="info" id="info"></div>
     </div>
+    
     <div id="schedule"></div>
 
     <script>
@@ -337,29 +344,17 @@
         };
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-        
-        const dayMap = { 
-            1: "Понедельник", 
-            2: "Вторник", 
-            3: "Среда", 
-            4: "Четверг", 
-            5: "Пятница", 
-            6: "Суббота", 
-            0: "Воскресенье" 
-        };
+        const dayMap = { 1: "Понедельник", 2: "Вторник", 3: "Среда", 4: "Четверг", 5: "Пятница", 6: "Суббота", 0: "Воскресенье" };
 
         let selectedDay = (() => {
             const now = new Date();
             const d = now.getDay();
             const hours = now.getHours();
-            
             if (d === 0) return "Понедельник";
-            
             if (hours >= 19) {
                 const nextDay = d === 6 ? 0 : d + 1;
                 return nextDay === 0 ? "Понедельник" : dayMap[nextDay];
             }
-            
             return dayMap[d];
         })();
 
@@ -377,22 +372,22 @@
                 element.style.opacity = '1';
             }, 200);
         }
-                const DIGIT_HEIGHT = 70;
-        
+
+        // === БАРАБАННЫЙ ТАЙМЕР ===
+        const DIGIT_HEIGHT = 70;
         function createStrip(elementId) {
             const strip = document.getElementById(elementId);
+            if (!strip) return;
             for (let i = 0; i <= 9; i++) {
                 const span = document.createElement('span');
                 span.textContent = i;
                 strip.appendChild(span);
             }
         }
-
         function setDigit(elementId, value) {
             const strip = document.getElementById(elementId);
-            strip.style.transform = `translateY(-${value * DIGIT_HEIGHT}px)`;
+            if (strip) strip.style.transform = `translateY(-${value * DIGIT_HEIGHT}px)`;
         }
-
         function displayOdometer(totalSeconds) {
             const mins = Math.floor(totalSeconds / 60);
             const secs = totalSeconds % 60;
@@ -401,12 +396,7 @@
             setDigit('sec1', Math.floor(secs / 10));
             setDigit('sec2', secs % 10);
         }
-
-        // Создаем барабаны при загрузке
-        createStrip('min1');
-        createStrip('min2');
-        createStrip('sec1');
-        createStrip('sec2');
+        createStrip('min1'); createStrip('min2'); createStrip('sec1'); createStrip('sec2');
 
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
@@ -462,11 +452,6 @@
                 }
             }
 
-            const h = Math.floor(left / 3600);
-            const m = Math.floor((left % 3600) / 60);
-            const s = left % 60;
-            const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
-
             const progressBar = document.getElementById('progressBar');
             if (isToday && active) {
                 const slot = timeSlots[active.slot - 1];
@@ -485,7 +470,7 @@
 
             const timerBlock = document.getElementById('timerBlock');
 
-            if (isToday) {
+            // ИСПРАВЛЕНО: убран дублирующийся if (isToday)
             if (isToday) {
                 timerBlock.style.display = 'block';
                 if (active) {
@@ -515,7 +500,6 @@
                 
                 const sch = document.getElementById('schedule');
                 sch.innerHTML = '';
-                let delay = 0;
                 
                 todayLessons.forEach(lesson => {
                     if (lesson.subject === "—") return;
@@ -527,7 +511,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -586,28 +570,23 @@
             }
         }
 
-        // === 3D ЭФФЕКТ (Вынесен из update(), чтобы не дублироваться каждую секунду) ===
+        // === 3D ЭФФЕКТ ===
         const scheduleContainer = document.getElementById('schedule');
-
         const handleTilt = (e, clientX, clientY) => {
             const card = e.target.closest('.lesson');
             if (!card) return;
-            
             const rect = card.getBoundingClientRect();
             const x = clientX - rect.left;
             const y = clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            
             const rotateX = ((y - centerY) / centerY) * -10;
             const rotateY = ((x - centerX) / centerX) * 10;
-            
             card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             card.style.setProperty('--mx', (x / rect.width) * 100 + '%');
             card.style.setProperty('--my', (y / rect.height) * 100 + '%');
             card.style.setProperty('--glow', '1');
         };
-
         const handleReset = (e) => {
             const card = e.target.closest('.lesson');
             if (!card) return;
@@ -621,15 +600,9 @@
         scheduleContainer.addEventListener('touchmove', (e) => handleTilt(e, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         scheduleContainer.addEventListener('touchend', handleReset);
         scheduleContainer.addEventListener('touchcancel', handleReset);
-        scheduleContainer.addEventListener('click', handleReset); // Гарантирует сброс при одиночном нажатии
+        scheduleContainer.addEventListener('click', handleReset);
 
-        const groupMapping = {
-            '1l2': '1l1',
-            '1l3': '2l1',
-            '1yu3': '2yu2',
-            '1bd3': '2bd1'
-        };
-        
+        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1' };
         let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
         document.getElementById('groupSelect').value = currentGroup;
         
@@ -658,38 +631,21 @@
             }
         }
         
-        document.getElementById('groupSelect').addEventListener('change', function() {
-            changeGroup(this.value);
-        });
-        
+        document.getElementById('groupSelect').addEventListener('change', function() { changeGroup(this.value); });
         document.getElementById('groupSearch').addEventListener('input', function() {
             const searchText = this.value.toLowerCase();
             const select = document.getElementById('groupSelect');
-            const options = select.options;
-            
-            for (let i = 0; i < options.length; i++) {
-                const optionText = options[i].text.toLowerCase();
-                if (optionText.includes(searchText)) {
-                    options[i].style.display = '';
-                } else {
-                    options[i].style.display = 'none';
-                }
-            }
-            
-            if (searchText.length > 0) {
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].text.toLowerCase() === searchText) {
-                        select.value = options[i].value;
-                        changeGroup(options[i].value);
-                        break;
-                    }
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].style.display = select.options[i].text.toLowerCase().includes(searchText) ? '' : 'none';
+                if (searchText.length > 0 && select.options[i].text.toLowerCase() === searchText) {
+                    select.value = select.options[i].value;
+                    changeGroup(select.options[i].value);
+                    break;
                 }
             }
         });
         
-        if (currentGroup !== '2p1') {
-            changeGroup(currentGroup);
-        }
+        if (currentGroup !== '2p1') changeGroup(currentGroup);
         
         setInterval(update, 1000);
         update();
