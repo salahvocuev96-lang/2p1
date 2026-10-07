@@ -46,15 +46,45 @@
             border-radius: 2px;
             transition: width 1s linear;
         }
+        .lesson-wrapper {
+            perspective: 1000px;
+            margin: 8px 0;
+        }
         .lesson {
             background: #1c1c1e;
             padding: 15px;
             border-radius: 12px;
-            margin: 8px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .lesson::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                circle at var(--mx, 50%) var(--my, 50%),
+                rgba(255,255,255,0.15) 0%,
+                transparent 60%
+            );
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .lesson:hover::before {
+            opacity: 1;
+        }
+        .lesson-info, .lesson-time {
+            transform: translateZ(25px);
+            position: relative;
+            z-index: 1;
         }
         .lesson.active { background: #0a84ff; }
         .lesson-info { text-align: left; flex: 1; }
@@ -402,14 +432,16 @@
                     const isActive = active && active.slot === lesson.slot;
                     const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
                     
-                    sch.innerHTML += `<div class="lesson ${isActive ? 'active' : ''}" style="animation-delay: ${delay}ms" data-slot="${lesson.slot}">
-                        <div class="lesson-info">
-                            <div class="lesson-subject">${lesson.subject}</div>
-                            <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
-                        </div>
-                        <div class="lesson-time">
-                            <span class="lesson-num">${lesson.slot} пара</span>
-                            <span>${slot.start}-${slot.end}</span>
+                    sch.innerHTML += `<div class="lesson-wrapper" style="animation-delay: ${delay}ms">
+                        <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
+                            <div class="lesson-info">
+                                <div class="lesson-subject">${lesson.subject}</div>
+                                <div class="lesson-details">‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                            </div>
+                            <div class="lesson-time">
+                                <span class="lesson-num">${lesson.slot} пара</span>
+                                <span>${slot.start}-${slot.end}</span>
+                            </div>
                         </div>
                     </div>`;
                     
@@ -452,6 +484,47 @@
                     }
                 });
             }
+        
+            // Добавляем 3D-эффект на все карточки
+            document.querySelectorAll('.lesson').forEach(card => {
+                // Мышь (компьютер)
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    const percentX = (x / rect.width) * 100;
+                    const percentY = (y / rect.height) * 100;
+                    card.style.setProperty('--mx', percentX + '%');
+                    card.style.setProperty('--my', percentY + '%');
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'rotateX(0) rotateY(0)';
+                });
+                // Тач (телефон)
+                card.addEventListener('touchmove', (e) => {
+                    const touch = e.touches[0];
+                    const rect = card.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    const percentX = (x / rect.width) * 100;
+                    const percentY = (y / rect.height) * 100;
+                    card.style.setProperty('--mx', percentX + '%');
+                    card.style.setProperty('--my', percentY + '%');
+                });
+                card.addEventListener('touchend', () => {
+                    card.style.transform = 'rotateX(0) rotateY(0)';
+                });
+            });
         }
 
         const groupMapping = {
