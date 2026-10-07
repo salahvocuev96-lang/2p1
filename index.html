@@ -78,6 +78,10 @@
             pointer-events: none;
             z-index: 2;
         }
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 2;
+        }
         .lesson:hover::before {
             opacity: 1;
         }
@@ -487,7 +491,7 @@
         
             // Добавляем 3D-эффект на все карточки
             document.querySelectorAll('.lesson').forEach(card => {
-                // Функция наклона
+                // Функция наклона и включения блика
                 const tilt = (x, y) => {
                     const rect = card.getBoundingClientRect();
                     const centerX = rect.width / 2;
@@ -495,42 +499,41 @@
                     const rotateX = ((y - centerY) / centerY) * -10;
                     const rotateY = ((x - centerX) / centerX) * 10;
                     card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    
                     const percentX = (x / rect.width) * 100;
                     const percentY = (y / rect.height) * 100;
                     card.style.setProperty('--mx', percentX + '%');
                     card.style.setProperty('--my', percentY + '%');
-                    card.style.setProperty('--glow', '1');
+                    card.style.setProperty('--glow', '1'); // Включаем блик
                 };
 
-                // Функция сброса
+                // Функция полного сброса (убирает наклон и блик)
                 const reset = () => {
                     card.style.transform = 'rotateX(0) rotateY(0)';
-                    card.style.setProperty('--glow', '0');
+                    card.style.setProperty('--glow', '0'); // Выключаем блик
                 };
 
-                // Мышь (компьютер)
+                // 1. Мышь (компьютер)
                 card.addEventListener('mousemove', (e) => {
-                    tilt(e.clientX - card.getBoundingClientRect().left, e.clientY - card.getBoundingClientRect().top);
+                    tilt(e.clientX - rect.left, e.clientY - rect.top); // rect берется внутри tilt
                 });
                 card.addEventListener('mouseleave', reset);
 
-                // Тач (телефон)
+                // 2. Тач (телефон) — добавили touchstart для мгновенной реакции!
+                card.addEventListener('touchstart', (e) => {
+                    const touch = e.touches[0];
+                    const rect = card.getBoundingClientRect();
+                    tilt(touch.clientX - rect.left, touch.clientY - rect.top);
+                }, { passive: true });
+                
                 card.addEventListener('touchmove', (e) => {
                     const touch = e.touches[0];
                     const rect = card.getBoundingClientRect();
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -10;
-                    const rotateY = ((x - centerX) / centerX) * 10;
-                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                    const percentX = (x / rect.width) * 100;
-                    const percentY = (y / rect.height) * 100;
-                    card.style.setProperty('--mx', percentX + '%');
-                    card.style.setProperty('--my', percentY + '%');
-                });
-                card.addEventListener('touchend', () => {
+                    tilt(touch.clientX - rect.left, touch.clientY - rect.top);
+                }, { passive: true });
+                
+                card.addEventListener('touchend', reset); // Полный сброс при убирании пальца
+            });
                     card.style.transform = 'rotateX(0) rotateY(0)';
                 });
             });
