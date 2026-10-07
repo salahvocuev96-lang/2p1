@@ -32,6 +32,22 @@
             gap: 6px;
             margin: 10px 0;
         }
+        .hours-display {
+            font-size: 48px;
+            font-weight: 300;
+            color: #fff;
+            margin-right: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+        .hours-display .hours-number {
+            color: #0a84ff;
+            font-weight: bold;
+        }
+        .hours-display .hours-label {
+            font-size: 24px;
+            color: #8e8e93;
+            margin-left: 2px;
+        }
         .digit-wrapper {
             position: relative;
             width: 50px;
@@ -268,6 +284,9 @@
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
         <div class="odometer">
+            <div class="hours-display">
+                <span class="hours-number" id="hoursNum">0</span><span class="hours-label">ч</span>
+            </div>
             <div class="digit-wrapper"><div class="digit-strip" id="min1"></div></div>
             <div class="digit-wrapper"><div class="digit-strip" id="min2"></div></div>
             <div class="separator">:</div>
@@ -398,8 +417,15 @@
             if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
                 totalSeconds = 0;
             }
-            const mins = Math.floor(totalSeconds / 60);
+            
+            const hours = Math.floor(totalSeconds / 3600);
+            const mins = Math.floor((totalSeconds % 3600) / 60);
             const secs = totalSeconds % 60;
+            
+            // Обновляем часы (текстом)
+            document.getElementById('hoursNum').textContent = hours;
+            
+            // Обновляем барабаны минут и секунд
             setDigit('min1', Math.floor(mins / 10));
             setDigit('min2', mins % 10);
             setDigit('sec1', Math.floor(secs / 10));
@@ -526,7 +552,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨‍ ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
