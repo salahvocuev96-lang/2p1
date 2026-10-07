@@ -32,22 +32,6 @@
             gap: 6px;
             margin: 10px 0;
         }
-        .hours-display {
-            font-size: 48px;
-            font-weight: 300;
-            color: #fff;
-            margin-right: 8px;
-            font-variant-numeric: tabular-nums;
-        }
-        .hours-display .hours-number {
-            color: #0a84ff;
-            font-weight: bold;
-        }
-        .hours-display .hours-label {
-            font-size: 24px;
-            color: #8e8e93;
-            margin-left: 2px;
-        }
         .digit-wrapper {
             position: relative;
             width: 50px;
@@ -96,6 +80,12 @@
             color: #0a84ff;
             animation: blink 1s ease infinite;
             margin: 0 2px;
+        }
+        .hours-label {
+            font-size: 24px;
+            color: #8e8e93;
+            margin-left: 4px;
+            margin-right: 8px;
         }
         @keyframes blink {
             0%, 100% { opacity: 1; }
@@ -284,9 +274,8 @@
     <div class="timer" id="timerBlock">
         <div class="status" id="status">Загрузка...</div>
         <div class="odometer">
-            <div class="hours-display">
-                <span class="hours-number" id="hoursNum">0</span><span class="hours-label">ч</span>
-            </div>
+            <div class="digit-wrapper"><div class="digit-strip" id="hour1"></div></div>
+            <div class="hours-label">ч</div>
             <div class="digit-wrapper"><div class="digit-strip" id="min1"></div></div>
             <div class="digit-wrapper"><div class="digit-strip" id="min2"></div></div>
             <div class="separator">:</div>
@@ -422,16 +411,17 @@
             const mins = Math.floor((totalSeconds % 3600) / 60);
             const secs = totalSeconds % 60;
             
-            // Обновляем часы (текстом)
-            document.getElementById('hoursNum').textContent = hours;
+            // Часы (одна цифра, максимум 9)
+            setDigit('hour1', hours > 9 ? 9 : hours);
             
-            // Обновляем барабаны минут и секунд
+            // Минуты и секунды
             setDigit('min1', Math.floor(mins / 10));
             setDigit('min2', mins % 10);
             setDigit('sec1', Math.floor(secs / 10));
             setDigit('sec2', secs % 10);
         }
 
+        createStrip('hour1');
         createStrip('min1'); 
         createStrip('min2'); 
         createStrip('sec1'); 
