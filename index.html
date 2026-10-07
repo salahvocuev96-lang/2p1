@@ -31,7 +31,7 @@
             transition: opacity 0.2s ease;
         }
         .info { font-size: 16px; color: #8e8e93; }
-                .progress-track {
+        .progress-track {
             width: 100%;
             height: 4px;
             background: #333333;
@@ -77,13 +77,6 @@
             transition: opacity 0.2s;
             pointer-events: none;
             z-index: 2;
-        }
-            transition: opacity 0.2s;
-            pointer-events: none;
-            z-index: 2;
-        }
-        .lesson:hover::before {
-            opacity: 1;
         }
         .lesson-info, .lesson-time {
             transform: translateZ(25px);
@@ -169,7 +162,7 @@
                 transform: translateY(0);
             }
         }
-                @keyframes gradientBG {
+        @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
@@ -380,7 +373,7 @@
             const m = Math.floor((left % 3600) / 60);
             const s = left % 60;
             const t = (h > 0 ? h + 'ч ' : '') + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
-                        // Обновляем полосу прогресса
+
             const progressBar = document.getElementById('progressBar');
             if (isToday && active) {
                 const slot = timeSlots[active.slot - 1];
@@ -440,7 +433,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -488,54 +481,34 @@
                     }
                 });
             }
-        
-            // Добавляем 3D-эффект на все карточки
+
             document.querySelectorAll('.lesson').forEach(card => {
-                // Функция наклона и включения блика
-                const tilt = (x, y) => {
+                const tilt = (clientX, clientY) => {
                     const rect = card.getBoundingClientRect();
+                    const x = clientX - rect.left;
+                    const y = clientY - rect.top;
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
+                    
                     const rotateX = ((y - centerY) / centerY) * -10;
                     const rotateY = ((x - centerX) / centerX) * 10;
-                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                     
-                    const percentX = (x / rect.width) * 100;
-                    const percentY = (y / rect.height) * 100;
-                    card.style.setProperty('--mx', percentX + '%');
-                    card.style.setProperty('--my', percentY + '%');
-                    card.style.setProperty('--glow', '1'); // Включаем блик
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    card.style.setProperty('--mx', (x / rect.width) * 100 + '%');
+                    card.style.setProperty('--my', (y / rect.height) * 100 + '%');
+                    card.style.setProperty('--glow', '1');
                 };
 
-                // Функция полного сброса (убирает наклон и блик)
                 const reset = () => {
                     card.style.transform = 'rotateX(0) rotateY(0)';
-                    card.style.setProperty('--glow', '0'); // Выключаем блик
+                    card.style.setProperty('--glow', '0');
                 };
 
-                // 1. Мышь (компьютер)
-                card.addEventListener('mousemove', (e) => {
-                    tilt(e.clientX - rect.left, e.clientY - rect.top); // rect берется внутри tilt
-                });
+                card.addEventListener('mousemove', (e) => tilt(e.clientX, e.clientY));
                 card.addEventListener('mouseleave', reset);
-
-                // 2. Тач (телефон) — добавили touchstart для мгновенной реакции!
-                card.addEventListener('touchstart', (e) => {
-                    const touch = e.touches[0];
-                    const rect = card.getBoundingClientRect();
-                    tilt(touch.clientX - rect.left, touch.clientY - rect.top);
-                }, { passive: true });
-                
-                card.addEventListener('touchmove', (e) => {
-                    const touch = e.touches[0];
-                    const rect = card.getBoundingClientRect();
-                    tilt(touch.clientX - rect.left, touch.clientY - rect.top);
-                }, { passive: true });
-                
-                card.addEventListener('touchend', reset); // Полный сброс при убирании пальца
-            });
-                    card.style.transform = 'rotateX(0) rotateY(0)';
-                });
+                card.addEventListener('touchstart', (e) => tilt(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+                card.addEventListener('touchmove', (e) => tilt(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+                card.addEventListener('touchend', reset);
             });
         }
 
