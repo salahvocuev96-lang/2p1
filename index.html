@@ -720,6 +720,7 @@
 
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
+        let lastScrolledSlot = null;
 
         function update() {
             const now = new Date();
@@ -861,12 +862,13 @@
                         }, index * 80);
                     });
                 }, 100);
-                                // Автоскролл к активной паре
+                // Автоскролл к активной паре (только если пара изменилась)
                 setTimeout(() => {
-                    if (active) {
+                    if (active && lastScrolledSlot !== active.slot) {
                         const activeCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
                         if (activeCard) {
                             activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            lastScrolledSlot = active.slot;
                         }
                     }
                 }, 600);
@@ -898,12 +900,13 @@
                     }
                 });
             }
-                            // Автоскролл при обновлении активной пары
+                // Автоскролл при смене активной пары
                 setTimeout(() => {
-                    if (active) {
+                    if (active && lastScrolledSlot !== active.slot) {
                         const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
                         if (activeCard) {
                             activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            lastScrolledSlot = active.slot;
                         }
                     }
                 }, 300);
