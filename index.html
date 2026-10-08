@@ -705,10 +705,14 @@
             
             if (lessonsCount && schedule[selectedDay]) {
                 const count = schedule[selectedDay].filter(l => l.subject !== "—").length;
+                const todayName = dayMap[new Date().getDay()];
+                
                 if (count === 0) {
                     lessonsCount.innerHTML = '<strong>Пар нет</strong>';
-                } else {
+                } else if (selectedDay === todayName) {
                     lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} сегодня`;
+                } else {
+                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} в ${selectedDay.toLowerCase()}`;
                 }
             }
             
