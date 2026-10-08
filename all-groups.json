@@ -751,5 +751,57 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+"3p1": {
+    "schedule": {
+        "Понедельник": [
+            { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 3, "subject": "Разраб. прогр. модулей", "teacher": "Максимова А.В.", "room": "218" },
+            { "slot": 4, "subject": "МДК. 01.04 Сист. программ.", "teacher": "Акимова А.Я.", "room": "218" },
+            { "slot": 5, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "215" },
+            { "slot": 6, "subject": "Час куратора", "teacher": "Марфина Л.А.", "room": "" }
+        ],
+        "Вторник": [
+            { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "" },
+            { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+        ],
+        "Среда": [
+            { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 6, "subject": "МДК. 04.02 Обеспеч. кач. функционир. комп. систем", "teacher": "Малькова Е.В.", "room": "дистант" }
+        ],
+        "Четверг": [
+            { "slot": 1, "subject": "МДК.01.02 Поддержка и тестиров. программ. модулей", "teacher": "Голеусов Р.О.", "room": "дистант" },
+            { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 5, "subject": "МДК. 04.01 Внедр. и поддержка комп. систем", "teacher": "Малькова Е.В.", "room": "дистант" },
+            { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+        ],
+        "Пятница": [
+            { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 2, "subject": "Техн. разраб. прогр. обеспеч.", "teacher": "Новиков В.С.", "room": "218" },
+            { "slot": 3, "subject": "Осн. алгоритм. и прогр.", "teacher": "Новиков В.С.", "room": "218" },
+            { "slot": 4, "subject": "Осн. алгоритм. и прогр.", "teacher": "Новиков В.С.", "room": "218" },
+            { "slot": 5, "subject": "МДК. 02.01 Техн. разраб. прогр. обеспеч.", "teacher": "Новиков В.С.", "room": "218" },
+            { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+        ],
+        "Суббота": [
+            { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+            { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+            { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+        ]
+    }
   }
 }
