@@ -879,7 +879,13 @@
                     const btn = document.createElement('button');
                     btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
                     btn.innerText = day.replace("Понедельник","Пн").replace("Вторник","Вт").replace("Среда","Ср").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
-                    btn.onclick = () => { selectedDay = day; update(); };
+                    btn.onclick = () => { 
+                        selectedDay = day; 
+                        if (day === dayMap[new Date().getDay()]) {
+                            lastScrolledSlot = null;
+                        }
+                        update(); 
+                    };
                     selector.appendChild(btn);
                 });
             } else {
