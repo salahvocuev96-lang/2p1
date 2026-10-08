@@ -971,6 +971,7 @@
                 });
                 document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 lastRenderedGroup = null;
+                lastScrolledSlot = null;
                 update();
                 updateLiveDate(true);
             }
