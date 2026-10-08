@@ -861,6 +861,15 @@
                         }, index * 80);
                     });
                 }, 100);
+                                // Автоскролл к активной паре
+                setTimeout(() => {
+                    if (active) {
+                        const activeCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
+                        if (activeCard) {
+                            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }, 600);
 
                 const selector = document.getElementById('daySelector');
                 selector.innerHTML = '';
@@ -889,6 +898,15 @@
                     }
                 });
             }
+                            // Автоскролл при обновлении активной пары
+                setTimeout(() => {
+                    if (active) {
+                        const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
+                        if (activeCard) {
+                            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }, 300);
             
             updateLiveDate(false);
         }
