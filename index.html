@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
         
-        /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК С ГОЛУБЫМ ОТТЕНКОМ === */
+        /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК === */
         h1.main-title {
             font-size: 40px;
             font-weight: 800;
@@ -45,7 +45,7 @@
             100% { background-position: 200% center; }
         }
 
-        /* === ЖИВАЯ ДАТА ПОД ЗАГОЛОВКОМ === */
+        /* === ЖИВАЯ ДАТА === */
         .live-date {
             display: flex;
             align-items: center;
@@ -109,15 +109,132 @@
             50% { opacity: 0.4; transform: scale(0.8); }
         }
 
-        .timer {
+        /* === ОБЩИЙ СТИЛЬ СТЕКЛА === */
+        .glass {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* === ПОИСК === */
+        .search-box {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 15px;
+            width: 90%;
+            max-width: 380px;
+            outline: none;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box:focus {
+            border-color: #0a84ff;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+            background: rgba(28, 28, 30, 0.5);
+        }
+
+        /* === СЕЛЕКТ ГРУППЫ === */
+        .group-select {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 15px;
+            width: 90%;
+            max-width: 380px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+            transition: all 0.3s;
+        }
+
+        .group-select:hover {
+            background-color: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .group-select option {
             background: #1c1c1e;
+            color: #fff;
+        }
+
+        /* === КНОПКИ ДНЕЙ === */
+        .day-selector {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+            gap: 6px;
+        }
+
+        .day-btn {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-btn:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .day-btn.active {
+            background: rgba(10, 132, 255, 0.5);
+            border-color: #0a84ff;
+            box-shadow: 0 0 20px rgba(10, 132, 255, 0.4);
+        }
+
+        /* === ТАЙМЕР === */
+        .timer {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 20px;
             padding: 30px;
-            margin: 20px 0;
+            margin: 20px auto;
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .status { font-size: 18px; color: #8e8e93; }
+
+        .status { font-size: 18px; color: rgba(255, 255, 255, 0.8); }
         
-        /* Барабанный эффект (Odometer) */
         .odometer {
             display: flex;
             align-items: center;
@@ -125,38 +242,55 @@
             gap: 6px;
             margin: 10px 0;
         }
+
+        /* СТЕКЛЯННЫЕ БАРАБАНЫ */
         .digit-wrapper {
             position: relative;
             width: 50px;
             height: 70px;
             overflow: hidden;
             border-radius: 10px;
-            background: #0a0a0a;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px) saturate(150%);
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        .digit-wrapper::before,
-        .digit-wrapper::after {
+
+        .digit-wrapper::before {
             content: '';
             position: absolute;
-            left: 0;
-            right: 0;
-            height: 25px;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+            border-radius: 10px 10px 50% 50%;
             z-index: 2;
             pointer-events: none;
         }
-        .digit-wrapper::before {
-            top: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-        }
+
         .digit-wrapper::after {
+            content: '';
+            position: absolute;
             bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+            z-index: 2;
+            pointer-events: none;
         }
+
         .digit-strip {
             display: flex;
             flex-direction: column;
             transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
+
         .digit-strip span {
             height: 70px;
             display: flex;
@@ -165,60 +299,94 @@
             font-size: 48px;
             font-weight: 300;
             color: #fff;
-            font-variant-numeric: tabular-nums;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
+
         .separator {
             font-size: 48px;
             font-weight: 300;
             color: #0a84ff;
             animation: blink 1s ease infinite;
             margin: 0 2px;
+            text-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
         }
+
         .hours-label {
             font-size: 24px;
-            color: #8e8e93;
+            color: rgba(255, 255, 255, 0.6);
             margin-left: 4px;
             margin-right: 8px;
         }
+
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
 
-        .info { font-size: 16px; color: #8e8e93; }
+        .info { font-size: 16px; color: rgba(255, 255, 255, 0.7); }
+
         .progress-track {
             width: 100%;
             height: 4px;
-            background: #333333;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 2px;
             margin: 15px 0;
             overflow: hidden;
         }
+
         .progress-fill {
             height: 100%;
             background: #0a84ff;
             width: 100%;
             border-radius: 2px;
             transition: width 1s linear;
+            position: relative;
+            overflow: hidden;
         }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmerBar 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmerBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* === КАРТОЧКИ ПАР === */
         .lesson-wrapper {
             perspective: 1000px;
             margin: 8px 0;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
         }
+
         .lesson {
-            background: #1c1c1e;
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             padding: 15px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transform-style: preserve-3d;
-            transition: transform 0.15s ease-out;
+            transition: transform 0.15s ease-out, background 0.3s, border-color 0.3s;
             overflow: hidden;
             cursor: pointer;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             position: relative;
         }
+
         .lesson::before {
             content: '';
             position: absolute;
@@ -233,16 +401,30 @@
             pointer-events: none;
             z-index: 2;
         }
+
+        .lesson:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
         .lesson-info, .lesson-time {
             transform: translateZ(25px);
             position: relative;
             z-index: 1;
         }
-        .lesson.active { background: #0a84ff; }
+
+        .lesson.active {
+            background: rgba(10, 132, 255, 0.3);
+            border-color: #0a84ff;
+            box-shadow: 0 0 25px rgba(10, 132, 255, 0.3);
+        }
+
         .lesson-info { text-align: left; flex: 1; }
         .lesson-subject { font-weight: bold; font-size: 14px; }
-        .lesson-details { font-size: 12px; color: #8e8e93; margin-top: 4px; }
-        .lesson.active .lesson-details { color: #fff; }
+        .lesson-details { font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; }
+        .lesson.active .lesson-details { color: rgba(255, 255, 255, 0.9); }
+
         .lesson-time { 
             font-weight: bold; 
             margin-left: 10px;
@@ -251,71 +433,50 @@
             flex-direction: column;
             align-items: flex-end;
         }
+
         .lesson-num {
             font-size: 13px;
             color: #0a84ff;
             margin-bottom: 2px;
             font-weight: 800;
         }
+
         .lesson.active .lesson-num { color: #fff; }
+
+        /* === ПЕРЕМЕНА === */
         .break {
-            background: #2c2c2e;
+            background: rgba(44, 44, 46, 0.25);
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 10px;
             border-radius: 8px;
-            margin: 8px 0;
+            margin: 8px auto;
+            max-width: 380px;
             font-size: 14px;
-            color: #8e8e93;
+            color: rgba(255, 255, 255, 0.7);
             display: flex;
             justify-content: space-between;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.3s;
         }
-        .break.active { background: #ff9500; color: #fff; }
-        .day-selector {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        .day-btn {
-            background: #1c1c1e;
-            border: none;
+
+        .break.active {
+            background: rgba(255, 149, 0, 0.3);
+            border-color: #ff9500;
             color: #fff;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin: 2px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: transform 0.2s ease, background 0.2s ease;
         }
-        .day-btn.active { background: #0a84ff; }
-        .day-btn:hover {
-            transform: scale(1.05);
-        }
-        .search-box {
-            background: #1c1c1e;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 12px 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            width: 90%;
-            max-width: 300px;
-            outline: none;
-            margin-bottom: 10px;
-        }
-        .search-box:focus {
-            border-color: #0a84ff;
-        }
-        
-        /* Blur Cascade анимация */
+
+        /* === BLUR CASCADE АНИМАЦИЯ === */
         .lesson, .break {
             opacity: 0;
             filter: blur(8px);
             transform: translateY(-15px);
         }
+
         .lesson.animate, .break.animate {
             animation: blurIn 0.5s ease forwards;
         }
+
         @keyframes blurIn {
             to {
                 opacity: 1;
@@ -328,9 +489,6 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
-        }
-        .lesson:hover, .break:hover {
-            box-shadow: 0 8px 20px rgba(10, 132, 255, 0.15);
         }
     </style>
 </head>
@@ -350,7 +508,7 @@
     <div style="margin: 15px 0; text-align: center;">
         <input type="text" id="groupSearch" class="search-box" placeholder="🔍 Поиск группы...">
         <br>
-        <select id="groupSelect" style="background: #1c1c1e; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 12px; font-size: 16px; width: 90%; max-width: 300px; outline: none;">
+        <select id="groupSelect" class="group-select">
             <option value="2p1">2П1</option>
             <option value="1p1">1П1</option>
             <option value="1l1">1Л1</option>
@@ -485,7 +643,6 @@
             }, 200);
         }
 
-        // === БАРАБАННЫЙ ТАЙМЕР ===
         const DIGIT_HEIGHT = 70;
         function createStrip(elementId) {
             const strip = document.getElementById(elementId);
@@ -510,11 +667,9 @@
             if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
                 totalSeconds = 0;
             }
-            
             const hours = Math.floor(totalSeconds / 3600);
             const mins = Math.floor((totalSeconds % 3600) / 60);
             const secs = totalSeconds % 60;
-            
             setDigit('hour1', hours > 9 ? 9 : hours);
             setDigit('min1', Math.floor(mins / 10));
             setDigit('min2', mins % 10);
@@ -528,7 +683,6 @@
         createStrip('sec1'); 
         createStrip('sec2');
 
-        // === ЖИВАЯ ДАТА ===
         function getLessonsWord(count) {
             const lastTwo = count % 100;
             const lastOne = count % 10;
@@ -558,7 +712,6 @@
                 }
             }
             
-            // Показываем индикатор только если явно попросили (при смене группы)
             if (showIndicator && updateIndicator) {
                 updateIndicator.classList.add('show');
                 setTimeout(() => updateIndicator.classList.remove('show'), 2000);
@@ -680,7 +833,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -737,11 +890,9 @@
                 });
             }
             
-            // Обновляем живую дату без индикатора при каждом тике
             updateLiveDate(false);
         }
 
-        // === 3D ЭФФЕКТ ===
         const scheduleContainer = document.getElementById('schedule');
         const handleTilt = (e, clientX, clientY) => {
             const card = e.target.closest('.lesson');
@@ -799,7 +950,6 @@
                 });
                 document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 update();
-                // СРАЗУ обновляем количество пар с индикатором
                 updateLiveDate(true);
             }
         }
@@ -822,7 +972,6 @@
         
         setInterval(update, 1000);
         update();
-        // Первый вызов БЕЗ индикатора
         updateLiveDate(false);
     </script>
 </body>
