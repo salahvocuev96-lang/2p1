@@ -26,15 +26,16 @@
         }
 
 .college-logo {
-    width: 70px;
-    height: auto;
-    background: white;
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px;
+    box-shadow: 0 0 20px rgba(10, 132, 255, 0.2);
     transition: transform 0.3s ease;
 }
-
         .college-logo:hover {
             transform: scale(1.05);
         }
@@ -55,6 +56,8 @@
             font-weight: 800;
             letter-spacing: 1px;
             margin: 10px 0 8px 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             background: linear-gradient(
                 90deg,
                 #d0e8ff 0%,
@@ -556,6 +559,13 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+    
+            @media (max-width: 480px) {
+            h1.main-title {
+                font-size: 28px;
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
