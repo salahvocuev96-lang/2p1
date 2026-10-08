@@ -707,12 +707,22 @@
                 const count = schedule[selectedDay].filter(l => l.subject !== "—").length;
                 const todayName = dayMap[new Date().getDay()];
                 
+                // Словарь с правильными формами дней недели
+                const dayPrepositions = {
+                    "Понедельник": "в понедельник",
+                    "Вторник": "во вторник",
+                    "Среда": "в среду",
+                    "Четверг": "в четверг",
+                    "Пятница": "в пятницу",
+                    "Суббота": "в субботу"
+                };
+                
                 if (count === 0) {
                     lessonsCount.innerHTML = '<strong>Пар нет</strong>';
                 } else if (selectedDay === todayName) {
                     lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} сегодня`;
                 } else {
-                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} в ${selectedDay.toLowerCase()}`;
+                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} ${dayPrepositions[selectedDay]}`;
                 }
             }
             
