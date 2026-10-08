@@ -804,4 +804,58 @@
         ]
     }
   }
+  },
+  "3n1": {
+    "groupName": "3Н1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "Час куратора", "teacher": "Коршакова М.С.", "room": "" },
+        { "slot": 2, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "216" },
+        { "slot": 3, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216А" },
+        { "slot": 4, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216А" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "МДК. 01.02 Особенности бухгалтерского учета в сфере торговли", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 5, "subject": "МДК. 02.02 Бухгалтерская технология проведения и оформления инвентаризации", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "МДК. 01.01 Прак. осн. бух. учета активов орган.", "teacher": "Мерзлякова З.Л.", "room": "203" },
+        { "slot": 2, "subject": "Фин., ден. обращ. и кредит", "teacher": "Малышева М.В.", "room": "221" },
+        { "slot": 3, "subject": "Фин., ден. обращ. и кредит", "teacher": "Малышева М.В.", "room": "221" },
+        { "slot": 4, "subject": "Осн. анализа бух. отчетн.", "teacher": "Малышева М.В.", "room": "216А" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "Техн. сост.бух. отчетности", "teacher": "Канцева Е.А.", "room": "201" },
+        { "slot": 2, "subject": "МДК. 02.01 Прак. осн. бух. учета источн. формир. активов орган.", "teacher": "Мерзлякова З.Л.", "room": "204" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "МДК. 01.01 Прак. осн. бух. учета активов орган.", "teacher": "Мерзлякова З.Л.", "room": "203" },
+        { "slot": 2, "subject": "МДК. 02.01 Прак. осн. бух. учета ист. формир. акт. орган.", "teacher": "Мерзлякова З.Л.", "room": "203" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
