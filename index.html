@@ -867,7 +867,7 @@
                 days.forEach(day => {
                     const btn = document.createElement('button');
                     btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
-                    btn.innerText = day.replace("Понедельник","Пн").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
+                    btn.innerText = day.replace("Понедельник","Пн").replace("Вторник","Вт").replace("Среда","Ср").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
                     btn.onclick = () => { selectedDay = day; update(); };
                     selector.appendChild(btn);
                 });
