@@ -70,7 +70,7 @@
         }
 
         .live-date .lessons-count {
-            color: #5ac8fa;
+            color: #c8d8e8;
             font-weight: 600;
         }
 
@@ -538,7 +538,7 @@
             return 'пар';
         }
 
-        function updateLiveDate() {
+        function updateLiveDate(showIndicator = false) {
             const now = new Date();
             const dayName = dayMap[now.getDay()] || '';
             const day = now.getDate();
@@ -558,7 +558,8 @@
                 }
             }
             
-            if (updateIndicator) {
+            // Показываем индикатор только если явно попросили (при смене группы)
+            if (showIndicator && updateIndicator) {
                 updateIndicator.classList.add('show');
                 setTimeout(() => updateIndicator.classList.remove('show'), 2000);
             }
@@ -679,7 +680,7 @@
                         <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
                             <div class="lesson-info">
                                 <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
+                                <div class="lesson-details">👨🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
                             </div>
                             <div class="lesson-time">
                                 <span class="lesson-num">${lesson.slot} пара</span>
@@ -735,6 +736,9 @@
                     }
                 });
             }
+            
+            // Обновляем живую дату без индикатора при каждом тике
+            updateLiveDate(false);
         }
 
         // === 3D ЭФФЕКТ ===
@@ -795,6 +799,8 @@
                 });
                 document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 update();
+                // СРАЗУ обновляем количество пар с индикатором
+                updateLiveDate(true);
             }
         }
         
@@ -816,8 +822,8 @@
         
         setInterval(update, 1000);
         update();
-        updateLiveDate();
-        setInterval(updateLiveDate, 60000);
+        // Первый вызов БЕЗ индикатора
+        updateLiveDate(false);
     </script>
 </body>
 </html>
