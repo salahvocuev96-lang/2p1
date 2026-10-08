@@ -16,6 +16,99 @@
             text-align: center;
             min-height: 100vh;
         }
+        
+        /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК С ГОЛУБЫМ ОТТЕНКОМ === */
+        h1.main-title {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 10px 0 8px 0;
+            background: linear-gradient(
+                90deg,
+                #d0e8ff 0%,
+                #ffffff 25%,
+                #ffffff 50%,
+                #ffffff 75%,
+                #d0e8ff 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 3s linear infinite;
+            filter: drop-shadow(0 0 25px rgba(180, 220, 255, 0.5));
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* === ЖИВАЯ ДАТА ПОД ЗАГОЛОВКОМ === */
+        .live-date {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .live-date .date-text {
+            font-weight: 500;
+            color: #c8d8e8;
+        }
+
+        .live-date .divider {
+            width: 4px;
+            height: 4px;
+            background: #5a7a9a;
+            border-radius: 50%;
+        }
+
+        .live-date .lessons-count {
+            color: #5ac8fa;
+            font-weight: 600;
+        }
+
+        .live-date .lessons-count strong {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .update-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #30d158;
+            opacity: 0;
+            transition: opacity 0.4s;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        .update-indicator.show {
+            opacity: 1;
+        }
+
+        .update-indicator .dot {
+            width: 6px;
+            height: 6px;
+            background: #30d158;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
         .timer {
             background: #1c1c1e;
             border-radius: 20px;
@@ -242,7 +335,17 @@
     </style>
 </head>
 <body>
-    <h1>Расписание 2П1</h1>
+    <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
+    
+    <div class="live-date">
+        <span class="date-text" id="dateText">Загрузка...</span>
+        <span class="divider"></span>
+        <span class="lessons-count" id="lessonsCount">Загрузка...</span>
+    </div>
+    <div class="update-indicator" id="updateIndicator">
+        <span class="dot"></span>
+        <span>Обновлено</span>
+    </div>
     
     <div style="margin: 15px 0; text-align: center;">
         <input type="text" id="groupSearch" class="search-box" placeholder="🔍 Поиск группы...">
@@ -353,6 +456,7 @@
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         const dayMap = { 1: "Понедельник", 2: "Вторник", 3: "Среда", 4: "Четверг", 5: "Пятница", 6: "Суббота", 0: "Воскресенье" };
+        const monthNames = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 
         let selectedDay = (() => {
             const now = new Date();
@@ -411,10 +515,7 @@
             const mins = Math.floor((totalSeconds % 3600) / 60);
             const secs = totalSeconds % 60;
             
-            // Часы (одна цифра, максимум 9)
             setDigit('hour1', hours > 9 ? 9 : hours);
-            
-            // Минуты и секунды
             setDigit('min1', Math.floor(mins / 10));
             setDigit('min2', mins % 10);
             setDigit('sec1', Math.floor(secs / 10));
@@ -426,6 +527,42 @@
         createStrip('min2'); 
         createStrip('sec1'); 
         createStrip('sec2');
+
+        // === ЖИВАЯ ДАТА ===
+        function getLessonsWord(count) {
+            const lastTwo = count % 100;
+            const lastOne = count % 10;
+            if (lastTwo >= 11 && lastTwo <= 19) return 'пар';
+            if (lastOne === 1) return 'пара';
+            if (lastOne >= 2 && lastOne <= 4) return 'пары';
+            return 'пар';
+        }
+
+        function updateLiveDate() {
+            const now = new Date();
+            const dayName = dayMap[now.getDay()] || '';
+            const day = now.getDate();
+            const month = monthNames[now.getMonth()];
+            const dateText = document.getElementById('dateText');
+            const lessonsCount = document.getElementById('lessonsCount');
+            const updateIndicator = document.getElementById('updateIndicator');
+            
+            if (dateText) dateText.textContent = `${dayName}, ${day} ${month}`;
+            
+            if (lessonsCount && schedule[selectedDay]) {
+                const count = schedule[selectedDay].filter(l => l.subject !== "—").length;
+                if (count === 0) {
+                    lessonsCount.innerHTML = '<strong>Пар нет</strong>';
+                } else {
+                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} сегодня`;
+                }
+            }
+            
+            if (updateIndicator) {
+                updateIndicator.classList.add('show');
+                setTimeout(() => updateIndicator.classList.remove('show'), 2000);
+            }
+        }
 
         let lastRenderedDay = null;
         let lastRenderedGroup = null;
@@ -656,7 +793,7 @@
                 Object.keys(schedule).forEach(day => {
                     schedule[day] = newSchedule[day] || schedule[day];
                 });
-                document.querySelector('h1').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
+                document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 update();
             }
         }
@@ -679,6 +816,8 @@
         
         setInterval(update, 1000);
         update();
+        updateLiveDate();
+        setInterval(updateLiveDate, 60000);
     </script>
 </body>
 </html>
