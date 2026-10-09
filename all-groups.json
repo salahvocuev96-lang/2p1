@@ -764,7 +764,7 @@
             { "slot": 6, "subject": "Час куратора", "teacher": "Марфина Л.А.", "room": "" }
         ],
         "Вторник": [
-            { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "" },
+            { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
             { "slot": 2, "subject": "—", "teacher": "", "room": "" },
             { "slot": 3, "subject": "—", "teacher": "", "room": "" },
             { "slot": 4, "subject": "—", "teacher": "", "room": "" },
