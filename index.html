@@ -917,29 +917,35 @@
                         }, index * 80);
                     });
                 }, 100);
-                // Автоскролл к активной паре (только если пара изменилась)
+                // Автоскролл к активной паре (или к первой, если активной нет)
                 setTimeout(() => {
-                    if (active && lastScrolledSlot !== active.slot) {
-                        const activeCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
-                        if (activeCard) {
-                            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            lastScrolledSlot = active.slot;
+                    if (lastScrolledSlot === null) {
+                        let targetSlot = null;
+                        if (active) {
+                            targetSlot = active.slot;
+                        } else {
+                            const firstLesson = todayLessons.find(l => l.subject !== "—");
+                            if (firstLesson) targetSlot = firstLesson.slot;
+                        }
+                        if (targetSlot) {
+                            const targetCard = sch.querySelector(`.lesson[data-slot="${targetSlot}"]`);
+                            if (targetCard) {
+                                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                lastScrolledSlot = targetSlot;
+                            }
                         }
                     }
                 }, 600);
-
                 const selector = document.getElementById('daySelector');
                 selector.innerHTML = '';
                 days.forEach(day => {
                     const btn = document.createElement('button');
                     btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
                     btn.innerText = day.replace("Понедельник","Пн").replace("Вторник","Вт").replace("Среда","Ср").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
-                    btn.onclick = () => { 
-                        selectedDay = day; 
-                        if (day === dayMap[new Date().getDay()]) {
-                            lastScrolledSlot = null;
-                        }
-                        update(); 
+                    btn.onclick = () => {
+                        selectedDay = day;
+                        lastScrolledSlot = null;
+                        update();
                     };
                     selector.appendChild(btn);
                 });
@@ -961,9 +967,9 @@
                     }
                 });
             }
-                // Автоскролл при смене активной пары
+                // Автоскролл при автоматической смене активной пары
                 setTimeout(() => {
-                    if (active && lastScrolledSlot !== active.slot) {
+                    if (active && lastScrolledSlot !== active.slot && lastRenderedDay === selectedDay) {
                         const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
                         if (activeCard) {
                             activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
