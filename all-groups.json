@@ -752,7 +752,8 @@
       ]
     }
   },
-"3p1": {
+  "3p1": {
+    "groupName": "3П1",
     "schedule": {
         "Понедельник": [
             { "slot": 1, "subject": "—", "teacher": "", "room": "" },
