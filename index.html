@@ -570,6 +570,8 @@
             <option value="3n1">3Н1</option>
             <option value="3b1">3Б1</option>
             <option value="2b3">2Б3</option>
+            <option value="3bd1">3БД1</option>
+            <option value="2bd3">2БД3</option>
         </select>
     </div>
     
@@ -1005,7 +1007,7 @@
         scheduleContainer.addEventListener('touchcancel', handleReset);
         scheduleContainer.addEventListener('click', handleReset);
 
-        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1', '2p3': '3p1', '2b3': '3b1' };
+        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1', '2p3': '3p1', '2b3': '3b1', '2bd3': '3bd1' };
         let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
         document.getElementById('groupSelect').value = currentGroup;
         
