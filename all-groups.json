@@ -910,5 +910,58 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+  "3bd1": {
+    "groupName": "3БД1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Цифр. экономика", "teacher": "Маханова Т.А.", "room": "203" },
+        { "slot": 4, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "215" },
+        { "slot": 5, "subject": "Час куратора", "teacher": "Марфина Л.А.", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Фин., ден. обращ. и кредит", "teacher": "Малышева М.В.", "room": "221" },
+        { "slot": 3, "subject": "Фин., ден. обращ. и кредит", "teacher": "Малышева М.В.", "room": "221" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "Осущ. кредитной работы", "teacher": "Старостина М.Ю.", "room": "216" },
+        { "slot": 2, "subject": "Осущ. кредитной работы", "teacher": "Старостина М.Ю.", "room": "216" },
+        { "slot": 3, "subject": "Кассовые операции", "teacher": "Старостина М.Ю.", "room": "216" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "Осущ. кредитной работы", "teacher": "Старостина М.Ю.", "room": "дистант" },
+        { "slot": 2, "subject": "Осущ. кредитной работы", "teacher": "Старостина М.Ю.", "room": "дистант" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
   }
 }
