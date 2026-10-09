@@ -858,4 +858,58 @@
       ]
     }
   }
+  },
+  "3b1": {
+    "groupName": "3Б1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "216" },
+        { "slot": 3, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216А" },
+        { "slot": 4, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216А" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "МДК. 01.01 Организ. расчетов с бюдж. бюджетн. сист. РФ", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 5, "subject": "МДК. 01.01 Организ. расчетов с бюдж. бюджетн. сист. РФ", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "Техн. сост. бух. отчетности", "teacher": "Канцева Е.А.", "room": "201" },
+        { "slot": 2, "subject": "МДК. 03.01 Техн. выполн. опер. по приему, выдаче и хран. ден. средств", "teacher": "Таманова Т.И.", "room": "217" },
+        { "slot": 3, "subject": "Час куратора", "teacher": "Бабенко Н.Б.", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
+  }
 }
