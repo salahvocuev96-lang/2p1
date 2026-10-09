@@ -917,22 +917,13 @@
                         }, index * 80);
                     });
                 }, 100);
-                // Автоскролл к активной паре (или к первой, если активной нет)
+                // Автоскролл только к активной паре
                 setTimeout(() => {
-                    if (lastScrolledSlot === null) {
-                        let targetSlot = null;
-                        if (active) {
-                            targetSlot = active.slot;
-                        } else {
-                            const firstLesson = todayLessons.find(l => l.subject !== "—");
-                            if (firstLesson) targetSlot = firstLesson.slot;
-                        }
-                        if (targetSlot) {
-                            const targetCard = sch.querySelector(`.lesson[data-slot="${targetSlot}"]`);
-                            if (targetCard) {
-                                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                lastScrolledSlot = targetSlot;
-                            }
+                    if (lastScrolledSlot === null && active) {
+                        const targetCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
+                        if (targetCard) {
+                            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            lastScrolledSlot = active.slot;
                         }
                     }
                 }, 600);
