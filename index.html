@@ -528,11 +528,26 @@
     
 /* === БУРГЕР-МЕНЮ === */
 .burger-btn {
-    position: fixed; /* Фиксируем относительно экрана, а не страницы */
-    top: 15px;       /* Чуть ниже самого верха */
-    top: 10px;       
-    left: 10px;      
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    left: auto;
+    width: 40px;
     height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 1000;
+    background: rgba(28, 28, 30, 0.6);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -693,9 +708,11 @@
 }
 
 @media (max-width: 480px) {
-    .burger-btn {
-        top: 15px;
-        left: 15px;
+.burger-btn {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    left: auto;
         width: 40px;
         height: 40px;
     }
@@ -716,6 +733,7 @@
 <div class="side-menu" id="sideMenu">
 <div class="menu-header">
     <span class="menu-title">Меню</span>
+    <div class="menu-close" id="menuClose">✕</div>
 </div>
     <div class="menu-items">
         <div class="menu-item" id="distantBtn">
@@ -1286,7 +1304,8 @@ burgerBtn.addEventListener('click', () => {
         openMenu();
     }
 });
-
+        
+menuClose.addEventListener('click', closeMenu);
 menuOverlay.addEventListener('click', closeMenu);
 
 // Закрытие по Escape
