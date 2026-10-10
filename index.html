@@ -530,10 +530,10 @@
 .burger-btn {
     position: fixed !important;
     top: 10px !important;
-    left: 15px !important;
-    right: auto !important;
-    width: 40px;
-    height: 40px;
+    right: 15px !important;
+    left: auto !important;
+    width: 40px !important;
+    height: 40px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -710,6 +710,7 @@
 <div class="side-menu" id="sideMenu">
 <div class="menu-header">
     <span class="menu-title">Меню</span>
+    <div class="menu-close" id="menuClose">✕</div>
 </div>
     <div class="menu-items">
         <div class="menu-item" id="distantBtn">
@@ -1293,6 +1294,7 @@ document.getElementById('distantBtn').addEventListener('click', () => {
     window.open('https://distant-nk.ru', '_blank');
     closeMenu();
 });
+    menuClose.addEventListener('click', closeMenu);
     </script>
 </body>
 </html>
