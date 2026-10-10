@@ -7,15 +7,22 @@
     <title>Расписание 2П1</title>
     <style>
         body {
-            font-family: -apple-system, sans-serif;
-            background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: #fff;
-            padding: 20px 20px 60px 20px;
-            text-align: center;
-            min-height: 100vh;
-        }
+html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    font-family: -apple-system, sans-serif;
+    background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: #fff;
+    padding: 20px 20px 60px 20px;
+    text-align: center;
+    min-height: 100vh;
+    margin: 0;
+}
         
         /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК === */
         h1.main-title {
@@ -533,8 +540,8 @@ body {
 }
 
 .burger-btn {
-    position: sticky !important;
-    top: 0 !important;
+    position: fixed !important;
+    top: 10px !important;
     right: 15px !important;
     left: auto !important;
     width: 44px !important;
@@ -554,6 +561,9 @@ body {
     transition: all 0.3s ease;
     margin: 0 !important;
     padding: 0 !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: transform !important;
 }
 
 .burger-btn:hover {
