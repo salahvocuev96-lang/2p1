@@ -525,9 +525,206 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+    
+    /* === БУРГЕР-МЕНЮ === */
+.burger-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 1000;
+    background: rgba(28, 28, 30, 0.6);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.burger-btn:hover {
+    background: rgba(28, 28, 30, 0.8);
+    transform: scale(1.05);
+}
+
+.burger-btn span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.burger-btn.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.burger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-btn.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Затемнение фона */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Само меню */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: rgba(20, 20, 25, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.side-menu.active {
+    transform: translateX(0);
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.menu-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.menu-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-items {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-item:active {
+    transform: scale(0.98);
+}
+
+.menu-icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.menu-text {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Сдвигаем контент, чтобы бургер не перекрывал герб */
+.header-top {
+    padding-top: 10px;
+}
+
+@media (max-width: 480px) {
+    .burger-btn {
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 40px;
+    }
+    .side-menu {
+        width: 85%;
+        max-width: 300px;
+    }
+}
     </style>
 </head>
 <body>
+    <div class="burger-btn" id="burgerBtn">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
+<div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+        <span class="menu-title">Меню</span>
+        <div class="menu-close" id="menuClose">✕</div>
+    </div>
+<div class="menu-item" id="distantBtn">
+    <span class="menu-icon">📹</span>
+    <span class="menu-text">Дистант</span>
+</div>
+    </div>
+</div>
+    
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
     <div class="live-date">
@@ -1017,7 +1214,7 @@
         async function loadGroupSchedule(groupCode) {
             try {
                 const actualGroup = groupMapping[groupCode] || groupCode;
-                const response = await fetch('all-groups.json');
+                const response = await fetch('data/all-groups.json');
                 const allData = await response.json();
                 return allData[actualGroup].schedule;
             } catch (error) {
@@ -1061,6 +1258,48 @@
         setInterval(update, 1000);
         update();
         updateLiveDate(false);
+    
+    // === БУРГЕР-МЕНЮ ===
+const burgerBtn = document.getElementById('burgerBtn');
+const sideMenu = document.getElementById('sideMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+const menuClose = document.getElementById('menuClose');
+
+function openMenu() {
+    burgerBtn.classList.add('active');
+    sideMenu.classList.add('active');
+    menuOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+    burgerBtn.classList.remove('active');
+    sideMenu.classList.remove('active');
+    menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+burgerBtn.addEventListener('click', () => {
+    if (sideMenu.classList.contains('active')) {
+        closeMenu();
+    } else {
+        openMenu();
+    }
+});
+
+menuClose.addEventListener('click', closeMenu);
+menuOverlay.addEventListener('click', closeMenu);
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+});
+
+// === КНОПКА ДИСТАНТ ===
+document.getElementById('distantBtn').addEventListener('click', () => {
+    window.open('https://distant-nk.ru', '_blank');
+    closeMenu();
+});
     </script>
 </body>
 </html>
