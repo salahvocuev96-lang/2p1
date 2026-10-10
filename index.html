@@ -526,25 +526,25 @@
             100% { background-position: 0% 50%; }
         }
     
-    /* === БУРГЕР-МЕНЮ === */
+/* === БУРГЕР-МЕНЮ === */
 .burger-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 44px;
-    height: 44px;
+    position: fixed; /* Фиксируем относительно экрана, а не страницы */
+    top: 15px;       /* Чуть ниже самого верха */
+    left: 15px;      /* Отступ слева */
+    width: 40px;     /* Чуть компактнее */
+    height: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 5px;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 1000;   /* Поверх всего */
     background: rgba(28, 28, 30, 0.6);
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
+    border-radius: 10px;
     transition: all 0.3s ease;
 }
 
@@ -555,7 +555,7 @@
 
 .burger-btn span {
     display: block;
-    width: 22px;
+    width: 20px;
     height: 2px;
     background: #fff;
     border-radius: 2px;
@@ -564,6 +564,14 @@
 
 .burger-btn.active span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
+}
+
+.burger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-btn.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 .burger-btn.active span:nth-child(2) {
