@@ -963,5 +963,58 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+  "3yu1": {
+    "groupName": "3Ю1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "216" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "МДК. 03.04 Судебн. и альтерн. формы защ. прав организ. и физ. лиц", "teacher": "Андрющенко П.И.", "room": "210" },
+        { "slot": 2, "subject": "МДК. 03.04 Судебн. и альтерн. формы защ. прав организ. и физ. лиц", "teacher": "Андрющенко П.И.", "room": "210" },
+        { "slot": 3, "subject": "Трудовое право", "teacher": "Москвичева Ф.О.", "room": "210" },
+        { "slot": 4, "subject": "Час куратора", "teacher": "Москвичева Ф.О.", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Дог. в предпр. деят.", "teacher": "Волкова М.Н.", "room": "215" },
+        { "slot": 3, "subject": "Дог. в предпр. деят.", "teacher": "Волкова М.Н.", "room": "215" },
+        { "slot": 4, "subject": "Административный процесс", "teacher": "Ладнова Е.В.", "room": "216" },
+        { "slot": 5, "subject": "Гражданский процесс", "teacher": "Ладнова Е.В.", "room": "216" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "МДК. 03.01 Корпоративное право", "teacher": "Быкова Н.В.", "room": "216а" },
+        { "slot": 2, "subject": "МДК. 03.01 Корпоративное право", "teacher": "Быкова Н.В.", "room": "216а" },
+        { "slot": 3, "subject": "Гражданское право", "teacher": "Широкова Ю.Н.", "room": "221" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
   }
 }
