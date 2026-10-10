@@ -2,17 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Расписание 2П1</title>
     <style>
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch !important;
-        }
-
         body {
             font-family: -apple-system, sans-serif;
             background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
@@ -30,7 +23,14 @@
             font-weight: 800;
             letter-spacing: 1px;
             margin: 10px 0 8px 0;
-            background: linear-gradient(90deg, #d0e8ff 0%, #ffffff 25%, #ffffff 50%, #ffffff 75%, #d0e8ff 100%);
+            background: linear-gradient(
+                90deg,
+                #d0e8ff 0%,
+                #ffffff 25%,
+                #ffffff 50%,
+                #ffffff 75%,
+                #d0e8ff 100%
+            );
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -57,10 +57,28 @@
             flex-wrap: wrap;
         }
 
-        .live-date .date-text { font-weight: 500; color: #c8d8e8; }
-        .live-date .divider { width: 4px; height: 4px; background: #5a7a9a; border-radius: 50%; }
-        .live-date .lessons-count { color: #c8d8e8; font-weight: 600; }
-        .live-date .lessons-count strong { color: #fff; font-weight: 700; font-size: 16px; }
+        .live-date .date-text {
+            font-weight: 500;
+            color: #c8d8e8;
+        }
+
+        .live-date .divider {
+            width: 4px;
+            height: 4px;
+            background: #5a7a9a;
+            border-radius: 50%;
+        }
+
+        .live-date .lessons-count {
+            color: #c8d8e8;
+            font-weight: 600;
+        }
+
+        .live-date .lessons-count strong {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+        }
 
         .update-indicator {
             display: inline-flex;
@@ -73,9 +91,16 @@
             margin-top: 6px;
             min-height: 16px;
         }
-        .update-indicator.show { opacity: 1; }
+
+        .update-indicator.show {
+            opacity: 1;
+        }
+
         .update-indicator .dot {
-            width: 6px; height: 6px; background: #30d158; border-radius: 50%;
+            width: 6px;
+            height: 6px;
+            background: #30d158;
+            border-radius: 50%;
             animation: pulse 1.5s ease-in-out infinite;
         }
 
@@ -84,46 +109,82 @@
             50% { opacity: 0.4; transform: scale(0.8); }
         }
 
-        /* === ПОИСК === */
-        .search-wrapper {
-            position: relative;
-            width: 90%;
-            max-width: 380px;
-            margin: 0 auto 12px auto;
-            box-sizing: border-box;
-        }
-
-        .search-input {
-            width: 100%;
+        /* === ОБЩИЙ СТИЛЬ СТЕКЛА === */
+        .glass {
             background: rgba(28, 28, 30, 0.4);
             backdrop-filter: blur(15px) saturate(180%);
             -webkit-backdrop-filter: blur(15px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
-            padding: 14px 18px 14px 70px;
-            border-radius: 14px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
-        .search-icon {
-            position: absolute;
-            left: 46px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            pointer-events: none;
-            z-index: 2;
-            animation: squint 3s ease-in-out infinite;
+        .glass:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        @keyframes squint {
-            0%, 100% { transform: translateY(-50%) rotate(0deg) scale(1); }
-            50% { transform: translateY(-50%) rotate(8deg) scale(1.1); }
-        }
+        /* === ПОИСК === */
+.search-wrapper {
+    position: relative;
+    width: 90%;
+    max-width: 380px;
+    margin: 0 auto 12px auto;
+    box-sizing: border-box;
+}
+
+.search-input {
+    width: 100%;
+    background: rgba(28, 28, 30, 0.4);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    padding: 14px 18px 14px 70px;
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+}
+
+.search-icon {
+    position: absolute;
+    left: 46px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    pointer-events: none;
+    z-index: 2;
+    transform-origin: center center;
+}
+/* Анимация работает ВСЕГДА, даже без клика */
+.search-wrapper.squint .search-icon {
+    animation: squint 3s ease-in-out infinite;
+}
+
+@keyframes squint {
+    0%, 100% {
+        transform: translateY(-50%) rotate(0deg) scale(1);
+    }
+    50% {
+        transform: translateY(-50%) rotate(8deg) scale(1.1);
+    }
+}
+
+.search-wrapper.squint .search-input:focus ~ .search-icon {
+    animation: squint 3s ease-in-out infinite;
+}
+
+@keyframes squint {
+    0%, 100% {
+        transform: translateY(-50%) rotate(0deg) scale(1);
+    }
+    50% {
+        transform: translateY(-50%) rotate(8deg) scale(1.1);
+    }
+}
 
         /* === СЕЛЕКТ ГРУППЫ === */
         .group-select {
@@ -146,8 +207,16 @@
             padding-right: 40px;
             transition: all 0.3s;
         }
-        .group-select:hover { background-color: rgba(28, 28, 30, 0.5); border-color: rgba(255, 255, 255, 0.2); }
-        .group-select option { background: #1c1c1e; color: #fff; }
+
+        .group-select:hover {
+            background-color: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .group-select option {
+            background: #1c1c1e;
+            color: #fff;
+        }
 
         /* === КНОПКИ ДНЕЙ === */
         .day-selector {
@@ -173,8 +242,18 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .day-btn:hover { background: rgba(28, 28, 30, 0.5); border-color: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
-        .day-btn.active { background: rgba(10, 132, 255, 0.5); border-color: #0a84ff; box-shadow: 0 0 20px rgba(10, 132, 255, 0.4); }
+
+        .day-btn:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .day-btn.active {
+            background: rgba(10, 132, 255, 0.5);
+            border-color: #0a84ff;
+            box-shadow: 0 0 20px rgba(10, 132, 255, 0.4);
+        }
 
         /* === ТАЙМЕР === */
         .timer {
@@ -188,9 +267,18 @@
             max-width: 380px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .status { font-size: 18px; color: rgba(255, 255, 255, 0.8); }
-        .odometer { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 10px 0; }
 
+        .status { font-size: 18px; color: rgba(255, 255, 255, 0.8); }
+        
+        .odometer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        /* СТЕКЛЯННЫЕ БАРАБАНЫ */
         .digit-wrapper {
             position: relative;
             width: 50px;
@@ -201,45 +289,121 @@
             backdrop-filter: blur(12px) saturate(150%);
             -webkit-backdrop-filter: blur(12px) saturate(150%);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        .digit-wrapper::before {
-            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 40%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
-            border-radius: 10px 10px 50% 50%; z-index: 2; pointer-events: none;
-        }
-        .digit-wrapper::after {
-            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
-            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent); z-index: 2; pointer-events: none;
-        }
-        .digit-strip { display: flex; flex-direction: column; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-        .digit-strip span {
-            height: 70px; display: flex; align-items: center; justify-content: center;
-            font-size: 48px; font-weight: 300; color: #fff; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        }
-        .separator {
-            font-size: 48px; font-weight: 300; color: #0a84ff; animation: blink 1s ease infinite;
-            margin: 0 2px; text-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
-        }
-        .hours-label { font-size: 24px; color: rgba(255, 255, 255, 0.6); margin-left: 4px; margin-right: 8px; }
 
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .digit-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+            border-radius: 10px 10px 50% 50%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .digit-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .digit-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .digit-strip span {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 300;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .separator {
+            font-size: 48px;
+            font-weight: 300;
+            color: #0a84ff;
+            animation: blink 1s ease infinite;
+            margin: 0 2px;
+            text-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
+        }
+
+        .hours-label {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 4px;
+            margin-right: 8px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
 
         .info { font-size: 16px; color: rgba(255, 255, 255, 0.7); }
-        .progress-track { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin: 15px 0; overflow: hidden; }
-        .progress-fill {
-            height: 100%; background: #0a84ff; width: 100%; border-radius: 2px;
-            transition: width 1s linear; position: relative; overflow: hidden;
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin: 15px 0;
+            overflow: hidden;
         }
+
+        .progress-fill {
+            height: 100%;
+            background: #0a84ff;
+            width: 100%;
+            border-radius: 2px;
+            transition: width 1s linear;
+            position: relative;
+            overflow: hidden;
+        }
+
         .progress-fill::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             animation: shimmerBar 2s ease-in-out infinite;
         }
-        @keyframes shimmerBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
+        @keyframes shimmerBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
 
         /* === КАРТОЧКИ ПАР === */
-        .lesson-wrapper { perspective: 1000px; margin: 8px 0; max-width: 380px; margin-left: auto; margin-right: auto; }
+        .lesson-wrapper {
+            perspective: 1000px;
+            margin: 8px 0;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .lesson {
             background: rgba(28, 28, 30, 0.4);
             backdrop-filter: blur(15px) saturate(180%);
@@ -257,20 +421,61 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             position: relative;
         }
+
         .lesson::before {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.15) 0%, transparent 60%);
-            opacity: var(--glow, 0); transition: opacity 0.2s; pointer-events: none; z-index: 2;
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                circle at var(--mx, 50%) var(--my, 50%),
+                rgba(255,255,255,0.15) 0%,
+                transparent 60%
+            );
+            opacity: var(--glow, 0);
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 2;
         }
-        .lesson:hover { background: rgba(28, 28, 30, 0.5); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); }
-        .lesson-info, .lesson-time { transform: translateZ(25px); position: relative; z-index: 1; }
-        .lesson.active { background: rgba(10, 132, 255, 0.3); border-color: #0a84ff; box-shadow: 0 0 25px rgba(10, 132, 255, 0.3); }
+
+        .lesson:hover {
+            background: rgba(28, 28, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .lesson-info, .lesson-time {
+            transform: translateZ(25px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .lesson.active {
+            background: rgba(10, 132, 255, 0.3);
+            border-color: #0a84ff;
+            box-shadow: 0 0 25px rgba(10, 132, 255, 0.3);
+        }
+
         .lesson-info { text-align: left; flex: 1; }
         .lesson-subject { font-weight: bold; font-size: 14px; }
         .lesson-details { font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; }
         .lesson.active .lesson-details { color: rgba(255, 255, 255, 0.9); }
-        .lesson-time { font-weight: bold; margin-left: 10px; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-        .lesson-num { font-size: 13px; color: #0a84ff; margin-bottom: 2px; font-weight: 800; }
+
+        .lesson-time { 
+            font-weight: bold; 
+            margin-left: 10px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .lesson-num {
+            font-size: 13px;
+            color: #0a84ff;
+            margin-bottom: 2px;
+            font-weight: 800;
+        }
+
         .lesson.active .lesson-num { color: #fff; }
 
         /* === ПЕРЕМЕНА === */
@@ -289,121 +494,40 @@
             justify-content: space-between;
             transition: all 0.3s;
         }
-        .break.active { background: rgba(255, 149, 0, 0.3); border-color: #ff9500; color: #fff; }
+
+        .break.active {
+            background: rgba(255, 149, 0, 0.3);
+            border-color: #ff9500;
+            color: #fff;
+        }
 
         /* === BLUR CASCADE АНИМАЦИЯ === */
-        .lesson, .break { opacity: 0; filter: blur(8px); transform: translateY(-15px); }
-        .lesson.animate, .break.animate { animation: blurIn 0.5s ease forwards; }
-        @keyframes blurIn { to { opacity: 1; filter: blur(0); transform: translateY(0); } }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    
-        /* === БУРГЕР-МЕНЮ (ЖЕЛЕЗОБЕТОННАЯ ФИКСАЦИЯ) === */
-        .burger-btn {
-            position: fixed !important;
-            top: 15px !important;
-            right: 15px !important;
-            left: auto !important;
-            width: 44px !important;
-            height: 44px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            gap: 5px;
-            cursor: pointer;
-            z-index: 10000 !important;
-            background: rgba(28, 28, 30, 0.85) !important;
-            backdrop-filter: blur(15px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 12px !important;
-            transition: all 0.3s ease;
-            /* Хак для iOS, чтобы кнопка не дергалась при скролле */
-            transform: translate3d(0, 0, 0) !important;
-            -webkit-transform: translate3d(0, 0, 0) !important;
-            will-change: transform;
+        .lesson, .break {
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateY(-15px);
         }
-        .burger-btn:hover { background: rgba(28, 28, 30, 0.95); transform: translate3d(0, 0, 0) scale(1.05) !important; }
-        .burger-btn span { display: block; width: 20px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.3s ease; }
-        .burger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .burger-btn.active span:nth-child(2) { opacity: 0; }
-        .burger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* Затемнение фона */
-        .menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 9998;
+        .lesson.animate, .break.animate {
+            animation: blurIn 0.5s ease forwards;
         }
-        .menu-overlay.active { opacity: 1; visibility: visible; }
 
-        /* Само меню (выезжает СПРАВА) */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: auto;
-            width: 280px;
-            height: 100%;
-            background: rgba(20, 20, 25, 0.95);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+        @keyframes blurIn {
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
         }
-        .side-menu.active { transform: translateX(0); }
-
-        .menu-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .menu-title { font-size: 18px; font-weight: 700; color: #fff; }
-        .menu-close {
-            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-            background: rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff;
-            cursor: pointer; font-size: 14px; transition: all 0.2s;
-        }
-        .menu-close:hover { background: rgba(255, 255, 255, 0.2); }
-        .menu-items { flex: 1; padding: 10px; overflow-y: auto; }
-        .menu-item {
-            display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-            border-radius: 12px; cursor: pointer; transition: all 0.2s ease; margin-bottom: 4px;
-        }
-        .menu-item:hover { background: rgba(255, 255, 255, 0.08); }
-        .menu-item:active { transform: scale(0.98); }
-        .menu-icon { font-size: 20px; width: 24px; text-align: center; }
-        .menu-text { font-size: 15px; color: rgba(255, 255, 255, 0.9); font-weight: 500; }
-
-        @media (max-width: 480px) {
-            .side-menu { width: 85%; max-width: 300px; }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
 <body>
-    <!-- КНОПКА МЕНЮ (Справа сверху, не двигается) -->
-    <div class="burger-btn" id="burgerBtn">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-
-    <!-- ЗАТЕМНЕНИЕ И САМО МЕНЮ -->
-    <div class="menu-overlay" id="menuOverlay"></div>
-    <div class="side-menu" id="sideMenu">
-        <div class="menu-header">
-            <span class="menu-title">Меню</span>
-            <div class="menu-close" id="menuClose">✕</div>
-        </div>
-        <div class="menu-items">
-            <div class="menu-item" id="distantBtn">
-                <span class="menu-icon">📹</span>
-                <span class="menu-text">Дистант</span>
-            </div>
-        </div>
-    </div>
-    
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
     <div class="live-date">
@@ -417,10 +541,10 @@
     </div>
     
     <div style="margin: 15px 0; text-align: center;">
-        <div class="search-wrapper squint">
-             <input type="text" id="groupSearch" class="search-input" placeholder="Поиск группы...">
-             <span class="search-icon">🔍</span>
-        </div>
+    <div class="search-wrapper squint">
+         <input type="text" id="groupSearch" class="search-input" placeholder="Поиск группы...">
+         <span class="search-icon">🔍</span>
+    </div>
         <br>
         <select id="groupSelect" class="group-select">
             <option value="2p1">2П1</option>
@@ -552,13 +676,19 @@
             return dayMap[d];
         })();
 
-        function toMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+        function toMin(t) {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+        }
 
         function fadeText(elementId, newText) {
             const element = document.getElementById(elementId);
             if (element.innerText === newText) return;
             element.style.opacity = '0';
-            setTimeout(() => { element.innerText = newText; element.style.opacity = '1'; }, 200);
+            setTimeout(() => {
+                element.innerText = newText;
+                element.style.opacity = '1';
+            }, 200);
         }
 
         const DIGIT_HEIGHT = 70;
@@ -582,7 +712,9 @@
         }
 
         function displayOdometer(totalSeconds) {
-            if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
+            if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
+                totalSeconds = 0;
+            }
             const hours = Math.floor(totalSeconds / 3600);
             const mins = Math.floor((totalSeconds % 3600) / 60);
             const secs = totalSeconds % 60;
@@ -593,7 +725,11 @@
             setDigit('sec2', secs % 10);
         }
 
-        createStrip('hour1'); createStrip('min1'); createStrip('min2'); createStrip('sec1'); createStrip('sec2');
+        createStrip('hour1');
+        createStrip('min1'); 
+        createStrip('min2'); 
+        createStrip('sec1'); 
+        createStrip('sec2');
 
         function getLessonsWord(count) {
             const lastTwo = count % 100;
@@ -618,7 +754,16 @@
             if (lessonsCount && schedule[selectedDay]) {
                 const count = schedule[selectedDay].filter(l => l.subject !== "—").length;
                 const todayName = dayMap[new Date().getDay()];
-                const dayPrepositions = { "Понедельник": "в понедельник", "Вторник": "во вторник", "Среда": "в среду", "Четверг": "в четверг", "Пятница": "в пятницу", "Суббота": "в субботу" };
+                
+                // Словарь с правильными формами дней недели
+                const dayPrepositions = {
+                    "Понедельник": "в понедельник",
+                    "Вторник": "во вторник",
+                    "Среда": "в среду",
+                    "Четверг": "в четверг",
+                    "Пятница": "в пятницу",
+                    "Суббота": "в субботу"
+                };
                 
                 if (count === 0) {
                     lessonsCount.innerHTML = '<strong>Пар нет</strong>';
@@ -628,6 +773,7 @@
                     lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} ${dayPrepositions[selectedDay]}`;
                 }
             }
+            
             if (showIndicator && updateIndicator) {
                 updateIndicator.classList.add('show');
                 setTimeout(() => updateIndicator.classList.remove('show'), 2000);
@@ -707,6 +853,7 @@
             }
 
             const timerBlock = document.getElementById('timerBlock');
+
             if (isToday) {
                 timerBlock.style.display = 'block';
                 if (active) {
@@ -735,6 +882,7 @@
             if (selectedDay !== lastRenderedDay || currentGroup !== lastRenderedGroup) {
                 lastRenderedDay = selectedDay;
                 lastRenderedGroup = currentGroup;
+                
                 const sch = document.getElementById('schedule');
                 sch.innerHTML = '';
                 
@@ -771,10 +919,12 @@
                 setTimeout(() => {
                     const elements = sch.querySelectorAll('.lesson, .break');
                     elements.forEach((el, index) => {
-                        setTimeout(() => { el.classList.add('animate'); }, index * 80);
+                        setTimeout(() => {
+                            el.classList.add('animate');
+                        }, index * 80);
                     });
                 }, 100);
-                
+                // Автоскролл только к активной паре
                 setTimeout(() => {
                     if (lastScrolledSlot === null && active) {
                         const targetCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
@@ -784,36 +934,47 @@
                         }
                     }
                 }, 600);
-                
                 const selector = document.getElementById('daySelector');
                 selector.innerHTML = '';
                 days.forEach(day => {
                     const btn = document.createElement('button');
                     btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
                     btn.innerText = day.replace("Понедельник","Пн").replace("Вторник","Вт").replace("Среда","Ср").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
-                    btn.onclick = () => { selectedDay = day; lastScrolledSlot = null; update(); };
+                    btn.onclick = () => {
+                        selectedDay = day;
+                        lastScrolledSlot = null;
+                        update();
+                    };
                     selector.appendChild(btn);
                 });
             } else {
                 document.querySelectorAll('.lesson').forEach(div => {
                     const slotNum = parseInt(div.getAttribute('data-slot'));
-                    div.classList.toggle('active', active && active.slot === slotNum);
+                    if (active && active.slot === slotNum) {
+                        div.classList.add('active');
+                    } else {
+                        div.classList.remove('active');
+                    }
                 });
                 document.querySelectorAll('.break').forEach(div => {
                     const slotNum = parseInt(div.getAttribute('data-slot'));
-                    div.classList.toggle('active', activeBreak && activeBreak.afterSlot === slotNum);
+                    if (activeBreak && activeBreak.afterSlot === slotNum) {
+                        div.classList.add('active');
+                    } else {
+                        div.classList.remove('active');
+                    }
                 });
             }
-            
-            setTimeout(() => {
-                if (active && lastScrolledSlot !== active.slot && lastRenderedDay === selectedDay) {
-                    const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
-                    if (activeCard) {
-                        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        lastScrolledSlot = active.slot;
+                // Автоскролл при автоматической смене активной пары
+                setTimeout(() => {
+                    if (active && lastScrolledSlot !== active.slot && lastRenderedDay === selectedDay) {
+                        const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
+                        if (activeCard) {
+                            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            lastScrolledSlot = active.slot;
+                        }
                     }
-                }
-            }, 300);
+                }, 300);
             
             updateLiveDate(false);
         }
@@ -827,7 +988,9 @@
             const y = clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            card.style.transform = `rotateX(${((y - centerY) / centerY) * -10}deg) rotateY(${((x - centerX) / centerX) * 10}deg)`;
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             card.style.setProperty('--mx', (x / rect.width) * 100 + '%');
             card.style.setProperty('--my', (y / rect.height) * 100 + '%');
             card.style.setProperty('--glow', '1');
@@ -854,7 +1017,7 @@
         async function loadGroupSchedule(groupCode) {
             try {
                 const actualGroup = groupMapping[groupCode] || groupCode;
-                const response = await fetch('data/all-groups.json');
+                const response = await fetch('all-groups.json');
                 const allData = await response.json();
                 return allData[actualGroup].schedule;
             } catch (error) {
@@ -868,7 +1031,9 @@
             localStorage.setItem('selectedGroup', groupCode);
             const newSchedule = await loadGroupSchedule(groupCode);
             if (newSchedule) {
-                Object.keys(schedule).forEach(day => { schedule[day] = newSchedule[day] || schedule[day]; });
+                Object.keys(schedule).forEach(day => {
+                    schedule[day] = newSchedule[day] || schedule[day];
+                });
                 document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
                 lastRenderedGroup = null;
                 lastScrolledSlot = null;
@@ -896,43 +1061,6 @@
         setInterval(update, 1000);
         update();
         updateLiveDate(false);
-    
-        // === БУРГЕР-МЕНЮ ===
-        const burgerBtn = document.getElementById('burgerBtn');
-        const sideMenu = document.getElementById('sideMenu');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const menuClose = document.getElementById('menuClose');
-
-        function openMenu() {
-            burgerBtn.classList.add('active');
-            sideMenu.classList.add('active');
-            menuOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeMenu() {
-            burgerBtn.classList.remove('active');
-            sideMenu.classList.remove('active');
-            menuOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        burgerBtn.addEventListener('click', () => {
-            if (sideMenu.classList.contains('active')) closeMenu();
-            else openMenu();
-        });
-
-        menuClose.addEventListener('click', closeMenu);
-        menuOverlay.addEventListener('click', closeMenu);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMenu();
-        });
-
-        document.getElementById('distantBtn').addEventListener('click', () => {
-            window.open('https://distant-nk.ru', '_blank');
-            closeMenu();
-        });
     </script>
 </body>
 </html>
