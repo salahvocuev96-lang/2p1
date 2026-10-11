@@ -1069,5 +1069,58 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+  "4p1": {
+    "groupName": "4П1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "МДК. 11.05 Техн. разраб. и защ. баз дан.", "teacher": "Акимова А.Я.", "room": "218" },
+        { "slot": 3, "subject": "Псих. общения", "teacher": "Шагидаева А.Б.", "room": "201" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "зал (с 01 октября)" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "216а" },
+        { "slot": 3, "subject": "МДК. 11.05 Техн. разраб. и защ. баз дан.", "teacher": "Акимова А.Я.", "room": "218" },
+        { "slot": 4, "subject": "Час куратора", "teacher": "Саркисян О.В.", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "МДК. 11.05 Техн. разраб. и защ. баз дан.", "teacher": "Акимова А.Я.", "room": "218" },
+        { "slot": 3, "subject": "Прав. обеспеч. проф. деят.", "teacher": "Широкова Ю.Н.", "room": "213" },
+        { "slot": 4, "subject": "Прав. обеспеч. проф. деят.", "teacher": "Широкова Ю.Н.", "room": "213" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "МДК. 11.05 Техн. разраб. и защ. баз дан.", "teacher": "Акимова А.Я.", "room": "дистант" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "МДК. 11.05 Техн. разраб. и защ. баз дан.", "teacher": "Акимова А.Я.", "room": "дистант" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
   }
 }
