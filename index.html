@@ -544,7 +544,8 @@
     gap: 5px;
     cursor: pointer;
     border: 1px solid rgba(255,255,255,0.1);
-    /* ГЛАВНЫЙ ФИКС: заставляет телефон не двигать кнопку */
+    margin: 0 !important;
+    padding: 0 !important;
     transform: translate3d(0, 0, 0) !important;
     -webkit-transform: translate3d(0, 0, 0) !important;
     will-change: transform;
@@ -618,12 +619,12 @@
     </style>
 </head>
 <body>
-    <!-- Кнопка меню -->
-<div class="burger-btn" id="burgerBtn">
+    <div class="burger-btn" id="burgerBtn">
     <span></span>
     <span></span>
     <span></span>
 </div>
+    <!-- Кнопка меню -->
 
 <!-- Затемнение фона -->
 <div class="menu-overlay" id="menuOverlay"></div>
