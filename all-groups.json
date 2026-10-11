@@ -182,7 +182,7 @@
         { "slot": 1, "subject": "Химия", "teacher": "Паршукова Э.В.", "room": "213" },
         { "slot": 2, "subject": "Иностранный язык", "teacher": "Марфина Л.А.", "room": "201" },
         { "slot": 3, "subject": "Информатика", "teacher": "Новиков В.С.", "room": "217" },
-        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "Иностранный язык", "teacher": "Марфина Л.А.", "room": "221" },
         { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
