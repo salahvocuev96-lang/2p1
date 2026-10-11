@@ -1016,5 +1016,58 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+  "3l1": {
+    "groupName": "3Л1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216а" },
+        { "slot": 4, "subject": "Нал. и налогообл.", "teacher": "Таманова Т.И.", "room": "216а" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "Ин. язык в проф. деят.", "teacher": "Титлова И.И.", "room": "216" },
+        { "slot": 2, "subject": "Бух. учет логист. операций", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 3, "subject": "Бух. учет логист. операций", "teacher": "Мощицкая З.В.", "room": "216" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "Осн. логистич. деят.", "teacher": "Бурдин С.С.", "room": "218" },
+        { "slot": 2, "subject": "Осн. логистич. деят.", "teacher": "Бурдин С.С.", "room": "221" },
+        { "slot": 3, "subject": "Час куратора", "teacher": "Магомедова П.А.", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "МДК. 03.01 Трансп. логистика", "teacher": "Петракова Е.В.", "room": "дистант" },
+        { "slot": 2, "subject": "МДК. 03.01 Трансп. логистика", "teacher": "Петракова Е.В.", "room": "дистант" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
   }
 }
