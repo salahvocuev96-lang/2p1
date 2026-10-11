@@ -541,12 +541,12 @@
     "groupName": "2Ю2",
     "schedule": {
       "Понедельник": [
-        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 1, "subject": "Осн. фин. грам.", "teacher": "Бурдин С.С.", "room": "213" },
+        { "slot": 2, "subject": "Ин. яз. в проф. деят.", "teacher": "Марфина Л.А.", "room": "221" },
         { "slot": 3, "subject": "БЖД", "teacher": "Наумова Е.М.", "room": "213" },
-        { "slot": 4, "subject": "Основы бережливого производства", "teacher": "Шагидаева А.Б.", "room": "213" },
-        { "slot": 5, "subject": "Основы финансовой грамотности", "teacher": "Бурдин С.С.", "room": "213" },
-        { "slot": 6, "subject": "Час куратора", "teacher": "Наумова Е.М.", "room": "—" }
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
       "Вторник": [
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
