@@ -833,7 +833,7 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
       "Четверг": [
-        { "slot": 1, "subject": "Техн. сост.бух. отчетности", "teacher": "Канцева Е.А.", "room": "201" },
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
         { "slot": 2, "subject": "МДК. 02.01 Прак. осн. бух. учета источн. формир. активов орган.", "teacher": "Мерзлякова З.Л.", "room": "204" },
         { "slot": 3, "subject": "—", "teacher": "", "room": "" },
         { "slot": 4, "subject": "—", "teacher": "", "room": "" },
@@ -886,7 +886,7 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
       "Четверг": [
-        { "slot": 1, "subject": "Техн. сост. бух. отчетности", "teacher": "Канцева Е.А.", "room": "201" },
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
         { "slot": 2, "subject": "МДК. 03.01 Техн. выполн. опер. по приему, выдаче и хран. ден. средств", "teacher": "Таманова Т.И.", "room": "217" },
         { "slot": 3, "subject": "Час куратора", "teacher": "Бабенко Н.Б.", "room": "" },
         { "slot": 4, "subject": "—", "teacher": "", "room": "" },
