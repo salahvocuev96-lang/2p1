@@ -969,8 +969,8 @@
     "schedule": {
       "Понедельник": [
         { "slot": 1, "subject": "Ин. яз. в проф. деят.", "teacher": "Титлова И.И.", "room": "216" },
-        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Административный процесс", "teacher": "Ладнова Е.В.", "room": "201" },
+        { "slot": 3, "subject": "Гражданский процесс", "teacher": "Ладнова Е.В.", "room": "201" },
         { "slot": 4, "subject": "—", "teacher": "", "room": "" },
         { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
@@ -995,8 +995,8 @@
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
         { "slot": 2, "subject": "Дог. в предпр. деят.", "teacher": "Волкова М.Н.", "room": "215" },
         { "slot": 3, "subject": "Дог. в предпр. деят.", "teacher": "Волкова М.Н.", "room": "215" },
-        { "slot": 4, "subject": "Административный процесс", "teacher": "Ладнова Е.В.", "room": "216" },
-        { "slot": 5, "subject": "Гражданский процесс", "teacher": "Ладнова Е.В.", "room": "216" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
       "Пятница": [
