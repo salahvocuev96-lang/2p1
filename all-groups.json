@@ -598,9 +598,9 @@
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
         { "slot": 2, "subject": "—", "teacher": "", "room": "" },
         { "slot": 3, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 4, "subject": "Иностранный язык в проф. деятельности", "teacher": "Марфина Л.А.", "room": "221" },
-        { "slot": 5, "subject": "Основы бережливого производства", "teacher": "Шагидаева А.Б.", "room": "221" },
-        { "slot": 6, "subject": "Час куратора", "teacher": "Шагидаева А.Б.", "room": "—" }
+        { "slot": 4, "subject": "Ин. яз. в проф. деят.", "teacher": "Марфина Л.А.", "room": "221" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
       "Вторник": [
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
