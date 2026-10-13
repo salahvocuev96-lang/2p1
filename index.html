@@ -6,31 +6,16 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Расписание 2П1</title>
     <style>
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 100dvh !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-body {
-    font-family: -apple-system, sans-serif;
-    background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    color: #fff;
-}
-
-.main-scroll {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding: 20px 20px 20px 20px !important;
-    text-align: center;
-}
+        body {
+            font-family: -apple-system, sans-serif;
+            background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            padding: 20px 20px 60px 20px;
+            text-align: center;
+            min-height: 100vh;
+        }
         
         /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК === */
         h1.main-title {
@@ -540,22 +525,9 @@ body {
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-.footer {
-    flex-shrink: 0 !important;
-    text-align: center !important;
-    padding: 15px 0 35px 0 !important;
-    font-size: 12px !important;
-    color: rgba(255, 255, 255, 0.4) !important;
-    background: rgba(0, 0, 0, 0.85) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    width: 100% !important;
-    z-index: 1000 !important;
-}
     </style>
 </head>
 <body>
-    <div class="main-scroll">
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
     <div class="live-date">
@@ -1094,9 +1066,5 @@ body {
         update();
         updateLiveDate(false);
     </script>
-</div>
-<div class="footer">
-    <span>© 2026 votsuev</span>
-</div>
 </body>
 </html>
