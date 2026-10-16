@@ -1122,5 +1122,58 @@
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ]
     }
+  },
+  "4n1": {
+    "groupName": "4Н1",
+    "schedule": {
+      "Понедельник": [
+        { "slot": 1, "subject": "МДК. 05.01 Орган. и планир. нал. деят.", "teacher": "Таманова Т.И.", "room": "203" },
+        { "slot": 2, "subject": "МДК. 05.01 Орган. и планир. нал. деят.", "teacher": "Таманова Т.И.", "room": "203" },
+        { "slot": 3, "subject": "Ин. язык в проф. деят.", "teacher": "Титлова И.И.", "room": "215" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Вторник": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Культурология", "teacher": "Саркисян О.В.", "room": "221" },
+        { "slot": 4, "subject": "Осн. цифр. эконом.", "teacher": "Бурдин С.С.", "room": "216А" },
+        { "slot": 5, "subject": "Осн. цифр. эконом.", "teacher": "Бурдин С.С.", "room": "218" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Среда": [
+        { "slot": 1, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "Бюджетная система РФ", "teacher": "Мерзлякова З.Л.", "room": "215" },
+        { "slot": 3, "subject": "Бюджетная система РФ", "teacher": "Мерзлякова З.Л.", "room": "215" },
+        { "slot": 4, "subject": "Час куратора / Осн. анализа бух. отчетн.", "teacher": "Малышева М.В.", "room": "216А" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Четверг": [
+        { "slot": 1, "subject": "МДК. 04.03 Междунар. станд. фин. отчетн.", "teacher": "Мерзлякова З.Л.", "room": "215" },
+        { "slot": 2, "subject": "Гражданское право", "teacher": "Широкова Ю.Н.", "room": "216" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Пятница": [
+        { "slot": 1, "subject": "Физич. культура", "teacher": "Наумова Е.М.", "room": "спортзал" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "Налоговое право", "teacher": "Быкова Н.В.", "room": "216А" },
+        { "slot": 4, "subject": "Культурология", "teacher": "Саркисян О.В.", "room": "216" },
+        { "slot": 5, "subject": "Час куратора", "teacher": "Саркисян О.В.", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ],
+      "Суббота": [
+        { "slot": 1, "subject": "День самостоятельной работы", "teacher": "", "room": "" },
+        { "slot": 2, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 3, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 4, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
+        { "slot": 6, "subject": "—", "teacher": "", "room": "" }
+      ]
+    }
   }
 }
