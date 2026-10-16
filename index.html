@@ -579,6 +579,8 @@
             <option value="2l3">2Л3</option>
             <option value="4p1">4П1</option>
             <option value="3p3">3П3</option>
+            <option value="4n1">4Н1</option>
+            <option value="3n3">3Н3</option>
         </select>
     </div>
     
@@ -1014,7 +1016,7 @@
         scheduleContainer.addEventListener('touchcancel', handleReset);
         scheduleContainer.addEventListener('click', handleReset);
 
-        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1', '2p3': '3p1', '2b3': '3b1', '2bd3': '3bd1', '3yu2': '3yu1', '2yu3': '3yu1', '2l3': '3l1', '3p3': '4p1' };
+        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1', '2p3': '3p1', '2b3': '3b1', '2bd3': '3bd1', '3yu2': '3yu1', '2yu3': '3yu1', '2l3': '3l1', '3p3': '4p1', '3n3': '4n1' };
         let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
         document.getElementById('groupSelect').value = currentGroup;
         
