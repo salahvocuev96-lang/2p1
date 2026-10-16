@@ -525,9 +525,171 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+    /* === БУРГЕР-КНОПКА (ЗАФИКСИРОВАНА ДЛЯ iOS) === */
+.burger-btn {
+    position: fixed !important;
+    top: 15px !important;
+    right: 15px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(28, 28, 30, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+    z-index: 10000 !important;
+    /* ГЛАВНЫЙ ХАК ДЛЯ iOS: включает GPU и предотвращает прыжки */
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: transform !important;
+}
+
+.burger-btn span {
+    display: block !important;
+    width: 22px !important;
+    height: 2px !important;
+    background: #fff !important;
+    border-radius: 2px !important;
+    transition: all 0.3s ease !important;
+}
+
+.burger-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px) !important;
+}
+
+.burger-btn.active span:nth-child(2) {
+    opacity: 0 !important;
+}
+
+.burger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px) !important;
+}
+
+/* === МЕНЮ (ВЫЕЗЖАЕТ СПРАВА) === */
+.menu-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s ease !important;
+    z-index: 9998 !important;
+}
+
+.menu-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.side-menu {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 280px !important;
+    height: 100% !important;
+    background: rgba(20, 20, 25, 0.95) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5) !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.side-menu.active {
+    transform: translateX(0) !important;
+}
+
+.menu-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.menu-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+}
+
+.menu-close {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: all 0.2s !important;
+}
+
+.menu-close:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.menu-items {
+    flex: 1 !important;
+    padding: 10px !important;
+    overflow-y: auto !important;
+}
+
+.menu-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 14px 16px !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    margin-bottom: 4px !important;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.menu-item:active {
+    transform: scale(0.98) !important;
+}
+
+.menu-icon {
+    font-size: 20px !important;
+    width: 24px !important;
+    text-align: center !important;
+}
+
+.menu-text {
+    font-size: 15px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+}
     </style>
 </head>
 <body>
+    <div class="burger-btn" id="burgerBtn">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
     <div class="live-date">
@@ -1067,6 +1229,43 @@
         setInterval(update, 1000);
         update();
         updateLiveDate(false);
+    // === БУРГЕР-МЕНЮ ===
+const burgerBtn = document.getElementById('burgerBtn');
+const sideMenu = document.getElementById('sideMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+const menuClose = document.getElementById('menuClose');
+const distantBtn = document.getElementById('distantBtn');
+
+function toggleMenu() {
+    burgerBtn.classList.toggle('active');
+    sideMenu.classList.toggle('active');
+    menuOverlay.classList.toggle('active');
+}
+
+burgerBtn.addEventListener('click', toggleMenu);
+menuClose.addEventListener('click', toggleMenu);
+menuOverlay.addEventListener('click', toggleMenu);
+
+distantBtn.addEventListener('click', () => {
+    window.open('https://distant-nk.ru', '_blank');
+    toggleMenu();
+});
     </script>
+<!-- Затемнение фона -->
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<!-- Само меню -->
+<div class="side-menu" id="sideMenu">
+    <div class="menu-header">
+        <span class="menu-title">Меню</span>
+        <div class="menu-close" id="menuClose">✕</div>
+    </div>
+    <div class="menu-items">
+        <div class="menu-item" id="distantBtn">
+            <span class="menu-icon">📹</span>
+            <span class="menu-text">Дистант</span>
+        </div>
+    </div>
+</div>
 </body>
 </html>
