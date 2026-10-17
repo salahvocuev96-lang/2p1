@@ -1048,7 +1048,10 @@
             }
         }
         
-        document.getElementById('groupSelect').addEventListener('change', function() { changeGroup(this.value); });
+document.getElementById('groupSelect').addEventListener('change', function() { 
+    document.getElementById('groupSearch').value = ''; 
+    changeGroup(this.value); 
+});
         document.getElementById('groupSearch').addEventListener('input', function() {
             const searchText = this.value.toLowerCase();
             const select = document.getElementById('groupSelect');
