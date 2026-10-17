@@ -605,20 +605,20 @@
 .menu-panel {
     position: fixed;
     top: 0;
-    left: 0;
+    right: 0;
     width: 78%;
     max-width: 340px;
     height: 100%;
     z-index: 999;
     background: #fff;
     color: #111;
-    transform: translateX(-100%);
+    transform: translateX(100%);
     transition: transform 0.3s ease;
     overflow-y: auto;
     box-sizing: border-box;
     padding: 20px 16px 24px 16px;
     text-align: left;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .menu-panel.open { transform: translateX(0); }
