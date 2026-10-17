@@ -1050,20 +1050,30 @@
         
 document.getElementById('groupSelect').addEventListener('change', function() { 
     document.getElementById('groupSearch').value = ''; 
+    const select = document.getElementById('groupSelect');
+    for (let i = 0; i < select.options.length; i++) {
+        select.options[i].style.display = '';
+    }
     changeGroup(this.value); 
 });
-        document.getElementById('groupSearch').addEventListener('input', function() {
-            const searchText = this.value.toLowerCase();
-            const select = document.getElementById('groupSelect');
-            for (let i = 0; i < select.options.length; i++) {
-                select.options[i].style.display = select.options[i].text.toLowerCase().includes(searchText) ? '' : 'none';
-                if (searchText.length > 0 && select.options[i].text.toLowerCase() === searchText) {
-                    select.value = select.options[i].value;
-                    changeGroup(select.options[i].value);
-                    break;
-                }
-            }
-        });
+document.getElementById('groupSearch').addEventListener('input', function() {
+    const searchText = this.value.toLowerCase();
+    const select = document.getElementById('groupSelect');
+    if (searchText === '') {
+        for (let i = 0; i < select.options.length; i++) {
+            select.options[i].style.display = '';
+        }
+        return;
+    }
+    for (let i = 0; i < select.options.length; i++) {
+        select.options[i].style.display = select.options[i].text.toLowerCase().includes(searchText) ? '' : 'none';
+        if (select.options[i].text.toLowerCase() === searchText) {
+            select.value = select.options[i].value;
+            changeGroup(select.options[i].value);
+            break;
+        }
+    }
+});
         
         if (currentGroup !== '2p1') changeGroup(currentGroup);
         
