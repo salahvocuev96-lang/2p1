@@ -16,34 +16,6 @@
             text-align: center;
             min-height: 100vh;
         }
-        
-        /* === ГРАДИЕНТНЫЙ ЗАГОЛОВОК === */
-        h1.main-title {
-            font-size: 40px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin: 10px 0 8px 0;
-            background: linear-gradient(
-                90deg,
-                #d0e8ff 0%,
-                #ffffff 25%,
-                #ffffff 50%,
-                #ffffff 75%,
-                #d0e8ff 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: transparent;
-            animation: shimmer 3s linear infinite;
-            filter: drop-shadow(0 0 25px rgba(180, 220, 255, 0.5));
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
 
         /* === ЖИВАЯ ДАТА === */
         .live-date {
@@ -390,10 +362,6 @@
             animation: shimmerBar 2s ease-in-out infinite;
         }
 
-        @keyframes shimmerBar {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
-        }
 
         /* === КАРТОЧКИ ПАР === */
         .lesson-wrapper {
@@ -561,34 +529,6 @@
 .menu-btn.open span:nth-child(2) { opacity: 0; }
 .menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-.menu-panel {
-    position: absolute;
-    top: calc(70px + env(safe-area-inset-top, 0px));
-    right: 16px;
-    transform: translateZ(0);
-    z-index: 999;
-    min-width: 200px;
-    padding: 10px;
-    background: rgba(28, 28, 30, 0.9);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    display: none;
-}
-
-.menu-panel.open { display: block; }
-
-.menu-panel a {
-    display: block;
-    color: #fff;
-    padding: 10px 12px;
-    border-radius: 10px;
-    text-decoration: none;
-    text-align: left;
-}
-
-.menu-panel a:hover { background: rgba(255, 255, 255, 0.08); }
     .menu-overlay {
     position: fixed;
     top: 0;
@@ -670,13 +610,18 @@
     cursor: pointer;
 }
 
-.menu-panel.light { background: #fff; color: #111; }
-.menu-panel.light .menu-title { color: #888; }
-.menu-panel.light .menu-close { color: #111; }
-.menu-panel.light a { color: #111; border-bottom: 1px solid #eee; }
-.menu-panel.light a::after { color: #111; }
-.menu-panel.light .theme-btn { color: #111; border-color: #111; }
-    </style>
+    body.light { background: #f2f2f7; color: #111; }
+body.light .lesson, body.light .break, body.light .timer, body.light .search-input, body.light .group-select, body.light .day-btn, body.light .digit-wrapper { background: #fff; color: #111; border-color: #ddd; }
+body.light .lesson-details, body.light .info, body.light .status { color: #555; }
+body.light .live-date .date-text, body.light .lessons-count, body.light .live-date .lessons-count strong { color: #111; }
+body.light .digit-strip span { color: #111; text-shadow: none; }
+body.light .lesson.active { background: rgba(10, 132, 255, 0.3); color: #111; }
+body.light .lesson.active .lesson-details { color: #222; }
+body.light .lesson.active .lesson-num { color: #111; }
+body.light .day-btn.active { background: rgba(10, 132, 255, 0.5); color: #fff; }
+body.light .break.active { background: rgba(255, 149, 0, 0.3); color: #111; }
+body.light .separator, body.light .hours-label { color: #0a84ff; }
+            </style>
 </head>
 <body>
     <button class="menu-btn" id="menuBtn" aria-label="Меню">
@@ -1275,16 +1220,10 @@ menuClose.addEventListener('click', closeMenu);
 menuOverlay.addEventListener('click', closeMenu);
         const themeBtn = document.getElementById('themeBtn');
 themeBtn.addEventListener('click', () => {
-    menuPanel.classList.toggle('light');
-    themeBtn.textContent = menuPanel.classList.contains('light') ? 'Тёмная тема' : 'Светлая тема';
+    document.body.classList.toggle('light');
+    themeBtn.textContent = document.body.classList.contains('light') ? 'Тёмная тема' : 'Светлая тема';
 });
 
-document.addEventListener('click', (e) => {
-    if (!menuPanel.contains(e.target)) {
-        menuBtn.classList.remove('open');
-        menuPanel.classList.remove('open');
-    }
-});
     </script>
 </body>
 </html>
