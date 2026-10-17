@@ -657,6 +657,25 @@
     font-size: 22px;
     color: #fff;
 }
+    .theme-btn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    border: 1px solid #555;
+    border-radius: 10px;
+    background: transparent;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.menu-panel.light { background: #fff; color: #111; }
+.menu-panel.light .menu-title { color: #888; }
+.menu-panel.light .menu-close { color: #111; }
+.menu-panel.light a { color: #111; border-bottom: 1px solid #eee; }
+.menu-panel.light a::after { color: #111; }
+.menu-panel.light .theme-btn { color: #111; border-color: #111; }
     </style>
 </head>
 <body>
@@ -672,6 +691,7 @@
     <button class="menu-close" id="menuClose">✕</button>
     <div class="menu-title">МЕНЮ</div>
     <a href="https://distant-nk.ru">Дистант колледж</a>
+    <button class="theme-btn" id="themeBtn">Светлая тема</button>
 </div>
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
@@ -1253,6 +1273,11 @@ menuBtn.addEventListener('click', (e) => {
 
 menuClose.addEventListener('click', closeMenu);
 menuOverlay.addEventListener('click', closeMenu);
+        const themeBtn = document.getElementById('themeBtn');
+themeBtn.addEventListener('click', () => {
+    menuPanel.classList.toggle('light');
+    themeBtn.textContent = menuPanel.classList.contains('light') ? 'Тёмная тема' : 'Светлая тема';
+});
 
 document.addEventListener('click', (e) => {
     if (!menuPanel.contains(e.target)) {
