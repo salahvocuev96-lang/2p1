@@ -589,6 +589,74 @@
 }
 
 .menu-panel a:hover { background: rgba(255, 255, 255, 0.08); }
+    .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    display: none;
+}
+
+.menu-overlay.open { display: block; }
+
+.menu-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 78%;
+    max-width: 340px;
+    height: 100%;
+    z-index: 999;
+    background: #fff;
+    color: #111;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 20px 16px 24px 16px;
+    text-align: left;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.menu-panel.open { transform: translateX(0); }
+
+.menu-title {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: #888;
+    margin: 10px 0 30px 0;
+}
+
+.menu-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: #111;
+    cursor: pointer;
+}
+
+.menu-panel a {
+    display: block;
+    color: #111;
+    padding: 18px 8px;
+    font-size: 18px;
+    text-decoration: none;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-panel a::after {
+    content: '›';
+    float: right;
+    font-size: 22px;
+    color: #111;
+}
     </style>
 </head>
 <body>
@@ -598,9 +666,15 @@
     <span></span>
 </button>
 
+<div class="menu-overlay" id="menuOverlay"></div>
+
 <div class="menu-panel" id="menuPanel">
-    <a href="#">Пункт 1</a>
-    <a href="#">Пункт 2</a>
+    <button class="menu-close" id="menuClose">✕</button>
+    <div class="menu-title">КАТАЛОГ</div>
+    <a href="#">Расписание</a>
+    <a href="#">Выбор группы</a>
+    <a href="#">Звонки</a>
+    <a href="#">Контакты</a>
 </div>
     <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
     
@@ -1154,14 +1228,34 @@ document.getElementById('groupSearch').addEventListener('input', function() {
         setInterval(update, 1000);
         update();
         updateLiveDate(false);
-    const menuBtn = document.getElementById('menuBtn');
+const menuBtn = document.getElementById('menuBtn');
 const menuPanel = document.getElementById('menuPanel');
+const menuOverlay = document.getElementById('menuOverlay');
+const menuClose = document.getElementById('menuClose');
+
+function openMenu() {
+    menuPanel.classList.add('open');
+    menuOverlay.classList.add('open');
+    menuBtn.classList.add('open');
+}
+
+function closeMenu() {
+    menuPanel.classList.remove('open');
+    menuOverlay.classList.remove('open');
+    menuBtn.classList.remove('open');
+}
 
 menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    menuBtn.classList.toggle('open');
-    menuPanel.classList.toggle('open');
+    if (menuPanel.classList.contains('open')) {
+        closeMenu();
+    } else {
+        openMenu();
+    }
 });
+
+menuClose.addEventListener('click', closeMenu);
+menuOverlay.addEventListener('click', closeMenu);
 
 document.addEventListener('click', (e) => {
     if (!menuPanel.contains(e.target)) {
