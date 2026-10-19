@@ -733,19 +733,7 @@ body.light .menu-btn span { background: #111; }
         <div class="info" id="info"></div>
     </div>
     
-    <div id="schedule" style="min-height: 800px; padding-bottom: 200px;"></div>
-
-        <footer class="site-footer">
-                    <div class="footer-contacts">
-            <div>Адрес: <a id="addressLink" class="footer-address-link" href="#">г. Москва, ул. 3-я Хорошевская, д. 2, стр. 1</a></div>
-            <div class="footer-links"><a href="https://yandex.ru/maps/?text=Москва, ул. 3-я Хорошевская, д. 2, стр. 1">Открыть в Яндекс Картах</a> | <a href="https://2gis.ru/moscow/search/Москва, ул. 3-я Хорошевская, д. 2, стр. 1">Открыть в 2ГИС</a></div>
-            <div>Телефон: <a href="tel:+74991910069">+7 (499) 191-00-69</a></div>
-            <div>Почта: <a href="mailto:sekretar@nalog-i.ru">sekretar@nalog-i.ru</a></div>
-        </div>
-        <img src="logo.png" alt="Логотип колледжа" style="width: 200px; max-width: 70%; display: block; margin: 0 auto;">
-        <div class="footer-name">НАЛОГОВЫЙ КОЛЛЕДЖ</div>
-        <div class="footer-bottom">© 2026 votsuev</div>
-    </footer>
+        <div id="schedule"></div>
     
     <script>
         const timeSlots = [
@@ -1256,14 +1244,6 @@ themeBtn.addEventListener('click', () => {
     themeBtn.textContent = document.body.classList.contains('light') ? 'Тёмная тема' : 'Светлая тема';
 });
 
-            (function () {
-            const address = 'Москва, ул. 3-я Хорошевская, д. 2, стр. 1';
-            const q = encodeURIComponent(address);
-            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-            document.getElementById('addressLink').href = isIOS
-                ? 'https://maps.apple.com/?q=' + q
-                : 'geo:0,0?q=' + q;
-        })();
     </script>
 </body>
 </html>
