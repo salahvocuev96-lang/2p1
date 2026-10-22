@@ -1,1229 +1,292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Расписание 2П1</title>
-    <style>
-        body {
-            font-family: -apple-system, sans-serif;
-            background: linear-gradient(270deg, #000000, #080818, #100a1a, #000000);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: #fff;
-            padding: 70px 20px 60px 20px;
-            text-align: center;
-            min-height: 100vh;
-        }
-
-        /* === ЖИВАЯ ДАТА === */
-        .live-date {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 14px;
-            color: #8e8e93;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .live-date .date-text {
-            font-weight: 500;
-            color: #c8d8e8;
-        }
-
-        .live-date .divider {
-            width: 4px;
-            height: 4px;
-            background: #5a7a9a;
-            border-radius: 50%;
-        }
-
-        .live-date .lessons-count {
-            color: #c8d8e8;
-            font-weight: 600;
-        }
-
-        .live-date .lessons-count strong {
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .update-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: #30d158;
-            opacity: 0;
-            transition: opacity 0.4s;
-            margin-top: 6px;
-            min-height: 16px;
-        }
-
-        .update-indicator.show {
-            opacity: 1;
-        }
-
-        .update-indicator .dot {
-            width: 6px;
-            height: 6px;
-            background: #30d158;
-            border-radius: 50%;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
-        }
-
-        /* === ОБЩИЙ СТИЛЬ СТЕКЛА === */
-        .glass {
-            background: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .glass:hover {
-            background: rgba(28, 28, 30, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* === ПОИСК === */
-.search-wrapper {
-    position: relative;
-    width: 90%;
-    max-width: 380px;
-    margin: 0 auto 12px auto;
-    box-sizing: border-box;
-}
-
-.search-input {
-    width: 100%;
-    background: rgba(28, 28, 30, 0.4);
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #fff;
-    padding: 14px 18px 14px 70px;
-    border-radius: 14px;
-    font-size: 15px;
-    outline: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-}
-
-.search-icon {
-    position: absolute;
-    left: 46px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    pointer-events: none;
-    z-index: 2;
-    transform-origin: center center;
-}
-/* Анимация работает ВСЕГДА, даже без клика */
-.search-wrapper.squint .search-icon {
-    animation: squint 3s ease-in-out infinite;
-}
-
-@keyframes squint {
-    0%, 100% {
-        transform: translateY(-50%) rotate(0deg) scale(1);
-    }
-    50% {
-        transform: translateY(-50%) rotate(8deg) scale(1.1);
-    }
-}
-
-.search-wrapper.squint .search-input:focus ~ .search-icon {
-    animation: squint 3s ease-in-out infinite;
-}
-
-@keyframes squint {
-    0%, 100% {
-        transform: translateY(-50%) rotate(0deg) scale(1);
-    }
-    50% {
-        transform: translateY(-50%) rotate(8deg) scale(1.1);
-    }
-}
-
-        /* === СЕЛЕКТ ГРУППЫ === */
-        .group-select {
-            background: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 14px;
-            font-size: 15px;
-            width: 90%;
-            max-width: 380px;
-            outline: none;
-            appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
-            transition: all 0.3s;
-        }
-
-        .group-select:hover {
-            background-color: rgba(28, 28, 30, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .group-select option {
-            background: #1c1c1e;
-            color: #fff;
-        }
-
-        /* === КНОПКИ ДНЕЙ === */
-        .day-selector {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            flex-wrap: wrap;
-            max-width: 380px;
-            margin-left: auto;
-            margin-right: auto;
-            gap: 6px;
-        }
-
-        .day-btn {
-            background: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .day-btn:hover {
-            background: rgba(28, 28, 30, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        .day-btn.active {
-            background: rgba(10, 132, 255, 0.5);
-            border-color: #0a84ff;
-            box-shadow: 0 0 20px rgba(10, 132, 255, 0.4);
-        }
-
-        /* === ТАЙМЕР === */
-        .timer {
-            background: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 380px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .status { font-size: 18px; color: rgba(255, 255, 255, 0.8); }
-        
-        .odometer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin: 10px 0;
-        }
-
-        /* СТЕКЛЯННЫЕ БАРАБАНЫ */
-        .digit-wrapper {
-            position: relative;
-            width: 50px;
-            height: 70px;
-            overflow: hidden;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(12px) saturate(150%);
-            -webkit-backdrop-filter: blur(12px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 
-                inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-                0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .digit-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            right: 10%;
-            height: 40%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
-            border-radius: 10px 10px 50% 50%;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .digit-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30%;
-            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .digit-strip {
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .digit-strip span {
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: 300;
-            color: #fff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        }
-
-        .separator {
-            font-size: 48px;
-            font-weight: 300;
-            color: #0a84ff;
-            animation: blink 1s ease infinite;
-            margin: 0 2px;
-            text-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
-        }
-
-        .hours-label {
-            font-size: 24px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-left: 4px;
-            margin-right: 8px;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .info { font-size: 16px; color: rgba(255, 255, 255, 0.7); }
-
-        .progress-track {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #0a84ff;
-            width: 100%;
-            border-radius: 2px;
-            transition: width 1s linear;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmerBar 2s ease-in-out infinite;
-        }
-
-
-        /* === КАРТОЧКИ ПАР === */
-        .lesson-wrapper {
-            perspective: 1000px;
-            margin: 8px 0;
-            max-width: 380px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .lesson {
-            background: rgba(28, 28, 30, 0.4);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transform-style: preserve-3d;
-            transition: transform 0.15s ease-out, background 0.3s, border-color 0.3s;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-
-        .lesson::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(
-                circle at var(--mx, 50%) var(--my, 50%),
-                rgba(255,255,255,0.15) 0%,
-                transparent 60%
-            );
-            opacity: var(--glow, 0);
-            transition: opacity 0.2s;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .lesson:hover {
-            background: rgba(28, 28, 30, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .lesson-info, .lesson-time {
-            transform: translateZ(25px);
-            position: relative;
-            z-index: 1;
-        }
-
-        .lesson.active {
-            background: rgba(10, 132, 255, 0.3);
-            border-color: #0a84ff;
-            box-shadow: 0 0 25px rgba(10, 132, 255, 0.3);
-        }
-
-        .lesson-info { text-align: left; flex: 1; }
-        .lesson-subject { font-weight: bold; font-size: 14px; }
-        .lesson-details { font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; }
-        .lesson.active .lesson-details { color: rgba(255, 255, 255, 0.9); }
-
-        .lesson-time { 
-            font-weight: bold; 
-            margin-left: 10px;
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .lesson-num {
-            font-size: 13px;
-            color: #0a84ff;
-            margin-bottom: 2px;
-            font-weight: 800;
-        }
-
-        .lesson.active .lesson-num { color: #fff; }
-
-        /* === ПЕРЕМЕНА === */
-        .break {
-            background: rgba(44, 44, 46, 0.25);
-            backdrop-filter: blur(10px) saturate(150%);
-            -webkit-backdrop-filter: blur(10px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 8px auto;
-            max-width: 380px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            display: flex;
-            justify-content: space-between;
-            transition: all 0.3s;
-        }
-
-        .break.active {
-            background: rgba(255, 149, 0, 0.3);
-            border-color: #ff9500;
-            color: #fff;
-        }
-
-        /* === BLUR CASCADE АНИМАЦИЯ === */
-        .lesson, .break {
-            opacity: 0;
-            filter: blur(8px);
-            transform: translateY(-15px);
-        }
-
-        .lesson.animate, .break.animate {
-            animation: blurIn 0.5s ease forwards;
-        }
-
-        @keyframes blurIn {
-            to {
-                opacity: 1;
-                filter: blur(0);
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-    /* === БУРГЕР-МЕНЮ === */
-.menu-btn {
-    position: absolute;
-    top: calc(16px + env(safe-area-inset-top, 0px));
-    right: 16px;
-    transform: translateZ(0);
-    z-index: 1000;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    background: rgba(28, 28, 30, 0.6);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-}
-
-.menu-btn span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: #fff;
-    border-radius: 2px;
-    transition: transform 0.3s, opacity 0.3s;
-}
-
-.menu-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.menu-btn.open span:nth-child(2) { opacity: 0; }
-.menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    .menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-    display: none;
-}
-
-.menu-overlay.open { display: block; }
-
-.menu-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 78%;
-    max-width: 340px;
-    height: 100%;
-    z-index: 999;
-    background: #000;
-    color: #fff;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-    box-sizing: border-box;
-    padding: 20px 16px 24px 16px;
-    text-align: left;
-    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.menu-panel.open { transform: translateX(0); }
-
-.menu-title {
-    text-align: center;
-    font-size: 16px;
-    letter-spacing: 3px;
-    color: #aaa;
-    margin: 10px 0 30px 0;
-}
-
-.menu-close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    background: none;
-    border: none;
-    font-size: 26px;
-    color: #fff;
-    cursor: pointer;
-}
-
-.menu-panel a {
-    display: block;
-    color: #fff;
-    padding: 18px 8px;
-    font-size: 18px;
-    text-decoration: none;
-    border-bottom: 1px solid #333;
-}
-
-.menu-panel a::after {
-    content: '›';
-    float: right;
-    font-size: 22px;
-    color: #fff;
-}
-    .theme-btn {
-    display: block;
-    width: 100%;
-    margin-top: 20px;
-    padding: 14px;
-    border: 1px solid #555;
-    border-radius: 10px;
-    background: transparent;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-    body.light { background: #f2f2f7; color: #111; }
-body.light .lesson, body.light .break, body.light .timer, body.light .search-input, body.light .group-select, body.light .day-btn, body.light .digit-wrapper { background: #fff; color: #111; border-color: #ddd; }
-body.light .lesson-details, body.light .info, body.light .status { color: #555; }
-body.light .live-date .date-text, body.light .lessons-count, body.light .live-date .lessons-count strong { color: #111; }
-body.light .digit-strip span { color: #111; text-shadow: none; }
-body.light .lesson.active { background: rgba(10, 132, 255, 0.3); color: #111; }
-body.light .lesson.active .lesson-details { color: #222; }
-body.light .lesson.active .lesson-num { color: #111; }
-body.light .day-btn.active { background: rgba(10, 132, 255, 0.5); color: #fff; }
-body.light .break.active { background: rgba(255, 149, 0, 0.3); color: #111; }
-body.light .separator, body.light .hours-label { color: #0a84ff; }
-            </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Чайхана «Ташкент» — Москва, улица Зорге, 2</title>
+  <meta name="description" content="Чайхана «Ташкент» на улице Зорге, 2: узбекская, центральноазиатская и домашняя кухня рядом с метро Полежаевская и Хорошёвская.">
+  <meta name="theme-color" content="#1D3F8A">
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <button class="menu-btn" id="menuBtn" aria-label="Меню">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
 
-<div class="menu-overlay" id="menuOverlay"></div>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1.2 12.2H6.7L5.5 8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.3-7-11.5a7 7 0 0 1 14 0C19 14.7 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.5"/></symbol>
+  </svg>
 
-<div class="menu-panel" id="menuPanel">
-    <button class="menu-close" id="menuClose">✕</button>
-    <div class="menu-title">МЕНЮ</div>
-    <a href="https://distant-nk.ru">Дистант колледж</a>
-    <button class="theme-btn" id="themeBtn">Светлая тема</button>
-</div>
-    <h1 class="main-title" id="mainTitle">Расписание 2П1</h1>
-    
-    <div class="live-date">
-        <span class="date-text" id="dateText">Загрузка...</span>
-        <span class="divider"></span>
-        <span class="lessons-count" id="lessonsCount">Загрузка...</span>
+  <a class="skip-link" href="#menu">Перейти к меню</a>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="#top" aria-label="Чайхана «Ташкент», в начало страницы">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">
+        <span class="brand-sub">чайхана</span>
+        <span class="brand-name">Ташкент</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" id="site-nav" aria-label="Разделы сайта">
+      <a href="#menu">Меню</a>
+      <a href="#about">О чайхане</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть навигацию">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+      <button class="cart-btn" id="cart-btn" type="button" aria-label="Корзина пуста">
+        <svg class="icon" aria-hidden="true"><use href="#i-bag"/></svg>
+        <span class="cart-btn-label">Корзина</span>
+        <span class="cart-count is-zero" id="cart-count" aria-hidden="true">0</span>
+      </button>
     </div>
-    <div class="update-indicator" id="updateIndicator">
-        <span class="dot"></span>
-        <span>Обновлено</span>
-    </div>
-    
-    <div style="margin: 15px 0; text-align: center;">
-    <div class="search-wrapper squint">
-         <input type="text" id="groupSearch" class="search-input" placeholder="Поиск группы...">
-         <span class="search-icon">🔍</span>
-    </div>
-        <br>
-        <select id="groupSelect" class="group-select">
-            <option value="2p1">2П1</option>
-            <option value="1p1">1П1</option>
-            <option value="1l1">1Л1</option>
-            <option value="1l2">1Л2</option>
-            <option value="1b1">1Б1</option>
-            <option value="1bd1">1БД1</option>
-            <option value="1yu1">1Ю1</option>
-            <option value="1yu2">1Ю2</option>
-            <option value="2b1">2Б1</option>
-            <option value="1b3">1Б3</option>
-            <option value="2yu1">2Ю1</option>
-            <option value="2yu2">2Ю2</option>
-            <option value="1yu3">1Ю3</option>
-            <option value="2bd1">2БД1</option>
-            <option value="1bd3">1БД3</option>
-            <option value="2l1">2Л1</option>
-            <option value="1l3">1Л3</option>
-            <option value="1p3">1П3</option>
-            <option value="3p1">3П1</option>
-            <option value="2p3">2П3</option>
-            <option value="3n1">3Н1</option>
-            <option value="3b1">3Б1</option>
-            <option value="2b3">2Б3</option>
-            <option value="3bd1">3БД1</option>
-            <option value="2bd3">2БД3</option>
-            <option value="3yu1">3Ю1</option>
-            <option value="3yu2">3Ю2</option>
-            <option value="2yu3">2Ю3</option>
-            <option value="3l1">3Л1</option>
-            <option value="2l3">2Л3</option>
-            <option value="4p1">4П1</option>
-            <option value="3p3">3П3</option>
-            <option value="4n1">4Н1</option>
-            <option value="3n3">3Н3</option>
-        </select>
-    </div>
-    
-    <div class="day-selector" id="daySelector"></div>
-    
-    <div class="timer" id="timerBlock">
-        <div class="status" id="status">Загрузка...</div>
-        <div class="odometer">
-            <div class="digit-wrapper"><div class="digit-strip" id="hour1"></div></div>
-            <div class="hours-label">ч</div>
-            <div class="digit-wrapper"><div class="digit-strip" id="min1"></div></div>
-            <div class="digit-wrapper"><div class="digit-strip" id="min2"></div></div>
-            <div class="separator">:</div>
-            <div class="digit-wrapper"><div class="digit-strip" id="sec1"></div></div>
-            <div class="digit-wrapper"><div class="digit-strip" id="sec2"></div></div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-visual">
+        <div class="plate plate--hero" data-tone="hot" data-rim>
+          <div class="plate-food">
+            <span class="plate-mono" aria-hidden="true">П</span>
+            <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Uzbek_palov_in_Yerevan_Food_Court.jpg?width=1000"
+                 alt="Узбекский плов с морковью и мясом" width="1000" height="1000" fetchpriority="high">
+          </div>
         </div>
-        <div class="progress-track">
-            <div class="progress-fill" id="progressBar"></div>
+
+        <svg class="hero-stamp" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+          <defs><path id="stamp-path" d="M60 60m-43 0a43 43 0 1 1 86 0a43 43 0 1 1-86 0"/></defs>
+          <circle cx="60" cy="60" r="58"/>
+          <text><textPath href="#stamp-path" textLength="268" lengthAdjust="spacing">узбекская и домашняя кухня ✶ Зорге, 2 ✶</textPath></text>
+          <path class="stamp-bowl" d="M42 60h36c0 8.5-8 14.5-18 14.5S42 68.5 42 60zM53 78h14"/>
+          <path class="stamp-steam" d="M55 53c-3-3 3-5.5 0-9s3-5.5 0-8.5M65 53c-3-3 3-5.5 0-9s3-5.5 0-8.5"/>
+        </svg>
+      </div>
+
+      <div class="hero-copy">
+        <h1 class="hero-title" id="hero-title">
+          <span class="hero-title-pre"><span>Чайхана</span></span>
+          <span class="hero-title-main"><span>Ташкент</span></span>
+        </h1>
+        <p class="hero-lead">Плов, шурпа, лагман, манты и домашние горячие блюда. Заходите пообедать на улицу Зорге,&nbsp;2 — рядом с метро Полежаевская и&nbsp;Хорошёвская.</p>
+        <div class="hero-actions">
+          <a class="btn btn--saffron" href="#menu">Посмотреть меню</a>
+          <a class="btn btn--ghost" href="#contacts">Как нас найти</a>
         </div>
-        <div class="info" id="info"></div>
+      </div>
+
+      <p class="hero-credit">Фото: <a href="https://commons.wikimedia.org/wiki/File:Uzbek_palov_in_Yerevan_Food_Court.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></p>
+      <div class="scallop" aria-hidden="true"></div>
+    </section>
+
+    <section class="menu" id="menu" aria-labelledby="menu-title">
+      <div class="menu-head" data-reveal>
+        <h2 class="section-title" id="menu-title">Меню</h2>
+        <p class="menu-note">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <span>Актуальные цены пока не внесены — у каждого блюда стоит пометка «Цена уточняется».</span>
+        </p>
+      </div>
+
+      <div class="menu-controls" id="menu-controls">
+        <div class="search">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" id="menu-search" placeholder="Найти блюдо" aria-label="Поиск по меню" autocomplete="off" enterkeyhint="search">
+          <button class="search-clear" id="search-clear" type="button" aria-label="Очистить поиск" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+        <div class="tabs" id="menu-tabs" role="group" aria-label="Разделы меню"></div>
+      </div>
+
+      <p class="sr-only" id="menu-status" aria-live="polite"></p>
+      <div class="menu-list" id="menu-list"></div>
+      <div class="menu-empty" id="menu-empty" hidden>
+        <div class="plate plate--empty-state" data-tone="other" data-rim><div class="plate-food"></div></div>
+        <h3 class="menu-empty-title" id="menu-empty-title"></h3>
+        <p class="menu-empty-text" id="menu-empty-text"></p>
+        <button class="btn btn--cobalt" id="menu-empty-btn" type="button"></button>
+      </div>
+    </section>
+
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="about-deco" data-rim aria-hidden="true"></div>
+      <div class="about-inner">
+        <div data-reveal>
+          <h2 class="about-title" id="about-title">Чай, плов и горячий обед</h2>
+          <p class="about-lead">Чайхана — место, куда приходят поесть и выпить чаю. В «Ташкенте» готовят блюда узбекской и центральноазиатской кухни, а рядом с ними в меню — привычная домашняя еда.</p>
+        </div>
+        <dl class="about-list" data-reveal>
+          <div>
+            <dt>Узбекская и центральноазиатская кухня</dt>
+            <dd>Плов, шурпа из баранины, лагман, манты, казан-кебаб, ханум.</dd>
+          </div>
+          <div>
+            <dt>Домашние блюда</dt>
+            <dd>Борщ, гуляш, бефстроганов, тефтели, жаркое, курица в сметане, долма.</dd>
+          </div>
+          <div>
+            <dt>Обед рядом с работой и учёбой</dt>
+            <dd>Доступные цены и выбор от салата до горячего — удобно зайти в перерыв.</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="scallop scallop--teal" aria-hidden="true"></div>
+    </section>
+
+    <section class="contacts" id="contacts" aria-labelledby="contacts-title">
+      <div class="contacts-main" data-reveal>
+        <h2 class="contacts-label" id="contacts-title">Как нас найти</h2>
+        <p class="address-big" aria-hidden="true">Зорге,&nbsp;2</p>
+      </div>
+      <div class="contacts-details" data-reveal>
+        <p class="address-full">
+          <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+          <span>Москва, улица Зорге, 2</span>
+        </p>
+        <ul class="metro" aria-label="Ближайшие станции метро">
+          <li><span class="metro-mark" aria-hidden="true">М</span>Полежаевская</li>
+          <li><span class="metro-mark" aria-hidden="true">М</span>Хорошёвская</li>
+        </ul>
+        <div class="contact-actions">
+          <a class="btn btn--cobalt" href="https://yandex.ru/maps/?text=Москва,%20улица%20Зорге,%202" target="_blank" rel="noopener">Открыть в Яндекс Картах</a>
+          <button class="btn btn--line" id="copy-address" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>
+            Скопировать адрес
+          </button>
+        </div>
+        <p class="contact-note">Телефон и часы работы появятся здесь после согласования с чайханой.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="scallop scallop--up" aria-hidden="true"></div>
+    <div class="footer-inner">
+      <div>
+        <p class="footer-sub">чайхана</p>
+        <p class="footer-brand">Ташкент</p>
+        <p class="footer-address">Москва, улица Зорге, 2</p>
+      </div>
+      <nav class="footer-nav" aria-label="Навигация в подвале">
+        <a href="#top">Наверх</a>
+        <a href="#menu">Меню</a>
+        <a href="#about">О чайхане</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+      <p class="footer-small">Демонстрационная версия сайта. Фото плова — <a href="https://commons.wikimedia.org/wiki/File:Uzbek_palov_in_Yerevan_Food_Court.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>, не из этой чайханы.</p>
     </div>
-    
-    <div id="schedule"></div>
+  </footer>
 
-    <script>
-        const timeSlots = [
-            { name: "1 пара", start: "09:00", end: "10:30" },
-            { name: "2 пара", start: "10:35", end: "12:05" },
-            { name: "3 пара", start: "12:35", end: "14:05" },
-            { name: "4 пара", start: "14:15", end: "15:45" },
-            { name: "5 пара", start: "15:55", end: "17:25" },
-            { name: "6 пара", start: "17:30", end: "19:00" }
-        ];
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="drawer" id="cart" role="dialog" aria-modal="true" aria-labelledby="cart-title" inert>
+    <div class="drawer-view" data-view="cart">
+      <div class="drawer-head">
+        <h2 class="drawer-title" id="cart-title">Корзина</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Закрыть корзину">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <ul class="cart-list" id="cart-list"></ul>
+        <div class="cart-empty" id="cart-empty">
+          <p class="cart-empty-title">Пока пусто</p>
+          <p>Добавьте блюда из меню — они появятся здесь.</p>
+          <button class="btn btn--cobalt" type="button" data-close>Вернуться к меню</button>
+        </div>
+      </div>
+      <div class="drawer-foot" id="cart-foot">
+        <div class="cart-total">
+          <span>Итого</span>
+          <strong id="cart-total">—</strong>
+        </div>
+        <p class="cart-total-note" id="cart-total-note"></p>
+        <button class="btn btn--saffron btn--block" id="to-checkout" type="button">Оформить заказ</button>
+      </div>
+    </div>
 
-        const schedule = {
-            "Понедельник": [
-                { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
-                { slot: 3, subject: "Операционные системы", teacher: "Альбатша А.М.Х.", room: "217" },
-                { slot: 4, subject: "Математическое моделирование", teacher: "Кудинова С.Л.", room: "201" },
-                { slot: 5, subject: "Численные методы", teacher: "Кудинова С.Л.", room: "201" },
-                { slot: 6, subject: "Час куратора", teacher: "Наумова Е.М.", room: "—" }
-            ],
-            "Вторник": [
-                { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
-                { slot: 3, subject: "Электронная высшая математика", teacher: "Кудинова С.Л.", room: "201" },
-                { slot: 4, subject: "Информационные технологии", teacher: "Новиков В.С.", room: "217" },
-                { slot: 5, subject: "История России", teacher: "Неменов Б.В.", room: "210" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
-            ],
-            "Среда": [
-                { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "—", teacher: "", room: "" },
-                { slot: 3, subject: "Физкультура", teacher: "Наумова", room: "спортзал" },
-                { slot: 4, subject: "—", teacher: "", room: "" },
-                { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "История России (дистант)", teacher: "Неменов Б.В.", room: "онлайн" }
-            ],
-            "Четверг": [
-                { slot: 1, subject: "—", teacher: "", room: "" },
-                { slot: 2, subject: "Разработка программных модулей", teacher: "Альбатша А.М.Х.", room: "203" },
-                { slot: 3, subject: "Иностранный язык в проф. деятельности", teacher: "Марфина Л.А.", room: "221" },
-                { slot: 4, subject: "—", teacher: "", room: "" },
-                { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
-            ],
-            "Пятница": [
-                { slot: 1, subject: "Основы алгоритмизации и программирования (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
-                { slot: 2, subject: "Основы проектирования баз данных (дистант)", teacher: "Голеусов Р.О.", room: "онлайн" },
-                { slot: 3, subject: "—", teacher: "", room: "" },
-                { slot: 4, subject: "—", teacher: "", room: "" },
-                { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
-            ],
-            "Суббота": [
-                { slot: 1, subject: "МДК 04.01 Внедрение и поддержка комп. систем", teacher: "Малькова Е.В.", room: "217" },
-                { slot: 2, subject: "Компьютерные сети", teacher: "Малькова Е.В.", room: "217" },
-                { slot: 3, subject: "Архитектура аппаратных средств", teacher: "Малькова Е.В.", room: "217" },
-                { slot: 4, subject: "—", teacher: "", room: "" },
-                { slot: 5, subject: "—", teacher: "", room: "" },
-                { slot: 6, subject: "—", teacher: "", room: "" }
-            ]
-        };
+    <form class="drawer-view" data-view="checkout" id="checkout-form" novalidate hidden>
+      <div class="drawer-head">
+        <button class="icon-btn" type="button" id="back-to-cart" aria-label="Назад в корзину">
+          <svg class="icon" aria-hidden="true"><use href="#i-back"/></svg>
+        </button>
+        <h2 class="drawer-title">Оформление</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Закрыть">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <p class="demo-banner">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <span>Это демонстрационная версия: приём заказов ещё не подключён, заказ никуда не отправится.</span>
+        </p>
 
-        const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-        const dayMap = { 1: "Понедельник", 2: "Вторник", 3: "Среда", 4: "Четверг", 5: "Пятница", 6: "Суббота", 0: "Воскресенье" };
-        const monthNames = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+        <div class="field">
+          <label for="f-name">Как к вам обращаться</label>
+          <input id="f-name" name="name" type="text" autocomplete="given-name" maxlength="40" required aria-describedby="f-name-error">
+          <p class="field-error" id="f-name-error" hidden>Введите имя — хотя бы две буквы.</p>
+        </div>
 
-        let selectedDay = (() => {
-            const now = new Date();
-            const d = now.getDay();
-            const hours = now.getHours();
-            if (d === 0) return "Понедельник";
-            if (hours >= 19) {
-                const nextDay = d === 6 ? 0 : d + 1;
-                return nextDay === 0 ? "Понедельник" : dayMap[nextDay];
-            }
-            return dayMap[d];
-        })();
+        <fieldset class="field choice">
+          <legend>Как получить заказ</legend>
+          <label class="choice-opt"><input type="radio" name="mode" value="takeaway" checked><span>Заберу с собой</span></label>
+          <label class="choice-opt"><input type="radio" name="mode" value="inside"><span>Поем в чайхане</span></label>
+        </fieldset>
 
-        function toMin(t) {
-            const [h, m] = t.split(':').map(Number);
-            return h * 60 + m;
-        }
+        <div class="field">
+          <label for="f-comment">Комментарий <span class="optional">необязательно</span></label>
+          <textarea id="f-comment" name="comment" rows="3" maxlength="300"></textarea>
+        </div>
 
-        function fadeText(elementId, newText) {
-            const element = document.getElementById(elementId);
-            if (element.innerText === newText) return;
-            element.style.opacity = '0';
-            setTimeout(() => {
-                element.innerText = newText;
-                element.style.opacity = '1';
-            }, 200);
-        }
+        <div class="order-summary">
+          <p class="order-summary-title" id="order-summary-title"></p>
+          <ul id="order-summary-list"></ul>
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn btn--saffron btn--block" type="submit">Подтвердить заказ (демо)</button>
+      </div>
+    </form>
 
-        const DIGIT_HEIGHT = 70;
-        function createStrip(elementId) {
-            const strip = document.getElementById(elementId);
-            if (!strip) return;
-            strip.innerHTML = '';
-            for (let i = 0; i <= 9; i++) {
-                const span = document.createElement('span');
-                span.textContent = i;
-                strip.appendChild(span);
-            }
-        }
-        
-        function setDigit(elementId, value) {
-            const strip = document.getElementById(elementId);
-            if (strip) {
-                const safeValue = Math.max(0, Math.min(9, Math.floor(value)));
-                strip.style.transform = `translateY(-${safeValue * DIGIT_HEIGHT}px)`;
-            }
-        }
+    <div class="drawer-view drawer-view--done" data-view="done" hidden>
+      <div class="drawer-head drawer-head--end">
+        <button class="icon-btn" type="button" data-close aria-label="Закрыть">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+      <div class="drawer-body done-body">
+        <div class="done-mark" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></div>
+        <h2 class="drawer-title" id="done-title" tabindex="-1">Это демо-версия</h2>
+        <p>Заказ не отправлен: приём заказов на сайте ещё не подключён, и ваши данные никуда не передавались.</p>
+        <p>Выбранные блюда остались в корзине.</p>
+        <div class="done-actions">
+          <button class="btn btn--cobalt btn--block" type="button" data-close>Вернуться к меню</button>
+          <button class="btn btn--line btn--block" type="button" id="clear-cart">Очистить корзину</button>
+        </div>
+      </div>
+    </div>
+  </aside>
 
-        function displayOdometer(totalSeconds) {
-            if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
-                totalSeconds = 0;
-            }
-            const hours = Math.floor(totalSeconds / 3600);
-            const mins = Math.floor((totalSeconds % 3600) / 60);
-            const secs = totalSeconds % 60;
-            setDigit('hour1', hours > 9 ? 9 : hours);
-            setDigit('min1', Math.floor(mins / 10));
-            setDigit('min2', mins % 10);
-            setDigit('sec1', Math.floor(secs / 10));
-            setDigit('sec2', secs % 10);
-        }
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-text" id="toast-text"></span>
+    <button class="toast-action" id="toast-action" type="button">Открыть корзину</button>
+  </div>
 
-        createStrip('hour1');
-        createStrip('min1'); 
-        createStrip('min2'); 
-        createStrip('sec1'); 
-        createStrip('sec2');
-
-        function getLessonsWord(count) {
-            const lastTwo = count % 100;
-            const lastOne = count % 10;
-            if (lastTwo >= 11 && lastTwo <= 19) return 'пар';
-            if (lastOne === 1) return 'пара';
-            if (lastOne >= 2 && lastOne <= 4) return 'пары';
-            return 'пар';
-        }
-
-        function updateLiveDate(showIndicator = false) {
-            const now = new Date();
-            const dayName = dayMap[now.getDay()] || '';
-            const day = now.getDate();
-            const month = monthNames[now.getMonth()];
-            const dateText = document.getElementById('dateText');
-            const lessonsCount = document.getElementById('lessonsCount');
-            const updateIndicator = document.getElementById('updateIndicator');
-            
-            if (dateText) dateText.textContent = `${dayName}, ${day} ${month}`;
-            
-            if (lessonsCount && schedule[selectedDay]) {
-                const count = schedule[selectedDay].filter(l => l.subject !== "—").length;
-                const todayName = dayMap[new Date().getDay()];
-                
-                // Словарь с правильными формами дней недели
-                const dayPrepositions = {
-                    "Понедельник": "в понедельник",
-                    "Вторник": "во вторник",
-                    "Среда": "в среду",
-                    "Четверг": "в четверг",
-                    "Пятница": "в пятницу",
-                    "Суббота": "в субботу"
-                };
-                
-                if (count === 0) {
-                    lessonsCount.innerHTML = '<strong>Пар нет</strong>';
-                } else if (selectedDay === todayName) {
-                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} сегодня`;
-                } else {
-                    lessonsCount.innerHTML = `<strong>${count}</strong> ${getLessonsWord(count)} ${dayPrepositions[selectedDay]}`;
-                }
-            }
-            
-            if (showIndicator && updateIndicator) {
-                updateIndicator.classList.add('show');
-                setTimeout(() => updateIndicator.classList.remove('show'), 2000);
-            }
-        }
-
-        let lastRenderedDay = null;
-        let lastRenderedGroup = null;
-        let lastScrolledSlot = null;
-
-        function update() {
-            const now = new Date();
-            const todayWeekday = now.getDay();
-            const todayName = dayMap[todayWeekday];
-            const todayLessons = schedule[selectedDay];
-            const isToday = (selectedDay === todayName && todayWeekday !== 0);
-            
-            let active = null, activeBreak = null, next = null, left = 0;
-
-            if (isToday) {
-                const cur = now.getHours() * 60 + now.getMinutes();
-                const sec = now.getSeconds();
-
-                for (let lesson of todayLessons) {
-                    if (lesson.subject === "—") continue;
-                    const slot = timeSlots[lesson.slot - 1];
-                    const s = toMin(slot.start), e = toMin(slot.end);
-                    if (cur >= s && cur < e) {
-                        active = { ...lesson, time: `${slot.start}-${slot.end}` };
-                        left = (e - cur) * 60 - sec;
-                        break;
-                    }
-                }
-
-                if (!active) {
-                    for (let i = 0; i < todayLessons.length - 1; i++) {
-                        if (todayLessons[i].subject === "—" || todayLessons[i+1].subject === "—") continue;
-                        const slot1 = timeSlots[todayLessons[i].slot - 1];
-                        const slot2 = timeSlots[todayLessons[i+1].slot - 1];
-                        const s = toMin(slot1.end), e = toMin(slot2.start);
-                        if (cur >= s && cur < e) {
-                            activeBreak = { afterSlot: todayLessons[i].slot, dur: e - s };
-                            left = (e - cur) * 60 - sec;
-                            break;
-                        }
-                    }
-                }
-
-                if (!active && !activeBreak) {
-                    for (let lesson of todayLessons) {
-                        if (lesson.subject === "—") continue;
-                        const slot = timeSlots[lesson.slot - 1];
-                        if (cur < toMin(slot.start)) {
-                            next = { ...lesson, time: `${slot.start}-${slot.end}` };
-                            left = (toMin(slot.start) - cur) * 60 - sec;
-                            if (left < 0) left = 0;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            const progressBar = document.getElementById('progressBar');
-            if (isToday && active) {
-                const slot = timeSlots[active.slot - 1];
-                const totalDuration = toMin(slot.end) - toMin(slot.start);
-                const elapsed = totalDuration - (left / 60);
-                const percent = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
-                progressBar.style.width = percent + '%';
-            } else if (isToday && activeBreak) {
-                const totalDuration = activeBreak.dur;
-                const elapsed = totalDuration - (left / 60);
-                const percent = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
-                progressBar.style.width = percent + '%';
-            } else {
-                progressBar.style.width = '0%';
-            }
-
-            const timerBlock = document.getElementById('timerBlock');
-
-            if (isToday) {
-                timerBlock.style.display = 'block';
-                if (active) {
-                    fadeText('status', 'Идет: ' + active.subject);
-                    displayOdometer(left);
-                    fadeText('info', 'до конца');
-                } else if (activeBreak) {
-                    const prevLesson = todayLessons.find(l => l.slot === activeBreak.afterSlot);
-                    const prevSubject = prevLesson && prevLesson.subject !== "—" ? prevLesson.subject : "пары";
-                    fadeText('status', 'Перемена после ' + prevSubject);
-                    displayOdometer(left);
-                    fadeText('info', 'до конца (' + activeBreak.dur + ' мин)');
-                } else if (next) {
-                    fadeText('status', 'Следующая: ' + next.subject);
-                    displayOdometer(left);
-                    fadeText('info', 'до начала');
-                } else {
-                    fadeText('status', 'Пары закончились');
-                    displayOdometer(0);
-                    fadeText('info', 'до завтра');
-                }
-            } else {
-                timerBlock.style.display = 'none';
-            }
-
-            if (selectedDay !== lastRenderedDay || currentGroup !== lastRenderedGroup) {
-                lastRenderedDay = selectedDay;
-                lastRenderedGroup = currentGroup;
-                
-                const sch = document.getElementById('schedule');
-                sch.innerHTML = '';
-                
-                todayLessons.forEach(lesson => {
-                    if (lesson.subject === "—") return;
-                    const slot = timeSlots[lesson.slot - 1];
-                    const isActive = active && active.slot === lesson.slot;
-                    const isBreak = activeBreak && activeBreak.afterSlot === lesson.slot;
-                    
-                    sch.innerHTML += `<div class="lesson-wrapper">
-                        <div class="lesson ${isActive ? 'active' : ''}" data-slot="${lesson.slot}">
-                            <div class="lesson-info">
-                                <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-details">👨‍🏫 ${lesson.teacher} | 🚪 ${lesson.room}</div>
-                            </div>
-                            <div class="lesson-time">
-                                <span class="lesson-num">${lesson.slot} пара</span>
-                                <span>${slot.start}-${slot.end}</span>
-                            </div>
-                        </div>
-                    </div>`;
-                    
-                    const nextLesson = todayLessons.find(l => l.slot === lesson.slot + 1 && l.subject !== "—");
-                    if (nextLesson) {
-                        const nextSlot = timeSlots[nextLesson.slot - 1];
-                        const breakDur = toMin(nextSlot.start) - toMin(slot.end);
-                        sch.innerHTML += `<div class="break ${isBreak ? 'active' : ''}" data-slot="${lesson.slot}">
-                            <span>Перемена</span>
-                            <span>${breakDur} мин</span>
-                        </div>`;
-                    }
-                });
-
-                setTimeout(() => {
-                    const elements = sch.querySelectorAll('.lesson, .break');
-                    elements.forEach((el, index) => {
-                        setTimeout(() => {
-                            el.classList.add('animate');
-                        }, index * 80);
-                    });
-                }, 100);
-                // Автоскролл только к активной паре
-                setTimeout(() => {
-                    if (lastScrolledSlot === null && active) {
-                        const targetCard = sch.querySelector(`.lesson[data-slot="${active.slot}"]`);
-                        if (targetCard) {
-                            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            lastScrolledSlot = active.slot;
-                        }
-                    }
-                }, 600);
-                const selector = document.getElementById('daySelector');
-                selector.innerHTML = '';
-                days.forEach(day => {
-                    const btn = document.createElement('button');
-                    btn.className = `day-btn ${day === selectedDay ? 'active' : ''}`;
-                    btn.innerText = day.replace("Понедельник","Пн").replace("Вторник","Вт").replace("Среда","Ср").replace("Четверг","Чт").replace("Пятница","Пт").replace("Суббота","Сб");
-                    btn.onclick = () => {
-                        selectedDay = day;
-                        lastScrolledSlot = null;
-                        update();
-                    };
-                    selector.appendChild(btn);
-                });
-            } else {
-                document.querySelectorAll('.lesson').forEach(div => {
-                    const slotNum = parseInt(div.getAttribute('data-slot'));
-                    if (active && active.slot === slotNum) {
-                        div.classList.add('active');
-                    } else {
-                        div.classList.remove('active');
-                    }
-                });
-                document.querySelectorAll('.break').forEach(div => {
-                    const slotNum = parseInt(div.getAttribute('data-slot'));
-                    if (activeBreak && activeBreak.afterSlot === slotNum) {
-                        div.classList.add('active');
-                    } else {
-                        div.classList.remove('active');
-                    }
-                });
-            }
-                // Автоскролл при автоматической смене активной пары
-                setTimeout(() => {
-                    if (active && lastScrolledSlot !== active.slot && lastRenderedDay === selectedDay) {
-                        const activeCard = document.querySelector(`.lesson[data-slot="${active.slot}"]`);
-                        if (activeCard) {
-                            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            lastScrolledSlot = active.slot;
-                        }
-                    }
-                }, 300);
-            
-            updateLiveDate(false);
-        }
-
-        const scheduleContainer = document.getElementById('schedule');
-        const handleTilt = (e, clientX, clientY) => {
-            const card = e.target.closest('.lesson');
-            if (!card) return;
-            const rect = card.getBoundingClientRect();
-            const x = clientX - rect.left;
-            const y = clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -10;
-            const rotateY = ((x - centerX) / centerX) * 10;
-            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            card.style.setProperty('--mx', (x / rect.width) * 100 + '%');
-            card.style.setProperty('--my', (y / rect.height) * 100 + '%');
-            card.style.setProperty('--glow', '1');
-        };
-        const handleReset = (e) => {
-            const card = e.target.closest('.lesson');
-            if (!card) return;
-            card.style.transform = 'rotateX(0) rotateY(0)';
-            card.style.setProperty('--glow', '0');
-        };
-
-        scheduleContainer.addEventListener('mousemove', (e) => handleTilt(e, e.clientX, e.clientY));
-        scheduleContainer.addEventListener('mouseleave', handleReset);
-        scheduleContainer.addEventListener('touchstart', (e) => handleTilt(e, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-        scheduleContainer.addEventListener('touchmove', (e) => handleTilt(e, e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-        scheduleContainer.addEventListener('touchend', handleReset);
-        scheduleContainer.addEventListener('touchcancel', handleReset);
-        scheduleContainer.addEventListener('click', handleReset);
-
-        const groupMapping = { '1l2': '1l1', '1l3': '2l1', '1yu3': '2yu2', '1bd3': '2bd1', '2p3': '3p1', '2b3': '3b1', '2bd3': '3bd1', '3yu2': '3yu1', '2yu3': '3yu1', '2l3': '3l1', '3p3': '4p1', '3n3': '4n1' };
-        let currentGroup = localStorage.getItem('selectedGroup') || '2p1';
-        document.getElementById('groupSelect').value = currentGroup;
-        
-        async function loadGroupSchedule(groupCode) {
-            try {
-                const actualGroup = groupMapping[groupCode] || groupCode;
-                const response = await fetch('all-groups.json');
-                const allData = await response.json();
-                return allData[actualGroup].schedule;
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                return null;
-            }
-        }
-        
-        async function changeGroup(groupCode) {
-            currentGroup = groupCode;
-            localStorage.setItem('selectedGroup', groupCode);
-            const newSchedule = await loadGroupSchedule(groupCode);
-            if (newSchedule) {
-                Object.keys(schedule).forEach(day => {
-                    schedule[day] = newSchedule[day] || schedule[day];
-                });
-                document.getElementById('mainTitle').innerText = 'Расписание ' + groupCode.toUpperCase().replace('P', 'П').replace('L', 'Л').replace('D', 'Д').replace('B', 'Б').replace('YU', 'Ю');
-                lastRenderedGroup = null;
-                lastScrolledSlot = null;
-                update();
-                updateLiveDate(true);
-            }
-        }
-        
-document.getElementById('groupSelect').addEventListener('change', function() { 
-    document.getElementById('groupSearch').value = ''; 
-    const select = document.getElementById('groupSelect');
-    for (let i = 0; i < select.options.length; i++) {
-        select.options[i].style.display = '';
-    }
-    changeGroup(this.value); 
-});
-document.getElementById('groupSearch').addEventListener('input', function() {
-    const searchText = this.value.toLowerCase();
-    const select = document.getElementById('groupSelect');
-    if (searchText === '') {
-        for (let i = 0; i < select.options.length; i++) {
-            select.options[i].style.display = '';
-        }
-        return;
-    }
-    for (let i = 0; i < select.options.length; i++) {
-        select.options[i].style.display = select.options[i].text.toLowerCase().includes(searchText) ? '' : 'none';
-        if (select.options[i].text.toLowerCase() === searchText) {
-            select.value = select.options[i].value;
-            changeGroup(select.options[i].value);
-            break;
-        }
-    }
-});
-        
-        if (currentGroup !== '2p1') changeGroup(currentGroup);
-        
-        setInterval(update, 1000);
-        update();
-        updateLiveDate(false);
-const menuBtn = document.getElementById('menuBtn');
-const menuPanel = document.getElementById('menuPanel');
-const menuOverlay = document.getElementById('menuOverlay');
-const menuClose = document.getElementById('menuClose');
-
-function openMenu() {
-    menuPanel.classList.add('open');
-    menuOverlay.classList.add('open');
-    menuBtn.classList.add('open');
-}
-
-function closeMenu() {
-    menuPanel.classList.remove('open');
-    menuOverlay.classList.remove('open');
-    menuBtn.classList.remove('open');
-}
-
-menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (menuPanel.classList.contains('open')) {
-        closeMenu();
-    } else {
-        openMenu();
-    }
-});
-
-menuClose.addEventListener('click', closeMenu);
-menuOverlay.addEventListener('click', closeMenu);
-        const themeBtn = document.getElementById('themeBtn');
-themeBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light');
-    themeBtn.textContent = document.body.classList.contains('light') ? 'Тёмная тема' : 'Светлая тема';
-});
-
-    </script>
+  <script src="js/script.js"></script>
 </body>
 </html>
