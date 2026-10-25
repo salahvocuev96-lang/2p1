@@ -37,6 +37,17 @@ const sc = document.createElement('canvas'); sc.width = W; sc.height = H;
 const sx = sc.getContext('2d', { alpha: false });
 
 const pool = {};
+/* Слои, которые не зависят от времени, рисуются один раз и переиспользуются. */
+const statics = {};
+function staticLayer(key, w, h, draw) {
+  let c2 = statics[key];
+  if (!c2) {
+    c2 = document.createElement('canvas'); c2.width = w; c2.height = h;
+    draw(c2.getContext('2d'), w, h);
+    statics[key] = c2;
+  }
+  return c2;
+}
 function off(key, w, h) {
   let o = pool[key];
   if (!o || o.c.width !== w || o.c.height !== h) {
@@ -70,29 +81,44 @@ function dgrad(c, x, y, w, h, from, to) {
   const g = c.createLinearGradient(x, y, x + w, y + h); g.addColorStop(0, from); g.addColorStop(1, to); return g;
 }
 
-/* абстрактная «фотография» — детерминированная графика-плейсхолдер */
-function photo(c, x, y, w, h, seed, r) {
+/* Абстрактная «фотография» — детерминированная графика-плейсхолдер.
+   Результат кешируется: композиция зависит только от seed и размера, а пересчёт
+   радиальных градиентов в режиме overlay был самой дорогой операцией рендера. */
+const photoCache = new Map();
+function drawPhotoInto(c, w, h, seed, r) {
   const R = prng(seed * 7919 + 13);
   const hues = [[C.blue, C.violet], [C.violet, '#F472B6'], [C.cyan, C.blue],
   ['#F59E0B', '#EF4444'], ['#10B981', C.cyan], ['#6366F1', '#22D3EE']];
   const pair = hues[Math.floor(R() * hues.length)];
   c.save();
-  rr(c, x, y, w, h, r === undefined ? 14 : r); c.clip();
-  c.fillStyle = dgrad(c, x, y, w, h, pair[0], pair[1]); c.fillRect(x, y, w, h);
+  rr(c, 0, 0, w, h, r); c.clip();
+  c.fillStyle = dgrad(c, 0, 0, w, h, pair[0], pair[1]); c.fillRect(0, 0, w, h);
   c.globalCompositeOperation = 'overlay';
   for (let i = 0; i < 3; i++) {
-    const cxp = x + R() * w, cyp = y + R() * h, rad = (0.25 + R() * 0.5) * Math.max(w, h);
+    const cxp = R() * w, cyp = R() * h, rad = (0.25 + R() * 0.5) * Math.max(w, h);
     const g = c.createRadialGradient(cxp, cyp, 0, cxp, cyp, rad);
     g.addColorStop(0, 'rgba(255,255,255,0.45)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = g; c.fillRect(x, y, w, h);
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
   }
   c.globalCompositeOperation = 'source-over';
   c.fillStyle = 'rgba(5,7,14,0.28)';
   c.beginPath();
-  c.moveTo(x, y + h * (0.55 + R() * 0.2));
-  c.lineTo(x + w, y + h * (0.35 + R() * 0.25));
-  c.lineTo(x + w, y + h); c.lineTo(x, y + h); c.closePath(); c.fill();
+  c.moveTo(0, h * (0.55 + R() * 0.2));
+  c.lineTo(w, h * (0.35 + R() * 0.25));
+  c.lineTo(w, h); c.lineTo(0, h); c.closePath(); c.fill();
   c.restore();
+}
+function photo(c, x, y, w, h, seed, r) {
+  const rad = r === undefined ? 14 : r;
+  const iw = Math.max(2, Math.round(w)), ih = Math.max(2, Math.round(h));
+  const key = seed + '|' + iw + '|' + ih + '|' + rad;
+  let cv2 = photoCache.get(key);
+  if (!cv2) {
+    cv2 = document.createElement('canvas'); cv2.width = iw; cv2.height = ih;
+    drawPhotoInto(cv2.getContext('2d'), iw, ih, seed, rad);
+    photoCache.set(key, cv2);
+  }
+  c.drawImage(cv2, x, y, w, h);
 }
 
 /* текстовые плашки-заглушки внутри макетов */
@@ -110,30 +136,44 @@ function proj(x, y, z) {
 }
 function dof(z) { return cam.dofK <= 0 ? 0 : Math.min(26, Math.abs(z - cam.focus) * cam.dofK); }
 
-/* отрисовка макета с перспективным разворотом вокруг вертикальной оси */
+/* Отрисовка макета с перспективным разворотом вокруг вертикальной оси.
+   Источник один раз приводится к экранному размеру и, если нужно, размывается:
+   иначе фильтр размытия считался бы заново для каждой вертикальной полосы. */
 function blit(c, img, x, y, z, w, h, opt) {
   opt = opt || {};
   const p = proj(x, y, z);
   const s = p.s;
   const dw = w * s, dh = h * s;
+  if (dw < 2 || dh < 2) return;
   const yaw = opt.yaw || 0;
   const bl = (opt.blur || 0) + dof(z);
+
+  let src = img;
+  if (bl > 0.4 || dw < img.width * 0.75) {
+    const tw = Math.max(8, Math.min(img.width, Math.ceil(dw)));
+    const th = Math.max(8, Math.min(img.height, Math.ceil(dh)));
+    const o = off('blitsrc', tw, th);
+    if (bl > 0.4) o.x.filter = `blur(${bl.toFixed(2)}px)`;
+    o.x.drawImage(img, 0, 0, tw, th);
+    src = o.c;
+  }
+
   c.save();
   c.globalAlpha = opt.alpha === undefined ? 1 : opt.alpha;
-  if (bl > 0.4) c.filter = `blur(${bl.toFixed(2)}px)`;
   c.translate(p.x, p.y);
   c.rotate(cam.rot + (opt.roll || 0));
   if (opt.shadow) {
-    c.save(); c.filter = `blur(${28 * s}px)`;
+    c.save(); c.filter = `blur(${Math.max(6, 28 * s)}px)`;
     c.fillStyle = 'rgba(0,0,0,0.6)';
     c.fillRect(-dw / 2, -dh / 2 + 26 * s, dw, dh); c.restore();
   }
   if (Math.abs(yaw) < 0.02) {
-    c.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+    c.drawImage(src, -dw / 2, -dh / 2, dw, dh);
   } else {
-    const N = 56, D = 2200 * s;
-    const cy2 = Math.cos(yaw), sy2 = Math.sin(yaw);
-    let prevX = null, prevS = null;
+    /* полос ровно столько, сколько нужно для гладкой перспективы при этом угле */
+    const N = Math.max(8, Math.min(40, Math.round(Math.abs(yaw) * 66)));
+    const D = 2200 * s;
+    const sy2 = Math.sin(yaw), cy2 = Math.cos(yaw);
     const pts = [];
     for (let i = 0; i <= N; i++) {
       const u = i / N - 0.5;
@@ -141,14 +181,13 @@ function blit(c, img, x, y, z, w, h, opt) {
       const ss = D / Math.max(60, D + lz);
       pts.push({ x: lx * ss, s: ss });
     }
+    const sw2 = src.width / N;
     for (let i = 0; i < N; i++) {
       const a = pts[i], b = pts[i + 1];
-      const sw2 = img.width / N;
-      const x0 = a.x, x1 = b.x;
-      if (x1 - x0 <= 0) continue;
+      if (b.x - a.x <= 0) continue;
       const ms = (a.s + b.s) / 2;
-      c.drawImage(img, i * sw2, 0, sw2 + 0.8, img.height,
-        x0, -dh * ms / 2, (x1 - x0) + 0.9, dh * ms);
+      c.drawImage(src, i * sw2, 0, sw2 + 0.8, src.height,
+        a.x, -dh * ms / 2, (b.x - a.x) + 0.9, dh * ms);
     }
   }
   c.restore();
@@ -780,12 +819,11 @@ function scene2(c, t) {
   const scroll = Math.max(0, eInOut(inv(t, T1 + 2.6, T2 - .25))) * 760;
 
   /* расфокусированные дубли в глубине — объём */
-  for (const d of [{ x: -1420, z: 900, yaw: .42, a: .40 }, { x: 1460, z: 1050, yaw: -.46, a: .34 }]) {
-    const o2 = off('s2d' + d.x, BW, BH);
-    browserFrame(o2.x, BW, BH, 'кафе-зерно.ру', false, (xx, ww, hh) =>
-      pageCafe(xx, ww, hh, { reveal: 1, scroll: 120 }));
-    blit(c, o2.c, d.x, 0, d.z, BW, BH, { yaw: d.yaw, alpha: d.a, blur: 3 });
-  }
+  const dup2 = staticLayer('dupCafe', BW, BH, (xx, ww, hh) =>
+    browserFrame(xx, ww, hh, 'кафе-зерно.ру', false, (yy, w2, h2) =>
+      pageCafe(yy, w2, h2, { reveal: 1, scroll: 120 })));
+  for (const d of [{ x: -1420, z: 900, yaw: .42, a: .40 }, { x: 1460, z: 1050, yaw: -.46, a: .34 }])
+    blit(c, dup2, d.x, 0, d.z, BW, BH, { yaw: d.yaw, alpha: d.a, blur: 3 });
 
   const o = off('s2m', BW, BH);
   browserFrame(o.x, BW, BH, 'вашбизнес.ру', false, (xx, ww, hh) =>
@@ -828,12 +866,11 @@ function scene3a(c, t) {
   drawBG(c, t, .85);
 
   /* два расфокусированных макета по сторонам — глубина и относительное движение */
-  for (const d of [{ x: -1680, z: 980, yaw: .5, a: .34 }, { x: 1700, z: 1120, yaw: -.52, a: .28 }]) {
-    const o2 = off('s3ad' + d.x, BW, BH);
-    browserFrame(o2.x, BW, BH, 'кафе-зерно.ру', false, (xx, ww, hh) =>
-      pageCafe(xx, ww, hh, { reveal: 1, scroll: 150 }));
-    blit(c, o2.c, d.x, 0, d.z, BW, BH, { yaw: d.yaw, alpha: d.a, blur: 4 });
-  }
+  const dup3 = staticLayer('dupCafe2', BW, BH, (xx, ww, hh) =>
+    browserFrame(xx, ww, hh, 'кафе-зерно.ру', false, (yy, w2, h2) =>
+      pageCafe(yy, w2, h2, { reveal: 1, scroll: 150 })));
+  for (const d of [{ x: -1680, z: 980, yaw: .5, a: .34 }, { x: 1700, z: 1120, yaw: -.52, a: .28 }])
+    blit(c, dup3, d.x, 0, d.z, BW, BH, { yaw: d.yaw, alpha: d.a, blur: 4 });
 
   /* каскад карточек + бегущая подсветка по сетке */
   const rev = clamp(inv(t, T2 + .05, T2 + 1.9) * .74 + .26, 0, 1);
@@ -912,9 +949,9 @@ function scene3c(c, t) {
   /* десктоп уходит вглубь и вбок */
   const dAlpha = 1 - clamp(m * 1.5, 0, 1);
   if (dAlpha > 0.01) {
-    const o = off('s3c_d', BW, BH);
-    browserFrame(o.x, BW, BH, 'вашбизнес.ру', false, (xx, ww, hh) =>
-      pageShop(xx, ww, hh, { reveal: 1, scroll: 300 }));
+    const o = { c: staticLayer('shopStatic300', BW, BH, (xx, ww, hh) =>
+      browserFrame(xx, ww, hh, 'вашбизнес.ру', false, (yy, w2, h2) =>
+        pageShop(yy, w2, h2, { reveal: 1, scroll: 300 }))) };
     blit(c, o.c, lerp(0, -760, m), 0, lerp(0, 820, m), BW, BH,
       { yaw: lerp(-.1, .52, m), alpha: dAlpha, shadow: true, blur: m * 5 });
   }
@@ -984,17 +1021,18 @@ function scene4(c, t) {
   const sweep = eInOut(clamp(inv(t, T3 + 1.5, T3 + 3.5), 0, 1)); // полоса проявки
 
   /* основное окно: два слоя — вайрфрейм и финал, разделённые бегущей маской */
-  const ow = off('s4w', BW, BH), ofn = off('s4f', BW, BH), comp = off('s4c', BW, BH);
+  const ow = off('s4w', BW, BH), comp = off('s4c', BW, BH);
   browserFrame(ow.x, BW, BH, null, true, (xx, ww, hh) =>
     pageShop(xx, ww, hh, { reveal: wrev, scroll: 180, wire: true }));
-  browserFrame(ofn.x, BW, BH, 'вашбизнес.ру', false, (xx, ww, hh) =>
-    pageShop(xx, ww, hh, { reveal: 1, scroll: 180, cart: 2 }));
+  const ofnC = staticLayer('shopFinal180', BW, BH, (xx, ww, hh) =>
+    browserFrame(xx, ww, hh, 'вашбизнес.ру', false, (yy, w2, h2) =>
+      pageShop(yy, w2, h2, { reveal: 1, scroll: 180, cart: 2 })));
   const cx2 = comp.x;
   cx2.drawImage(ow.c, 0, 0);
   const edge = sweep * (BW + 260) - 130;
   cx2.save();
   cx2.beginPath(); cx2.rect(0, 0, Math.max(0, edge), BH); cx2.clip();
-  cx2.drawImage(ofn.c, 0, 0);
+  cx2.drawImage(ofnC, 0, 0);
   cx2.restore();
   /* светящаяся кромка проявки */
   if (sweep > 0.001 && sweep < 0.999) {
@@ -1319,10 +1357,9 @@ function drawScene(c, t) {
 
 /* число подкадров motion blur: больше на быстрых фазах */
 function subs(t) {
-  for (const b of BOUNDS) if (Math.abs(t - b) < 0.30) return 4;
-  if ((t > T4 && t < T4 + 1.0)) return 4;
-  if (t > DUR - 3.0) return 1;
-  return 2;
+  for (const b of BOUNDS) if (Math.abs(t - b) < 0.30) return 3;
+  if (t > T4 && t < T4 + 1.0) return 3;
+  return 1;
 }
 
 function renderFrame(t) {
