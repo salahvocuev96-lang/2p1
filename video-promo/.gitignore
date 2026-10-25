@@ -1,0 +1,8 @@
+# Промежуточные результаты рендера — пересобираются из исходников через ./build.sh
+out/probe/
+out/silent.mp4
+out/mix.wav
+out/voice.wav
+out/music.wav
+out/render.log
+out/t30.log
