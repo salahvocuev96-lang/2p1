@@ -741,6 +741,18 @@ function cursor(c, x, y, z, press) {
   c.restore();
 }
 
+/* Готовые макеты, которые нужны сразу нескольким сценам. */
+function layerShopFinal() {
+  return staticLayer('shopFinal180', BW, BH, (xx, ww, hh) =>
+    browserFrame(xx, ww, hh, 'вашбизнес.ру', false, (yy, w2, h2) =>
+      pageShop(yy, w2, h2, { reveal: 1, scroll: 180, cart: 2 })));
+}
+function layerPhoneFinal() {
+  return staticLayer('phoneFinal', PW, PH, (xx, ww, hh) =>
+    phoneFrame(xx, ww, hh, (yy, w3, h3) =>
+      pageMobile(yy, w3, h3, { reveal: 1, scroll: 0 })));
+}
+
 /* ───────────────────────── сцены ───────────────────────── */
 const T1 = 4.2, T2 = 10.4, T3A = 13.0, T3B = 15.7, T3 = 18.4, T4 = 25.0;
 
@@ -873,7 +885,7 @@ function scene3a(c, t) {
     blit(c, dup3, d.x, 0, d.z, BW, BH, { yaw: d.yaw, alpha: d.a, blur: 4 });
 
   /* каскад карточек + бегущая подсветка по сетке */
-  const rev = clamp(inv(t, T2 + .05, T2 + 1.9) * .74 + .26, 0, 1);
+  const rev = clamp(.80 + inv(t, T2 + .02, T2 + .75) * .20, 0, 1);
   const hover = t > T2 + 1.5 ? (1 + Math.floor((t - T2 - 1.5) / .42)) % 8 : -1;
   const o = off('s3a', BW, BH);
   browserFrame(o.x, BW, BH, 'вашбизнес.ру/каталог', false, (xx, ww, hh) =>
@@ -977,7 +989,7 @@ function scene3c(c, t) {
 /* общий текст сцены 3 — три кинетические подмены на одной строке */
 function scene3Text(c, t) {
   const blocks = [
-    { from: T2 + .35, to: T3A, lines: ['КРАСИВЫЙ', 'ДИЗАЙН'], col: C.blue, mode: 'scale', chip: 'ИНТЕРНЕТ-МАГАЗИН' },
+    { from: T2 + .12, to: T3A, lines: ['КРАСИВЫЙ', 'ДИЗАЙН'], col: C.blue, mode: 'scale', chip: 'ИНТЕРНЕТ-МАГАЗИН' },
     { from: T3A + .2, to: T3B, lines: ['УДОБСТВО'], col: C.cyan, mode: 'blurin', chip: 'МЕНЮ КАФЕ' },
     { from: T3B + .2, to: T3 - .05, lines: ['АДАПТАЦИЯ', 'ПОД ТЕЛЕФОН'], col: C.violet, mode: 'rise', chip: 'МОБИЛЬНАЯ ВЕРСИЯ' }
   ];
@@ -1024,9 +1036,7 @@ function scene4(c, t) {
   const ow = off('s4w', BW, BH), comp = off('s4c', BW, BH);
   browserFrame(ow.x, BW, BH, null, true, (xx, ww, hh) =>
     pageShop(xx, ww, hh, { reveal: wrev, scroll: 180, wire: true }));
-  const ofnC = staticLayer('shopFinal180', BW, BH, (xx, ww, hh) =>
-    browserFrame(xx, ww, hh, 'вашбизнес.ру', false, (yy, w2, h2) =>
-      pageShop(yy, w2, h2, { reveal: 1, scroll: 180, cart: 2 })));
+  const ofnC = layerShopFinal();
   const cx2 = comp.x;
   cx2.drawImage(ow.c, 0, 0);
   const edge = sweep * (BW + 260) - 130;
@@ -1117,46 +1127,33 @@ function scene5(c, t) {
   cam.focus = -120; cam.dofK = 0.009;
   drawBG(c, t, 1.0);
 
-  /* экраны слетаются к центру и схлопываются в линию */
-  const col = eInOut(clamp(inv(t, T4 - .0, T4 + .85), 0, 1));
+  /* Камера проходит сквозь готовый сайт из прошлой сцены: композиция та же,
+     поэтому финал причинно продолжает «от идеи до готового сайта», а не
+     вводит новые объекты. Уход вперёд с размытием и затуханием. */
+  const col = eInOut(clamp(inv(t, T4, T4 + .66), 0, 1));
   if (col < 1) {
-    const items = [
-      { img: 'f1', x: -480, y: -620, z: 260, yaw: .4 },
-      { img: 'f2', x: 520, y: 150, z: 340, yaw: -.4 },
-      { img: 'f3', x: -180, y: 800, z: 120, yaw: .18 }
-    ];
-    for (let i = 0; i < items.length; i++) {
-      const it = items[i];
-      const o = off('s5_' + it.img, 520, 360);
-      const xx = o.x;
-      fillRR(xx, 0, 0, 520, 360, 18, '#0C1322');
-      strokeRR(xx, 1, 1, 518, 358, 18, 'rgba(120,160,230,0.3)', 2);
-      photo(xx, 16, 16, 488, 200, 50 + i * 5, 12);
-      bar(xx, 16, 234, 300, 20, '#2A3550', 6);
-      bar(xx, 16, 268, 420, 14, '#1F2B44', 5);
-      bar(xx, 16, 294, 360, 14, '#1F2B44', 5);
-      bar(xx, 16, 322, 140, 22, C.blue, 8);
-      const k = eInOut(col);
-      blit(c, o.c, lerp(it.x, 0, k), lerp(it.y, 0, k), lerp(it.z, -120, k),
-        lerp(520, 40, k), lerp(360, 6, k),
-        { yaw: it.yaw * (1 - k), alpha: 1 - Math.pow(k, 3), blur: k * 6 });
-    }
+    const k = col, fade = Math.max(0, 1 - Math.pow(k, 1.35));
+    blit(c, layerShopFinal(), 0, 0, lerp(-110, -1120, k), BW, BH,
+      { yaw: lerp(-.18, -.04, k), alpha: fade, blur: k * 9 });
+    blit(c, layerPhoneFinal(), lerp(463, 700, k), lerp(246, 330, k), lerp(40, -980, k), PW, PH,
+      { yaw: lerp(-.28, -.08, k), alpha: fade, blur: k * 9 });
   }
+
   /* вспышка-линия */
-  const fl = Math.max(0, 1 - Math.abs(t - (T4 + .88)) / .42);
+  const fl = Math.max(0, 1 - Math.abs(t - (T4 + .70)) / .38);
   if (fl > 0) {
     c.save(); c.globalCompositeOperation = 'lighter';
     const g = c.createLinearGradient(0, H / 2 - 120, 0, H / 2 + 120);
     g.addColorStop(0, 'rgba(79,140,255,0)');
     g.addColorStop(.5, `rgba(190,220,255,${.9 * fl})`);
     g.addColorStop(1, 'rgba(79,140,255,0)');
-    const lw = lerp(120, W * 1.3, eOutExpo(clamp(inv(t, T4 + .7, T4 + 1.3), 0, 1)));
+    const lw = lerp(120, W * 1.3, eOutExpo(clamp(inv(t, T4 + .52, T4 + 1.1), 0, 1)));
     c.fillStyle = g; c.fillRect(W / 2 - lw / 2, H / 2 - 120, lw, 240);
     c.restore();
   }
 
   /* кольцо-ореол */
-  const ha = clamp(inv(t, T4 + .8, T4 + 1.6), 0, 1);
+  const ha = clamp(inv(t, T4 + .5, T4 + 1.3), 0, 1);
   if (ha > 0) {
     glow(c, 0, -170, -60, 1300, 700, C.blue, .17 * ha);
     glow(c, 0, 420, -60, 1100, 520, C.violet, .13 * ha);
@@ -1164,8 +1161,8 @@ function scene5(c, t) {
 
   /* три строки финала */
   const TY = 800, SY = 1120, BY = 1345;
-  topChip(c, 'ВЕБ-РАЗРАБОТКА', clamp(inv(t, T4 + .75, T4 + 1.35), 0, 1), C.blue, 432);
-  const t1 = inv(t, T4 + .85, T4 + 2.2);
+  topChip(c, 'ВЕБ-РАЗРАБОТКА', clamp(inv(t, T4 + .42, T4 + .95), 0, 1), C.blue, 432);
+  const t1 = inv(t, T4 + .55, T4 + 1.9);
   if (t1 > 0) {
     screenGlow(c, W / 2, TY, 1060, 500, C.blue, .20 * Math.min(1, t1 * 2));
     kinetic(c, ['СОЗДАЁМ САЙТ', 'ДЛЯ ВАШЕГО', 'БИЗНЕСА'], {
@@ -1173,7 +1170,7 @@ function scene5(c, t) {
       accentIdx: 1, accentColor: C.blue, letter: -2
     });
   }
-  const t2 = inv(t, T4 + 1.9, T4 + 2.9);
+  const t2 = inv(t, T4 + 1.7, T4 + 2.7);
   if (t2 > 0) {
     c.save(); c.globalAlpha = Math.min(1, t2 * 1.6);
     const e = eOutQuint(t2);
@@ -1188,7 +1185,7 @@ function scene5(c, t) {
   }
 
   /* CTA-пилюля */
-  const t3 = inv(t, T4 + 2.7, T4 + 3.8);
+  const t3 = inv(t, T4 + 2.5, T4 + 3.6);
   if (t3 > 0) {
     const e = eOutElastic(clamp(t3 * 1.25, 0, 1));
     const pulse = 1 + .018 * Math.sin((t - T4 - 3.6) * 3.4);
@@ -1235,7 +1232,7 @@ function scene5(c, t) {
   }
 
   /* что именно делаю — короткий ряд услуг */
-  const t4 = inv(t, T4 + 3.5, T4 + 4.6);
+  const t4 = inv(t, T4 + 3.3, T4 + 4.4);
   if (t4 > 0) {
     const chips = ['Сайты-визитки', 'Интернет-магазины', 'Меню для кафе'];
     c.save(); c.font = F(600, 25); c.textBaseline = 'middle'; c.textAlign = 'center';
@@ -1260,7 +1257,7 @@ function scene5(c, t) {
 
   /* лёгкие частицы вверх */
   const R = prng(777);
-  const pa = clamp(inv(t, T4 + 1.0, T4 + 2.0), 0, 1);
+  const pa = clamp(inv(t, T4 + .7, T4 + 1.7), 0, 1);
   if (pa > 0) {
     c.save(); c.globalCompositeOperation = 'lighter';
     for (let i = 0; i < 40; i++) {
@@ -1358,7 +1355,7 @@ function drawScene(c, t) {
 /* число подкадров motion blur: больше на быстрых фазах */
 function subs(t) {
   for (const b of BOUNDS) if (Math.abs(t - b) < 0.30) return 3;
-  if (t > T4 && t < T4 + 1.0) return 3;
+  if (t > T4 && t < T4 + 0.85) return 3;
   return 1;
 }
 
