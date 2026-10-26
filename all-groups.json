@@ -656,14 +656,14 @@
         { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
       ],
-      "Вторник": [
+       "Вторник": [
         { "slot": 1, "subject": "—", "teacher": "", "room": "" },
-        { "slot": 2, "subject": "Информационное обеспечение логистических процессов", "teacher": "Новиков В.С.", "room": "218" },
+        { "slot": 2, "subject": "Информ. обеспеч. логистич. проц.", "teacher": "Новиков В.С.", "room": "218" },
         { "slot": 3, "subject": "Экономика организации", "teacher": "Бурдин С.С.", "room": "216А" },
-        { "slot": 4, "subject": "БЖД", "teacher": "Наумова Е.М.", "room": "201" },
-        { "slot": 5, "subject": "История России", "teacher": "Неменов Б.В.", "room": "210" },
+        { "slot": 4, "subject": "История России", "teacher": "Неменов Б.В.", "room": "дистант" },
+        { "slot": 5, "subject": "—", "teacher": "", "room": "" },
         { "slot": 6, "subject": "—", "teacher": "", "room": "" }
-      ],
+     ],
       "Среда": [
         { "slot": 1, "subject": "Финансы, денежное обращение и кредит", "teacher": "Малышева М.В.", "room": "221" },
         { "slot": 2, "subject": "—", "teacher": "", "room": "" },
