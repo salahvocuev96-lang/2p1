@@ -16,7 +16,7 @@
 <script>
 /* Votsuev — 22 c промо. Детерминированный таймлайн: renderAt(t) рисует кадр строго по времени. */
 const W=1920,H=1080,FPS=60,DUR=22,SH=0.5/60; // SH — выдержка (180°) для motion blur
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const tmp=document.createElement('canvas');tmp.width=W;tmp.height=H;const tctx=tmp.getContext('2d');
 const SANS="'Inter Display','Inter',sans-serif",MONO="'JetBrains Mono',monospace";
 const GOLD='#ffb347',ORANGE='#ff7a1a';
@@ -55,9 +55,9 @@ const KF=[
  [10.2, 555,-80,7600,   400,-80,11000,.005],
  [11.0, 560,-80,9300,    20,-80,10600,.012],
  [12.3, 430,-150,9420,  -90,-60,10600,.02],
- [13.4, 300,-200,9480,  880,-90,10600,-.01],
- [14.6, 330,-120,9480,  930,-80,10600,-.025],
- [15.9, 460,-60,9520,   960,-80,10600,-.03],
+ [13.4,-460,-20,9600,  -340, 10,10600,-.008],
+ [14.6, 440,-20,9600,   560, 10,10600,-.006],
+ [15.9,1360,-20,9600,  1480, 10,10600,-.004],
  [16.45,560,-90,9980,   560,-80,12300, 0],
  [16.95,560,-80,10850,  560,-80,12300, 0],
  [19.4, 560,-82,11090,  560,-80,12300,.004],
@@ -79,6 +79,8 @@ function focal(t){return 1000-300*bump(8.45,9.4,10.9,t)}
 function camAt(t){
   const k=hermite(t);let pos=[k[0],k[1],k[2]],tg=[k[3],k[4],k[5]];
   // «ручная» микроподвижность + удары камеры на акцентах
+  const wS=sm(13.3,13.7,t)*(1-sm(15.85,16.2,t));
+  if(wS>0){const px=panX(t);tg=L3(tg,[px,10,SITE[2]],wS);pos=L3(pos,[px-120,-20,SITE[2]-1000],wS)}
   const shake=6*bump(8.45,8.5,9.1,t)+3*bump(19.72,19.76,20.2,t);
   tg=add(tg,[Math.sin(t*1.3)*6+Math.sin(t*47)*shake,Math.sin(t*1.7+1)*5+Math.cos(t*53)*shake,0]);
   const f=norm(sub(tg,pos));let r=norm(cross([0,1,0],f)),dn=cross(f,r);
@@ -161,13 +163,15 @@ function mainPos(p,t,camDelta){
   const k2=eo((t-9.75-p.d*.9)/1.35);
   if(k2>0){const S=[SITE[0]+p.st[0],SITE[1]+p.st[1]+Math.sin(t*2+p.ph)*1.5,SITE[2]+p.st[2]];P=L3(P,S,k2)}
   const k3=eio((t-13.15-p.d*.45)/.75);
-  if(k3>0){const ang=p.ra+p.rsp*t,x=Math.cos(ang)*p.ringR,y=Math.sin(ang)*p.ringR;
-    P=L3(P,[SITE[0]+x,SITE[1]+y*Math.cos(TILT),SITE[2]-y*Math.sin(TILT)+p.rj],k3)}
+  if(k3>0){let Q;const ni=Math.floor(p.ph/6.29*3);
+    if(p.ringR===110)Q=[SITE[0]-2200+p.ra/6.283*4400,SITE[1]+p.rj*.3,SITE[2]+p.rj];
+    else{const ang=p.ra+p.rsp*t,r=150+(p.ringR-190)/150*26;Q=[SITE[0]+(ni-1)*900+Math.cos(ang)*r,SITE[1]+Math.sin(ang)*r,SITE[2]+p.rj]}
+    P=L3(P,Q,k3)}
   const k4=t-16.3;
   if(k4>0){const e=eo(k4/1.1);P=add(SITE,add(mul(sub(P,SITE),1+e*3.2),[0,0,e*900*(p.d-.3)]))}
   return P;
 }
-function mainAlpha(p,t){return p.a*(1-sm(16.5,17.25,t))*sm(0,.6,t)}
+function mainAlpha(p,t){return p.a*(1-sm(16.5,17.25,t))*sm(0,.6,t)*(1-.5*bump(13.4,13.9,16.3,t))}
 
 /* ---------- текст ---------- */
 function T(s,x,y,size,o={}){
@@ -228,7 +232,7 @@ function renderAt(t){
     const nb=1+.6*(1-sm(4.2,4.8,t));drawP(mainPos(p,t,camDelta),mainPos(p,t-SH,camDeltaP),cam,camP,p.sz*nb,p.col,Math.min(1,a*nb),fd,1)}
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
 
-  scene1(t,cam);scene2(t,cam);scene3(t,cam,camP,fd);scene4(t,cam);scene5(t,cam);scene6(t);
+  scene1(t,cam);scene2(t,cam);scene3(t,cam,camP,fd);scene4MB(t);scene5(t,cam);scene6(t);
 
   // пост: радиальный zoom-blur на переходах
   const zb=.16*bump(4.25,4.6,5.0,t)+.11*bump(8.38,8.55,8.95,t)+.035*bump(8.9,9.6,10.5,t)+.12*bump(16.25,16.55,16.95,t)+.06*bump(19.6,19.76,20.05,t);
@@ -381,45 +385,79 @@ function scene3(t,cam,camP,fd){
   }
 }
 
-/* ---------- СЦЕНА 4 · Процесс 13.5–16.5 ---------- */
-const NODES=[{an:-40,hit:14.0,n:'01',tx:'Дизайн под твою нишу'},{an:5,hit:14.75,n:'02',tx:'Быстрый запуск'},{an:50,hit:15.5,n:'03',tx:'Поток заявок от клиентов'}];
-const RP=(x,y)=>[SITE[0]+x,SITE[1]+y*Math.cos(TILT),SITE[2]-y*Math.sin(TILT)];
+/* ---------- СЦЕНА 4 · Процесс 13.5–16.5 (линия-конвейер, как «The machine» в референсе) ---------- */
+const NODES=[{hit:14.0,n:'01',tx:'Дизайн под твою нишу',sub:'УНИКАЛЬНО ПОД ВАШ БИЗНЕС'},
+             {hit:14.75,n:'02',tx:'Быстрый запуск',sub:'ОТ ИДЕИ ДО САЙТА БЕЗ ЗАДЕРЖЕК'},
+             {hit:15.5,n:'03',tx:'Поток заявок от клиентов',sub:'ЗАЯВКИ ИДУТ ВАМ, А НЕ КОНКУРЕНТАМ'}];
+const NSP=900,NW=k=>[SITE[0]+(k-1)*NSP,SITE[1],SITE[2]];
+const LY=document.createElement('canvas');LY.width=W;LY.height=H;const lctx=LY.getContext('2d');
+function panX(t){return SITE[0]-NSP+NSP*eio((t-14.38)/.36)+NSP*eio((t-15.13)/.36)+(t-14)*30}
+function progX(t){const a=NW(0)[0];return a-1400*(1-eo((t-13.45)/.55))+NSP*eio((t-14.38)/.36)+NSP*eio((t-15.13)/.36)}
+function lineW(a,b,col,al,w,dash){ctx.save();ctx.globalAlpha=al;ctx.strokeStyle=col;ctx.lineWidth=w;if(dash)ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
+function icon(k,on,ka,a){
+  const c=on?GOLD:'#7d7368',c2=on?ORANGE:'#5d554c';ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=c;ctx.fillStyle=c2;ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';
+  const ap=j=>on?eo((ka-.04*j)/.35):1;
+  if(k===0){ctx.beginPath();ctx.roundRect(-64,-48,128,96,10);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-64,-30);ctx.lineTo(64,-30);ctx.stroke();
+    ctx.globalAlpha=a*ap(1);ctx.fillRect(-50,-18,44,26);
+    ctx.globalAlpha=a*ap(2);ctx.fillStyle=on?'#f4efe8':'#6d655b';ctx.fillRect(4,-18,46*ap(2),6);ctx.fillRect(4,-6,34*ap(3),6);
+    ctx.fillStyle=c2;ctx.globalAlpha=a*ap(4);[-50,-14,22].forEach((x,j)=>ctx.fillRect(x,18,28,18*ap(4+j)));}
+  else if(k===1){ctx.beginPath();ctx.arc(0,6,46,0,6.283);ctx.stroke();ctx.fillStyle=c;ctx.fillRect(-10,-52,20,8);
+    const sw=on?eo(ka/.6)*5.2:0;if(sw>0){ctx.fillStyle=ORANGE;ctx.globalAlpha=a*.85;ctx.beginPath();ctx.moveTo(0,6);ctx.arc(0,6,36,-1.571,-1.571+sw);ctx.closePath();ctx.fill();ctx.globalAlpha=a}
+    const ha=-1.571+(on?sw:.9);ctx.strokeStyle=on?'#fff':c;ctx.beginPath();ctx.moveTo(0,6);ctx.lineTo(Math.cos(ha)*30,6+Math.sin(ha)*30);ctx.stroke();}
+  else{const hs=[26,42,60,82];hs.forEach((h,j)=>{const hh=on?h*eo((ka-.06*j)/.45):h*.35;ctx.fillRect(-52+j*28,44-hh,18,hh)});
+    const pr=on?eo((ka-.2)/.4):0;if(pr>0){ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(-56,18);ctx.lineTo(lerp(-56,52,pr),lerp(18,-46,pr));ctx.stroke();
+      if(pr>.95){ctx.beginPath();ctx.moveTo(34,-46);ctx.lineTo(54,-48);ctx.lineTo(50,-28);ctx.stroke()}}}
+  ctx.restore();
+}
 function scene4(t,cam){
-  if(t<13.3||t>16.8)return;
-  const a=sm(13.35,13.8,t)*(1-sm(16.25,16.6,t));
-  chapter(t,'04','КАК ЭТО РАБОТАЕТ',13.45,16.45);
-  // кольца
-  ctx.save();ctx.lineWidth=1.2;
-  [110,190,270,340].forEach((r,j)=>{const pr=eo((t-13.35-j*.07)/.6);if(pr<=0)return;ctx.globalAlpha=a*(j===3?.55:.22);ctx.strokeStyle=j===3?GOLD:'#e6d2b8';ctx.beginPath();
-    for(let i=0;i<=96*pr;i++){const an=i/96*6.283-1.57,p=proj(RP(Math.cos(an)*r,Math.sin(an)*r),cam);if(p)i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)}ctx.stroke()});
-  // деления
-  ctx.globalAlpha=a*.4;ctx.strokeStyle='#e6d2b8';ctx.beginPath();
-  for(let i=0;i<72;i++){const an=i/72*6.283,l=i%6?8:18,p1=proj(RP(Math.cos(an)*352,Math.sin(an)*352),cam),p2=proj(RP(Math.cos(an)*(352+l),Math.sin(an)*(352+l)),cam);if(p1&&p2){ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y)}}ctx.stroke();
-  // перекрестие
-  const c0=proj(RP(0,0),cam);
-  for(const[x,y]of[[-360,0],[360,0],[0,-360],[0,360]]){const p=proj(RP(x,y),cam);if(p&&c0){ctx.globalAlpha=a*.15;ctx.beginPath();ctx.moveTo(c0.x,c0.y);ctx.lineTo(p.x,p.y);ctx.stroke()}}
-  ctx.restore();
-  // луч-радар
-  const sw=(-40+60*(t-14.0))*Math.PI/180;
-  ctx.save();ctx.globalCompositeOperation='lighter';
-  for(let j=0;j<26;j++){const an=sw-j*.022,p=proj(RP(Math.cos(an)*340,Math.sin(an)*340),cam);if(!p||!c0)continue;
-    ctx.globalAlpha=a*(j===0?.9:.22*(1-j/26));ctx.strokeStyle=j===0?'#ffd59a':ORANGE;ctx.lineWidth=j===0?2:6;ctx.beginPath();ctx.moveTo(c0.x,c0.y);ctx.lineTo(p.x,p.y);ctx.stroke()}
-  if(c0){ctx.globalAlpha=a;ctx.drawImage(SPR[1][2],c0.x-40,c0.y-40,80,80)}
-  ctx.restore();
-  // узлы-шаги
-  NODES.forEach((nd,i)=>{const an=nd.an*Math.PI/180,p=proj(RP(Math.cos(an)*340,Math.sin(an)*340),cam);if(!p)return;
-    const on=t>=nd.hit,k=t-nd.hit;
-    ctx.save();ctx.strokeStyle=on?GOLD:'#8a7e70';ctx.lineWidth=1.6;ctx.globalAlpha=a;
-    ctx.beginPath();ctx.arc(p.x,p.y,on?lerp(10,22,eo(k/.3)):9,0,6.283);ctx.stroke();
-    if(on){ctx.fillStyle=ORANGE;ctx.shadowColor='rgba(255,120,30,.9)';ctx.shadowBlur=24;ctx.beginPath();ctx.arc(p.x,p.y,lerp(4,9,eo(k/.3)),0,6.283);ctx.fill();
-      ctx.shadowBlur=0;ctx.globalAlpha=a*(1-clamp(k/.7));ctx.beginPath();ctx.arc(p.x,p.y,22+eo(k/.7)*70,0,6.283);ctx.stroke()}
+  if(t<13.3||t>16.75)return;
+  const A=sm(13.35,13.8,t)*(1-sm(16.2,16.55,t));if(A<=0)return;
+  const hits=NODES.filter(n=>t>=n.hit).length;
+  // шапка: «— КАК ЭТО РАБОТАЕТ» и счётчик шагов с полосками
+  ctx.save();ctx.globalAlpha=A;ctx.fillStyle=ORANGE;ctx.fillRect(120,111,lerp(0,30,eo((t-13.4)/.5)),2);ctx.restore();
+  T('КАК ЭТО РАБОТАЕТ',166,118,16,{mono:1,c:GOLD,a:A,ls:3});
+  T(`0${Math.max(1,hits)} / 03`,W-350,118,16,{mono:1,c:'#b9ad9c',a:A,al:'right',ls:3});
+  for(let j=0;j<3;j++){const f=j<hits?eo((t-NODES[j].hit)/.3):0;ctx.save();ctx.globalAlpha=A*.35;ctx.fillStyle='#8d857a';ctx.fillRect(W-320+j*70,112,60,2);
+    ctx.globalAlpha=A;ctx.fillStyle=ORANGE;ctx.fillRect(W-320+j*70,111,60*f,3);ctx.restore()}
+  // линия-конвейер: пройдено — оранжевая, впереди — пунктир
+  const ya=SITE[1],za=SITE[2],L0=proj([SITE[0]-3200,ya,za],cam),L1=proj([SITE[0]+3200,ya,za],cam),px=progX(t),P=proj([px,ya,za],cam);
+  if(L0&&L1&&P){lineW(P,L1,'#8d857a',A*.35,1.4,[3,9]);lineW(L0,P,ORANGE,A*.9,2);
+    const mv=Math.abs(progX(t)-progX(t-1/60));if(mv>3){ctx.save();ctx.globalCompositeOperation='lighter';const hd=proj([px-120,ya,za],cam);
+      const g=ctx.createLinearGradient(hd.x,0,P.x,0);g.addColorStop(0,'rgba(255,170,80,0)');g.addColorStop(1,'rgba(255,240,210,1)');
+      ctx.globalAlpha=A;ctx.strokeStyle=g;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(hd.x,hd.y);ctx.lineTo(P.x,P.y);ctx.stroke();ctx.restore()}}
+  // узлы
+  NODES.forEach((nd,k)=>{const q=proj(NW(k),cam);if(!q||q.x<-500||q.x>W+500)return;
+    const on=t>=nd.hit,ka=t-nd.hit,cur=on&&k===hits-1,s=q.s,R=150*s;
+    const dim=on?(cur?1:.62):.55;
+    ctx.save();ctx.translate(q.x,q.y);
+    if(cur){const g=ctx.createRadialGradient(0,0,0,0,0,R);g.addColorStop(0,`rgba(255,110,20,${.28*A})`);g.addColorStop(1,'rgba(255,110,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,R,0,6.283);ctx.fill()}
+    ctx.fillStyle='rgba(5,4,7,.85)';ctx.globalAlpha=A;ctx.beginPath();ctx.arc(0,0,R-1,0,6.283);ctx.fill();
+    ctx.strokeStyle=on?ORANGE:'#6f655a';ctx.lineWidth=cur?2.4:1.5;ctx.globalAlpha=A*dim;
+    if(on&&cur){ctx.shadowColor='rgba(255,110,20,.9)';ctx.shadowBlur=18}
+    ctx.beginPath();ctx.arc(0,0,R,0,6.283);ctx.stroke();ctx.shadowBlur=0;
+    if(on){const e=eo(ka/.35);ctx.lineWidth=1.4;ctx.globalAlpha=A*(cur?.7:.35);ctx.beginPath();ctx.arc(0,0,lerp(R,R*1.17,e),0,6.283);ctx.stroke();
+      if(cur){ctx.strokeStyle='#b9ad9c';ctx.globalAlpha=A*.3*e;ctx.beginPath();ctx.arc(0,0,R*1.08,0,6.283);ctx.stroke()}
+      const pk=clamp(ka/.55);if(pk<1){ctx.strokeStyle=GOLD;ctx.globalAlpha=A*(1-pk)*.8;ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,R*(1+eo(pk)*.8),0,6.283);ctx.stroke()}}
+    ctx.scale(s,s);icon(k,on,ka,A*(on?(cur?1:.75):.6));
     ctx.restore();
-    if(!on)return;
-    const lx=p.x+60,ly=p.y;const lw=eo(k/.35);
-    ctx.save();ctx.globalAlpha=a*.6;ctx.strokeStyle=GOLD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x+24,p.y);ctx.lineTo(p.x+24+(lx-p.x-30)*lw,p.y);ctx.stroke();ctx.restore();
-    T(nd.n,lx+6,ly-24,17,{mono:1,c:ORANGE,a:a*lw,ls:2,w:700});
-    words(nd.tx.split(' '),lx+4,ly+22,42,t,nd.hit+.08,.06,{w:500,a});
+    T(nd.n,q.x,q.y+R+34*s,15,{mono:1,c:on?ORANGE:'#6f655a',a:A*dim,al:'center',ls:2,w:700});
+    // заголовок шага (+ «двоение» в момент переключения, как в референсе)
+    const ts=64*s,ty=q.y+278*s;
+    if(on&&ka<.2)T(nd.tx,q.x+(1-ka/.2)*34,ty,ts,{w:500,al:'center',a:A*.45*(1-ka/.2),blur:5});
+    T(nd.tx,q.x,ty,ts,{w:500,al:'center',c:on?'#f4efe8':'#5f574e',a:A*(on?(cur?1:.7):.85),glow:cur?'rgba(255,255,255,.35)':null,gb:22,blur:on&&ka<.2?(1-ka/.2)*4:0});
+    if(on)T(scramble(nd.sub,(ka-.05)/.45,Math.floor(t*30)+k*5),q.x,q.y+328*s,17,{mono:1,c:'#b9ad9c',a:A*(cur?.9:.5)*eo(ka/.15),al:'center',ls:2.5});
   });
+}
+// размытие в движении при резком переезде камеры: несколько подкадров
+function scene4MB(t){
+  if(t<13.3||t>16.75)return;
+  const v=Math.abs(panX(t)-panX(t-1/60)),n=v>5?10:1;
+  if(n===1){scene4(t,camAt(t));return}
+  const m=ctx;m.save();m.globalCompositeOperation='lighter';
+  for(let j=0;j<n;j++){const tj=t-SH*j/(n-1);lctx.setTransform(1,0,0,1,0,0);lctx.globalAlpha=1;lctx.globalCompositeOperation='source-over';lctx.clearRect(0,0,W,H);
+    ctx=lctx;scene4(tj,camAt(tj));ctx=m;m.globalAlpha=1/n;m.drawImage(LY,0,0)}
+  m.restore();
 }
 
 /* ---------- СЦЕНА 5 · Результат 16.5–19.5 ---------- */
