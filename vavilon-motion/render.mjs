@@ -27,7 +27,7 @@ if (mode === 'stills') {
   mkdirSync(path.join(dir, 'out'), { recursive: true });
   const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
     '-i', path.join(dir, 'audio/mix.wav'), '-map', '0:v', '-map', '1:a',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-r', String(FPS),
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-pix_fmt', 'yuv420p', '-r', String(FPS),
     '-c:a', 'aac', '-b:a', '256k', '-t', String(DUR), '-movflags', '+faststart', path.join(dir, 'out/vavilon_31s.mp4')],
     { stdio: ['pipe', 'inherit', 'inherit'] });
   const t0 = Date.now();

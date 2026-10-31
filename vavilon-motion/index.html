@@ -308,23 +308,22 @@ function featherPath(L,w){
   ctx.beginPath();ctx.moveTo(0,-L/2);ctx.bezierCurveTo(-w,-L*.25,-w*.9,L*.2,-w*.15,L*.42);ctx.lineTo(0,L*.3);
   ctx.lineTo(w*.15,L*.42);ctx.bezierCurveTo(w*.9,L*.2,w,-L*.25,0,-L/2);ctx.closePath();
 }
+const FEATHER_SPR=[0,3,7,12].map(bl=>{const [c,g]=canvas2(260,420);g.translate(130,210);g.filter=bl?`blur(${bl}px)`:'none';
+  const L=300,w=55,gr=g.createLinearGradient(-w,0,w,0);gr.addColorStop(0,'rgba(220,210,255,.25)');gr.addColorStop(.5,'rgba(250,246,255,.85)');gr.addColorStop(1,'rgba(220,210,255,.25)');
+  g.beginPath();g.moveTo(0,-L/2);g.bezierCurveTo(-w,-L*.25,-w*.9,L*.2,-w*.15,L*.42);g.lineTo(0,L*.3);g.lineTo(w*.15,L*.42);g.bezierCurveTo(w*.9,L*.2,w,-L*.25,0,-L/2);g.fillStyle=gr;g.fill();
+  g.strokeStyle='rgba(120,100,180,.5)';g.lineWidth=2;for(let k=1;k<9;k++){const yy=-L/2+L*k/10;g.beginPath();g.moveTo(0,yy);g.lineTo(-w*.75,yy+L*.08);g.moveTo(0,yy);g.lineTo(w*.75,yy+L*.08);g.stroke()}
+  g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;g.beginPath();g.moveTo(0,-L/2);g.quadraticCurveTo(w*.1,0,0,L*.62);g.stroke();return c});
 function drawFeathers(t,C,focus){
   const al0=ss(CUE.son,CUE.son+.6,t)*(1-ss(8.4,8.9,t));if(al0<.01)return;
   for(const f of FEATH){
     const u=t-CUE.son,x=f.x+Math.sin(u*1.2+f.ph)*f.sw,y=f.y+u*f.v*3.2,rot=Math.sin(u*1.2+f.ph+.6)*.7;
     const a=proj(x,y,f.z,C);if(!a||a[2]<120)continue;
-    const blur=Math.min(14,Math.abs(a[2]-focus)/a[2]*10);
-    ctx.save();ctx.translate(a[0],a[1]);ctx.rotate(rot);ctx.scale(a[3],a[3]);ctx.globalAlpha=al0*clamp(1.1-blur*.05)*ss(120,400,a[2]);
-    if(blur>1.2)ctx.filter=`blur(${blur.toFixed(1)}px)`;
-    const L=f.sz*2.4,w=f.sz*.45;
-    const g=ctx.createLinearGradient(-w,0,w,0);g.addColorStop(0,'rgba(220,210,255,.25)');g.addColorStop(.5,'rgba(250,246,255,.85)');g.addColorStop(1,'rgba(220,210,255,.25)');
-    featherPath(L,w);ctx.fillStyle=g;ctx.fill();
-    ctx.strokeStyle='rgba(120,100,180,.5)';ctx.lineWidth=2;
-    for(let k=1;k<9;k++){const yy=-L/2+L*k/10;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(-w*.75,yy+L*.08);ctx.moveTo(0,yy);ctx.lineTo(w*.75,yy+L*.08);ctx.stroke()}
-    ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-L/2);ctx.quadraticCurveTo(w*.1,0,0,L*.62);ctx.stroke();
-    ctx.restore();
+    const blur=Math.abs(a[2]-focus)/a[2]*10,lv=blur<1.5?0:blur<5?1:blur<9.5?2:3;
+    const sc=a[3]*f.sz/125;
+    ctx.save();ctx.translate(a[0],a[1]);ctx.rotate(rot);ctx.scale(sc,sc);ctx.globalAlpha=al0*clamp(1.1-blur*.05)*ss(120,400,a[2]);
+    ctx.drawImage(FEATHER_SPR[lv],-130,-210);ctx.restore();
   }
-  ctx.filter='none';ctx.globalAlpha=1;
+  ctx.globalAlpha=1;
 }
 const CLK0=5.95;
 function drawClock(t,C){
@@ -372,6 +371,7 @@ const FW=128,FH=104,FIELD=new Float32Array(FW*FH);{let mn=9,mx=-9;
     const v=d*.85+noise2(x*.07,y*.07)*.38+noise2(x*.22,y*.22)*.12;FIELD[y*FW+x]=v;mn=Math.min(mn,v);mx=Math.max(mx,v)}
   for(let i=0;i<FIELD.length;i++)FIELD[i]=(FIELD[i]-mn)/(mx-mn)}
 const [MASK,mkg]=canvas2(FW,FH),[CHAR,chg]=canvas2(FW,FH),[GLOW,glg]=canvas2(FW,FH),[PC,pcg]=canvas2(PW,PH);
+const [GLOWB,gbg]=canvas2(FW,FH);
 const MD=mkg.createImageData(FW,FH),CD=chg.createImageData(FW,FH),GD=glg.createImageData(FW,FH);
 const B0=9.45,BM=13.38,B1=14.7;
 const burnLevel=t=>t<BM?lerp(-.06,.42,clamp((t-B0)/(BM-B0))):lerp(.42,1.08,clamp((t-BM)/(B1-BM)));
@@ -383,7 +383,7 @@ function updateBurn(t){
     MD.data[j]=MD.data[j+1]=MD.data[j+2]=255;MD.data[j+3]=f<b-.035?0:255;
     const ch=f>=b-.035&&f<b+.07?clamp(1-(f-b)/.07):0;CD.data[j]=35;CD.data[j+1]=16;CD.data[j+2]=6;CD.data[j+3]=230*ch;
     const gw=f>=b-.05&&f<b+.005?1-Math.abs(f-(b-.02))/.03:0;GD.data[j]=255;GD.data[j+1]=150+80*clamp(gw);GD.data[j+2]=50;GD.data[j+3]=255*clamp(gw)}
-  mkg.putImageData(MD,0,0);chg.putImageData(CD,0,0);glg.putImageData(GD,0,0);
+  mkg.putImageData(MD,0,0);chg.putImageData(CD,0,0);glg.putImageData(GD,0,0);gbg.clearRect(0,0,FW,FH);gbg.filter='blur(1.5px)';gbg.drawImage(GLOW,0,0);gbg.filter='none';
 }
 const PAPER_A=[0,-60,2000];
 function paperXf(t){const u=t-CUE.pepel;return {dy:lerp(-900,0,eOutBack(u/.55,1.2)),rot:-.06+.05*Math.sin(t*.8)+(1-eOutExpo(u/.6))*.6,sx:Math.cos(.28*Math.sin(t*.55))}}
@@ -397,7 +397,7 @@ function drawPaper(t,C){
   ctx.save();ctx.translate(a[0],a[1]);ctx.rotate(X.rot);ctx.scale(a[3]*X.sx,a[3]);
   ctx.shadowColor='rgba(255,90,20,.6)';ctx.shadowBlur=60*a[3];ctx.globalAlpha=ss(-.05,.05,t-CUE.pepel);
   ctx.drawImage(PC,-PW/2,-PH/2);ctx.shadowBlur=0;
-  ctx.globalCompositeOperation='lighter';ctx.filter='blur(6px)';ctx.drawImage(GLOW,-PW/2,-PH/2,PW,PH);ctx.filter='none';ctx.drawImage(GLOW,-PW/2,-PH/2,PW,PH);
+  ctx.globalCompositeOperation='lighter';ctx.drawImage(GLOWB,-PW/2,-PH/2,PW,PH);ctx.drawImage(GLOW,-PW/2,-PH/2,PW,PH);
   ctx.restore();
 }
 // хлопья пепла от фото: срываются, когда их точку «съедает» огонь
@@ -414,7 +414,7 @@ const FL=[];{for(let j=0;j<38;j++)FL.push([hash(j+1),hash(j+20),hash(j+40),j%3])
 function fireI(t){if(t<CUE.pepel)return 0;const u=t-CUE.pepel;
   return eOutExpo(u/.35)*(1+.5*Math.exp(-Math.max(0,t-BM)*2.2)*(t>BM?1:0)+.25*Math.exp(-(((t-12.05)/.2)**2)))*(1-ss(14.3,15.3,t))*(.85+.2*envAt(t))}
 // огонь рисуется в половинном буфере, затем дважды: размытое свечение + резкое ядро
-const [FIRE,fg2]=canvas2(W/2,H/2);
+const [FIRE,fg2]=canvas2(W/2,H/2),[FIREB,fb2]=canvas2(W/4,H/4);
 function drawFlames(t,C,layer){
   const I=fireI(t);if(I<.01)return;
   fg2.setTransform(1,0,0,1,0,0);fg2.clearRect(0,0,W/2,H/2);fg2.setTransform(.5,0,0,.5,W/4,H/4);fg2.globalCompositeOperation='lighter';
@@ -431,7 +431,8 @@ function drawFlames(t,C,layer){
   }
   const base=fg2.createLinearGradient(0,H*.42,0,H);base.addColorStop(0,'rgba(255,90,20,0)');base.addColorStop(1,`rgba(255,110,30,${.5*I})`);
   if(layer==='back'){fg2.setTransform(.5,0,0,.5,W/4,H/4);fg2.fillStyle=base;fg2.fillRect(-W/2,-H/2,W,H)}
-  ctx.save();ctx.globalCompositeOperation='lighter';ctx.filter='blur(14px)';ctx.globalAlpha=.9;ctx.drawImage(FIRE,-W/2,-H/2,W,H);
+  fb2.clearRect(0,0,W/4,H/4);fb2.filter='blur(3.5px)';fb2.drawImage(FIRE,0,0,W/4,H/4);fb2.filter='none';
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.9;ctx.drawImage(FIREB,-W/2,-H/2,W,H);
   ctx.filter='none';ctx.globalAlpha=.85;ctx.drawImage(FIRE,-W/2,-H/2,W,H);ctx.restore();
 }
 const SPARK=[];{const r=mulberry(12);for(let i=0;i<260;i++)SPARK.push([r(),r(),r(),i<110?CUE.pepel:BM])}
