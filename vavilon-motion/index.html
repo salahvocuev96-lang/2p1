@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Вавилон — motion</title>
+<style>
+@font-face{font-family:PF;src:url(fonts/PlayfairDisplay.ttf);font-weight:400 900;font-style:normal}
+@font-face{font-family:PF;src:url(fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:JB;src:url(fonts/JetBrainsMono.ttf);font-weight:100 800}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;color:#bbb;font:12px JB,monospace}
+canvas{position:absolute;inset:0;margin:auto;width:min(100vw,177.78vh);height:min(56.25vw,100vh)}
+#ui{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;padding:8px 12px;background:#000a}
+#ui input{flex:1}#ui button{font:inherit;background:#222;color:#ddd;border:1px solid #444;padding:4px 10px;cursor:pointer}
+#taps{position:fixed;right:10px;top:10px;max-width:340px;white-space:pre-wrap;background:#000c;padding:8px;display:none}
+body.render #ui,body.render #taps{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="ui"><button id="play">▶ играть</button><input id="seek" type="range" min="0" max="31" step="0.001" value="0"><span id="tc">0.00</span>
+<span title="Нажимайте T на каждом ключевом слове, чтобы записать точные тайминги">T — отметить слово</span></div>
+<div id="taps"></div>
+<audio id="aud" src="audio/mix.wav" preload="auto"></audio>
+<script src="audio-env.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   «ВАВИЛОН» — 31 с, 1920×1080, 60 fps. Детерминированный таймлайн:
+   renderAt(t) рисует кадр только из t → одинаково при превью и экспорте.
+   ===================================================================== */
+const W=1920,H=1080,FPS=60,DUR=31,F=1000;
+const BPM=161.5,BEAT=60/BPM;
+// Тайминги ключевых слов (секунды трека). Привязаны к акцентам дорожки:
+// 3.30 — вступление бита после провала, 9.01 и 15.09 — сильнейшие атаки,
+// 21.55 — возврат бита после брейка, 27.24 — сильная доля перед финалом.
+// Если слово в песне звучит чуть иначе — поправьте число (режим T в превью).
+const CUE={son:3.30,pepel:9.01,stars:15.09,vav:21.55,end:27.24};
+const ENV=window.ENV||[];
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+
+/* ---------- математика ---------- */
+const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ss=(a,b,x)=>{x=clamp((x-a)/(b-a));return x*x*(3-2*x)};
+const sms=(a,b,x)=>{x=clamp((x-a)/(b-a));return x*x*x*(x*(x*6-15)+10)};
+const eOutExpo=x=>{x=clamp(x);return x>=1?1:1-Math.pow(2,-10*x)};
+const eOutBack=(x,s=1.6)=>{x=clamp(x)-1;return 1+(s+1)*x*x*x+s*x*x};
+const eInCubic=x=>{x=clamp(x);return x*x*x};
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hash=n=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s)};
+const noise=x=>{const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return lerp(hash(i),hash(i+1),u)*2-1};
+const envAt=t=>ENV.length?ENV[clamp(Math.round(t*FPS),0,ENV.length-1)]:.5;
+const rgba=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const mixc=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)];
+
+/* ---------- веса сцен (кроссфейды) ---------- */
+function phases(t){
+  const a=ss(CUE.son-.25,CUE.son+.35,t), b=ss(8.45,9.05,t), c=ss(13.7,15.4,t), d=ss(21.15,21.7,t), e=ss(27.1,27.8,t);
+  return {intro:1-a, son:a*(1-b), pepel:b*(1-c), stars:c*(1-d), vav:d*(1-e), end:e};
+}
+
+/* ---------- камера: Эрмитов сплайн по ключам + тряска на ударах ---------- */
+// [t, x, y, z, yaw, pitch, roll]
+const CK=[
+ [0.0,   0,  60,-1800,-.06, .04,-.03],
+ [3.3,   0,   0,-1080, .00, .00, .00],
+ [5.6,  55, -18, -985, .035,-.015,.02],
+ [7.8, -30,  10, -880,-.02, .01,-.012],
+ [8.6,   0,   0, -120, .00, .00, .03],
+ [9.0,   0,   0,  955, .00, .00, .00],
+ [11.6, 75, -22, 1080, .045,-.02, .022],
+ [13.5,-40,   0, 1170,-.03, .00,-.015],
+ [15.2,  0,-640, 1720, .00,-.05, .00],
+ [18.2, 90,-700, 2260, .055,-.03,.04],
+ [21.2,  0,-720, 2850, .00, .00, .00],
+ [21.6,  0,-720, 2990, .00, .00, .00],
+ [24.6,-95,-765, 3260,-.065,.025,-.03],
+ [27.3,  0,-720, 3010, .00, .00, .00],
+ [31.0, 12,-724, 2900, .01, .00, .006]];
+function hermite(k,t){
+  const n=CK.length;
+  if(t<=CK[0][0])return CK[0][k];
+  if(t>=CK[n-1][0])return CK[n-1][k];
+  let i=0;while(CK[i+1][0]<t)i++;
+  const p0=CK[i],p1=CK[i+1],h=p1[0]-p0[0],u=(t-p0[0])/h;
+  const m=j=>{if(j===0||j===n-1)return 0;const a=CK[j-1],b=CK[j+1];return (b[k]-a[k])/(b[0]-a[0])};
+  const u2=u*u,u3=u2*u;
+  return (2*u3-3*u2+1)*p0[k]+(u3-2*u2+u)*h*m(i)+(-2*u3+3*u2)*p1[k]+(u3-u2)*h*m(i+1);
+}
+const HITS=[[CUE.son,5],[CUE.pepel,16],[CUE.vav,12],[CUE.end,3]];
+function cam(t){
+  let sx=0,sy=0,sr=0;
+  for(const [h,a] of HITS){if(t<h)continue;const d=Math.exp(-(t-h)*5.5)*a;sx+=noise(t*28+h)*d;sy+=noise(t*31+h*3)*d;sr+=noise(t*22+h*7)*d*.0005}
+  return {x:hermite(1,t)+sx,y:hermite(2,t)+sy,z:hermite(3,t),yaw:hermite(4,t),pitch:hermite(5,t),roll:hermite(6,t)+sr};
+}
+function proj(x,y,z,C){
+  const dx=x-C.x,dy=y-C.y,dz=z-C.z;
+  const cy=Math.cos(C.yaw),sy=Math.sin(C.yaw),cp=Math.cos(C.pitch),sp=Math.sin(C.pitch);
+  const x1=dx*cy-dz*sy,z1=dx*sy+dz*cy;
+  const y2=dy*cp-z1*sp,z2=dy*sp+z1*cp;
+  if(z2<4)return null;
+  const s=F/z2;return [x1*s,y2*s,z2,s];
+}
+
+/* ---------- фокус (глубина резкости) ---------- */
+const ANCH={son:[0,0,0],pepel:[0,0,2000],stars:[0,-690,3300],vav:[0,-720,4400]};
+function focusDepth(t,C){
+  const P=phases(t);
+  const d=a=>Math.max(60,ANCH[a][2]-C.z);
+  // в интро фокус на ближнем тумане, затем перевод фокуса на слово
+  const near=lerp(380,d('son'),sms(CUE.son-.1,CUE.son+1.1,t));
+  return P.intro*near+P.son*near+P.pepel*d('pepel')+P.stars*lerp(d('stars'),d('stars')+1500,ss(19.4,21.2,t))+(P.vav+P.end)*d('vav');
+}
+
+/* ---------- спрайты ---------- */
+function sprite(col,hard=.0){
+  const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+  const gr=g.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,rgba(col,1));gr.addColorStop(.18+hard*.5,rgba(col,.75));gr.addColorStop(.5,rgba(col,.18));gr.addColorStop(1,rgba(col,0));
+  g.fillStyle=gr;g.fillRect(0,0,64,64);return c;
+}
+const COL={mote:[178,168,235],ash:[150,136,128],ember:[255,120,50],star:[225,235,255],starB:[150,180,255],orange:[255,110,55],white:[255,244,230]};
+const SPR={};for(const k in COL)SPR[k]=sprite(COL[k]);
+function cloudSprite(seed){
+  const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const r=mulberry(seed);
+  for(let i=0;i<60;i++){const x=128+(r()-.5)*150,y=128+(r()-.5)*90,rad=14+r()*50;
+    const gr=g.createRadialGradient(x,y,0,x,y,rad);gr.addColorStop(0,'rgba(255,255,255,.12)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,256,256)}
+  return c;
+}
+const CLOUDS=[cloudSprite(3),cloudSprite(11),cloudSprite(27)];
+function tint(src,col){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.drawImage(src,0,0);g.globalCompositeOperation='source-in';g.fillStyle=rgba(col,1);g.fillRect(0,0,c.width,c.height);return c}
+const FOG=CLOUDS.map(s=>tint(s,[105,96,165])), SMOKE=CLOUDS.map(s=>tint(s,[120,40,22]));
+const GRAIN=[0,1,2,3].map(k=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const d=g.createImageData(256,256);const r=mulberry(99+k);
+  for(let i=0;i<d.data.length;i+=4){const v=r()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}g.putImageData(d,0,0);return c});
+
+/* ---------- частицы ---------- */
+const NP=1300, R=mulberry(2024);
+const P=[];for(let i=0;i<NP;i++)P.push([R(),R(),R(),R(),R(),R(),R(),R()]);
+const wrap=(v,a,b)=>{const w=b-a;return a+((v-a)%w+w)%w};
+function pFog(p,t){return [(p[0]-.5)*3800+Math.sin(t*.25+p[6]*6)*70,(p[1]-.5)*2100+Math.cos(t*.2+p[7]*6)*45-t*7,-1400+p[2]*3400]}
+function pAsh(p,t){
+  const ember=p[4]<.15;
+  const v=ember?-(80+p[3]*90):(60+p[3]*120);
+  return [(p[0]-.5)*3800+Math.sin(t*(.6+p[5])+p[6]*9)*60,wrap((p[1]-.5)*2300+t*v,-1150,1150),1250+p[2]*3200];
+}
+function pStar(p,t){return [(p[0]-.5)*5200+Math.sin(t*.05+p[6]*6)*20,-720+(p[1]-.5)*3300,2300+p[2]*5400]}
+function particlePos(p,t){
+  const fogA=pFog(p,t);
+  if(t<8.2)return {pos:fogA,kind:'mote'};
+  const ash=pAsh(p,t);
+  const k1=sms(8.2+p[5]*.6,9.2+p[5]*.6,t);
+  if(t<13.6||k1<1&&t<10)return {pos:[lerp(fogA[0],ash[0],k1),lerp(fogA[1],ash[1],k1),lerp(fogA[2],ash[2],k1)],kind:k1<.5?'mote':(p[4]<.15?'ember':'ash')};
+  const st=pStar(p,t);
+  const d=13.6+p[0]*.9+p[5]*.4, k2=sms(d,d+1.6,t);
+  const lift=Math.sin(k2*Math.PI)*-380*(.5+p[3]);
+  const pos=[lerp(ash[0],st[0],k2),lerp(ash[1],st[1],k2)+lift,lerp(ash[2],st[2],k2)];
+  return {pos,kind:k2<.55?(p[4]<.15?'ember':'ash'):(p[4]<.3?'starB':'star')};
+}
+function particleAlpha(p,t,kind){
+  const tw=.65+.35*noise(t*(1.2+p[6]*2.5)+p[7]*40);
+  if(kind==='mote')return (.25+.45*p[4])*(.7+.3*tw)*ss(0,1.2,t);
+  if(kind==='ember')return .9*(.6+.4*tw);
+  if(kind==='ash')return .55+.25*p[6];
+  let a=(.35+.65*p[4])*tw;
+  a*=1-.55*ss(27.4,29,t); // в финале звёзды тихо гаснут
+  return a;
+}
+function particleSize(p,kind){return kind==='mote'?1.4+p[3]*2.4:kind==='ash'?2+p[3]*3.4:kind==='ember'?1.3+p[3]*1.6:1+p[3]*p[3]*3.2}
+
+// пыль из горящего слова «ПЕПЕЛ»
+let DUST=[];
+function buildDust(){
+  const c=document.createElement('canvas');c.width=1700;c.height=520;const g=c.getContext('2d');
+  g.font='900 300px PF';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#fff';g.fillText('ПЕПЕЛ',850,270);
+  const d=g.getImageData(0,0,1700,520).data,pts=[];
+  for(let y=0;y<520;y+=5)for(let x=0;x<1700;x+=5)if(d[(y*1700+x)*4+3]>140)pts.push([x-850,y-270]);
+  const r=mulberry(77);for(let i=pts.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[pts[i],pts[j]]=[pts[j],pts[i]]}
+  DUST=pts.slice(0,900).map(q=>[q[0],q[1],r(),r(),r()]);
+}
+const BURN0=13.38,BURN1=14.75;
+const burnFront=t=>lerp(-760,760,clamp((t-BURN0)/(BURN1-BURN0)));
+function dustPos(q,t){
+  const rel=(q[0]+760)/1520, tr=lerp(BURN0,BURN1,rel)+q[2]*.08;
+  if(t<tr)return null;
+  const u=t-tr, A=ANCH.pepel;
+  const k=sms(0,2.2+q[3],u);
+  const tx=(q[2]-.5)*2600,ty=-720+(q[3]-.5)*2000,tz=2700+q[4]*2800;
+  const x=A[0]+q[0]+noise(u*1.5+q[3]*30)*60*u+(tx-q[0])*k;
+  const y=A[1]+q[1]-u*u*110-u*60+(ty-(A[1]+q[1]))*k*.35;
+  return [x,y,lerp(A[2],tz,k*.8),u];
+}
+
+/* ---------- рисование частиц с DOF и motion blur ---------- */
+function drawDot(spr,C,Cp,pos,prev,size,alpha,focus){
+  const a=proj(pos[0],pos[1],pos[2],C);if(!a||Math.abs(a[0])>1300||Math.abs(a[1])>800)return;
+  const r=size*a[3];
+  const coc=Math.min(40,Math.abs(a[2]-focus)/a[2]*14);
+  const Rr=Math.max(.7,r+coc*.55);
+  let al=alpha*clamp(((r+.7)*(r+.7))/(Rr*Rr)*1.6,.12,1);
+  if(a[2]<200)al*=ss(20,200,a[2]);
+  if(al<.01)return;
+  const b=prev&&proj(prev[0],prev[1],prev[2],Cp);
+  ctx.globalAlpha=al;
+  if(b){const dx=a[0]-b[0],dy=a[1]-b[1],L=Math.hypot(dx,dy);
+    if(L>2.5&&L<500){ // штрих по относительному движению = motion blur
+      const n=Math.min(8,Math.ceil(L/Rr));ctx.globalAlpha=al*Math.min(1,1.6/n+.15);
+      for(let i=0;i<=n;i++){const u=i/n;ctx.drawImage(spr,b[0]+dx*u-Rr*2,b[1]+dy*u-Rr*2,Rr*4,Rr*4)}return}}
+  ctx.drawImage(spr,a[0]-Rr*2,a[1]-Rr*2,Rr*4,Rr*4);
+}
+function drawParticles(t,C,Cp,focus){
+  const tp=t-1/120;
+  for(let i=0;i<NP;i++){
+    const p=P[i],q=particlePos(p,t),qp=particlePos(p,tp);
+    const kind=q.kind;
+    ctx.globalCompositeOperation=kind==='ash'?'source-over':'lighter';
+    drawDot(SPR[kind],C,Cp,q.pos,qp.pos,particleSize(p,kind),particleAlpha(p,t,kind),focus);
+  }
+  if(t>BURN0&&t<20){
+    ctx.globalCompositeOperation='lighter';
+    for(const q of DUST){const a=dustPos(q,t);if(!a)continue;const b=dustPos(q,tp);
+      const u=a[3],hot=Math.exp(-u*1.6);
+      const al=(.9*hot+.5*(1-hot))*(1-ss(16.5,19.5,t)*.7);
+      drawDot(hot>.35?SPR.ember:SPR.star,C,Cp,a,b,1.2+q[4]*1.6,al,focus)}
+  }
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+}
+
+/* ---------- облака тумана и дыма ---------- */
+const CL=[];{const r=mulberry(5);for(let i=0;i<30;i++)CL.push({x:(r()-.5)*3600,y:(r()-.5)*1300,z:-900+r()*2800,s:900+r()*1300,v:(r()-.5)*90,img:i%3,a:.35+r()*.4,set:i<18?'fog':'smoke'})}
+for(const c of CL)if(c.set==='smoke'){c.z+=2300;c.y+=300}
+function drawClouds(t,C,P_,front){
+  const zText=front?null:0;
+  for(const c of CL){
+    const w=c.set==='fog'?(P_.intro+P_.son)*(1-ss(8.6,9.2,t))+.0:P_.pepel*(1-ss(13.8,15,t));
+    if(w<.01)continue;
+    const z=c.z, wx=c.x+c.v*t+Math.sin(t*.3+c.z)*60, wy=c.y-(c.set==='smoke'?t*25:t*5);
+    const anchorZ=c.set==='fog'?ANCH.son[2]:ANCH.pepel[2];
+    if((z<anchorZ)!==front)continue;
+    const a=proj(wx,wy,z,C);if(!a)continue;
+    const S=c.s*a[3];if(S<20)continue;
+    let al=w*c.a*(c.set==='fog'?.34:.55)*ss(30,500,a[2]);
+    if(front&&c.set==='fog')al*=.75;
+    ctx.globalAlpha=al;ctx.globalCompositeOperation='screen';
+    ctx.drawImage((c.set==='fog'?FOG:SMOKE)[c.img],a[0]-S/2,a[1]-S/2,S,S*.62);
+  }
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+
+/* ---------- текст ---------- */
+const mcache={};
+function layout(str,font,track){
+  const key=str+font+track;if(mcache[key])return mcache[key];
+  ctx.save();ctx.font=font;const ws=[...str].map(ch=>ctx.measureText(ch).width);ctx.restore();
+  const tot=ws.reduce((s,w)=>s+w,0)+track*(ws.length-1);let x=-tot/2;
+  const xs=ws.map(w=>{const c=x+w/2;x+=w+track;return c});return mcache[key]={xs,ws,tot};
+}
+// слово-«билборд» в мире: каждая буква со своим смещением, масштабом, размытием
+function drawWord(C,anchor,str,o){
+  const a=proj(anchor[0],anchor[1],anchor[2],C);if(!a)return null;
+  const S=a[3];
+  const L=layout(str,o.font,o.track||0);
+  const letters=[...str];
+  for(let k=0;k<letters.length;k++){
+    const st=o.letter(k,letters.length);if(!st||st.a<=.003)continue;
+    const sc=S*(st.s??1);
+    const x=a[0]+((L.xs[k]+(st.x||0))*S),y=a[1]+(st.y||0)*S;
+    const zs=st.z?F/(a[2]+st.z)/S:1; // смещение буквы по глубине
+    ctx.save();ctx.translate(x*zs,y*zs);ctx.rotate(st.r||0);ctx.scale(sc*zs,sc*zs);
+    ctx.font=o.font;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    const blur=Math.min(40,(st.b||0)*sc*zs);
+    ctx.filter=blur>.4?`blur(${blur.toFixed(1)}px)`:'none';
+    if(o.glow){ctx.shadowColor=o.glow;ctx.shadowBlur=(o.glowR||30)*sc*zs*(st.g??1)}
+    // хроматическая аберрация на ударах
+    if(st.ca>.05){ctx.globalCompositeOperation='lighter';const d=st.ca*10;
+      ctx.globalAlpha=st.a*.55;ctx.fillStyle='rgba(255,40,40,1)';ctx.fillText(letters[k],-d,o.base||0);
+      ctx.fillStyle='rgba(40,200,255,1)';ctx.fillText(letters[k],d,o.base||0);ctx.globalCompositeOperation='source-over'}
+    ctx.globalAlpha=st.a;ctx.fillStyle=st.fill||o.fill;ctx.fillText(letters[k],0,o.base||0);
+    ctx.restore();
+  }
+  return a;
+}
+function line(C,anchor,y,w,alpha,col){
+  const a=proj(anchor[0],anchor[1]+y,anchor[2],C);if(!a||alpha<.01)return;
+  const hw=w*a[3]/2;const g=ctx.createLinearGradient(a[0]-hw,0,a[0]+hw,0);
+  g.addColorStop(0,rgba(col,0));g.addColorStop(.5,rgba(col,alpha));g.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=g;ctx.fillRect(a[0]-hw,a[1]-.75,hw*2,1.5);
+}
+
+// СЦЕНА 1 — «сон»: туман, расфокус → фокус, буквы дышат и расплываются
+function wordSon(t,C){
+  if(t<CUE.son-.3||t>9.1)return;
+  const pass=1-ss(8.35,8.75,t);
+  drawWord(C,ANCH.son,'сон',{font:'italic 400 300px PF',track:10,base:90,fill:'#ece6ff',glow:'rgba(170,150,255,.55)',glowR:40,
+    letter:(k)=>{
+      const t0=CUE.son+k*BEAT*.5,u=t-t0;
+      const inn=eOutExpo(u/1.1), drift=ss(6.0,8.4,t);
+      return {a:ss(0,.6,u)*pass*(.85+.15*Math.sin(t*1.7+k)),
+        b:lerp(26,0,inn)+drift*5+(k===1?noise(t*.8)*1.5:0),
+        y:lerp(60,0,inn)+Math.sin(t*1.3+k*1.7)*6-drift*(k-1)*12,
+        x:lerp(70*(k-1),0,inn)+drift*(k-1)*70,
+        r:drift*(k-1)*.05,s:1+.02*Math.sin(t*1.6+k)};
+    }});
+  line(C,ANCH.son,150,lerp(0,620,eOutExpo((t-CUE.son-.2)/1.2)),.35*pass,[190,180,255]);
+}
+
+// СЦЕНА 2 — «ПЕПЕЛ»: удар, раскалённые буквы, слово сгорает слева направо
+const WC=document.createElement('canvas');WC.width=1700;WC.height=520;const wg=WC.getContext('2d');
+function wordPepel(t,C){
+  if(t<CUE.pepel-.05||t>BURN1+.3)return;
+  const u=t-CUE.pepel, heat=ss(11.9,13.3,t);
+  wg.clearRect(0,0,1700,520);
+  wg.font='900 300px PF';wg.textAlign='center';wg.textBaseline='middle';
+  const gr=wg.createLinearGradient(0,140,0,400);
+  gr.addColorStop(0,'#f6ece2');gr.addColorStop(.55,heat>0?`rgb(${255},${lerp(220,140,heat)|0},${lerp(200,90,heat)|0})`:'#f3d8c4');gr.addColorStop(1,`rgb(255,${lerp(120,70,heat)|0},40)`);
+  wg.fillStyle=gr;wg.fillText('ПЕПЕЛ',850,270);
+  // тлеющие прожилки внутри букв
+  if(heat>0){wg.globalCompositeOperation='source-atop';
+    for(let i=0;i<22;i++){const x=850+(hash(i)-.5)*1500,y=270+(hash(i+9)-.5)*260,r=40+hash(i+3)*90;
+      const g2=wg.createRadialGradient(x,y,0,x,y,r);g2.addColorStop(0,`rgba(255,80,20,${.55*heat*(.6+.4*noise(t*2+i))})`);g2.addColorStop(1,'rgba(255,80,20,0)');wg.fillStyle=g2;wg.fillRect(x-r,y-r,2*r,2*r)}
+    wg.globalCompositeOperation='source-over'}
+  // фронт горения
+  if(t>BURN0){const fx=850+burnFront(t);
+    wg.globalCompositeOperation='destination-out';wg.beginPath();wg.moveTo(0,0);
+    for(let y=0;y<=520;y+=12)wg.lineTo(fx+noise(y*.05+t*3)*26,y);wg.lineTo(0,520);wg.closePath();wg.fill();
+    wg.globalCompositeOperation='source-atop';const g3=wg.createLinearGradient(fx-10,0,fx+70,0);
+    g3.addColorStop(0,'rgba(255,240,200,1)');g3.addColorStop(.2,'rgba(255,120,30,1)');g3.addColorStop(1,'rgba(255,120,30,0)');wg.fillStyle=g3;wg.fillRect(fx-10,0,80,520);
+    wg.globalCompositeOperation='source-over'}
+  const a=proj(ANCH.pepel[0],ANCH.pepel[1],ANCH.pepel[2],C);if(!a)return;
+  // удар: масштаб 1.55 → 1 с отскоком; motion blur — несколько сэмплов затвора
+  const scAt=uu=>lerp(1.55,1,eOutBack(uu/.42,1.3));
+  const samples=u<.3?6:1;
+  ctx.save();ctx.translate(a[0],a[1]);
+  for(let i=0;i<samples;i++){
+    const uu=u-i*(1/240), sc=scAt(uu)*a[3];
+    ctx.globalAlpha=ss(-.03,.06,uu)/(samples>1?samples*.55:1);
+    ctx.filter=uu<.25?`blur(${(lerp(8,0,uu/.25)).toFixed(1)}px)`:'none';
+    ctx.shadowColor=`rgba(255,90,30,${.5+.4*heat})`;ctx.shadowBlur=(40+60*heat)*a[3];
+    ctx.drawImage(WC,-850*sc,-270*sc,1700*sc,520*sc);
+  }
+  // хроматический сдвиг в момент удара
+  const ca=1-ss(0,.3,u);
+  if(ca>.02){ctx.globalCompositeOperation='lighter';ctx.filter='none';ctx.shadowBlur=0;ctx.globalAlpha=.35*ca;const sc=scAt(u)*a[3];
+    ctx.drawImage(WC,-850*sc-12*ca,-270*sc,1700*sc,520*sc);ctx.drawImage(WC,-850*sc+12*ca,-270*sc,1700*sc,520*sc)}
+  ctx.restore();ctx.filter='none';ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;
+  line(C,ANCH.pepel,200,lerp(0,900,eOutExpo(u/.6))*(1-ss(BURN0,BURN1,t)),.45,[255,120,60]);
+}
+
+// СЦЕНА 3 — «з в ё з д ы»: каждая буква вспыхивает звездой на долю, затем слово уходит вглубь
+function flare(x,y,size,alpha,col){
+  if(alpha<.01)return;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=alpha;
+  ctx.drawImage(SPR.white,x-size*.6,y-size*.6,size*1.2,size*1.2);
+  const g=ctx.createLinearGradient(x-size*3,0,x+size*3,0);g.addColorStop(0,rgba(col,0));g.addColorStop(.5,rgba(col,1));g.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=g;ctx.fillRect(x-size*3,y-1,size*6,2);
+  const g2=ctx.createLinearGradient(0,y-size*1.6,0,y+size*1.6);g2.addColorStop(0,rgba(col,0));g2.addColorStop(.5,rgba(col,1));g2.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=g2;ctx.fillRect(x-1,y-size*1.6,2,size*3.2);ctx.restore();
+}
+function wordStars(t,C){
+  if(t<CUE.stars-.1||t>21.6)return;
+  const rec=eInCubic(ss(19.4,21.15,t));
+  const anchor=[ANCH.stars[0],ANCH.stars[1],ANCH.stars[2]+rec*2600];
+  const font='400 210px PF',track=lerp(78,-40,rec);
+  const a=drawWord(C,anchor,'звёзды',{font,track,base:70,fill:'#eef2ff',glow:'rgba(150,180,255,.8)',glowR:26,
+    letter:(k)=>{const u=t-(CUE.stars+k*BEAT);if(u<0)return null;const e=eOutExpo(u/.7);
+      const tw=.86+.14*noise(t*2.2+k*13);
+      return {a:ss(0,.2,u)*tw*(1-ss(20.4,21.15,t)),b:lerp(14,0,e),s:lerp(.55,1,e),y:lerp(-30,0,e)}}});
+  if(a){const L=layout('звёзды',font,track);
+    for(let k=0;k<6;k++){const u=t-(CUE.stars+k*BEAT);if(u<0)continue;
+      flare(a[0]+L.xs[k]*a[3],a[1]+(-10)*a[3],70*a[3]*(1+envAt(t)*.3),Math.exp(-u*3.2)*.95,[190,210,255])}
+    // финальная одиночная звезда — в неё сворачивается слово
+    const s1=ss(20.6,21.2,t)*(1-ss(21.55,21.9,t));flare(a[0],a[1]-10*a[3],90+40*s1,s1,[210,225,255]);}
+  line(C,anchor,140,lerp(0,780,eOutExpo((t-CUE.stars)/1.5))*(1-rec),.35,[170,195,255]);
+}
+
+// СЦЕНА 4 — «ВАВИЛОН»: созвездие-башня строится от земли, затмение, буквы падают из глубины
+const TOWER=(()=>{ // ступенчатая башня (зиккурат) из рёбер, мировые координаты
+  const V=[],E=[];const base=-720+640,tiers=7,z=4900;let y=base,w=760;
+  for(let i=0;i<tiers;i++){const h=lerp(200,120,i/(tiers-1)),w2=w*.8;
+    const a=V.length;V.push([-w,y,z],[w,y,z],[-w2,y-h,z],[w2,y-h,z]);
+    E.push([a,a+1],[a,a+2],[a+1,a+3],[a+2,a+3]);
+    E.push([a,a+3]); // диагональ пандуса
+    if(i>0)E.push([a-2,a],[a-1,a+1]);
+    y-=h;w=w2*.92;}
+  const top=V.length;V.push([0,y-160,z]);E.push([top-2,top],[top-1,top]);
+  return {V,E,base,top:y-160};
+})();
+function towerVert(v,t){
+  const col=ss(CUE.end,CUE.end+.65,t), bend=ss(CUE.end+.55,CUE.end+1.3,t);
+  let y=lerp(v[1],TOWER.base,eInCubic(col)*.0+sms(0,1,col));
+  const nx=v[0]/760;y+=bend*(nx*nx)*-260+bend*120;
+  const x=v[0]*lerp(1,1.25,bend);
+  return [x,y,v[2]];
+}
+function drawTower(t,C){
+  if(t<CUE.vav-.05)return;
+  const fadeOut=1-ss(CUE.end+.35,CUE.end+.9,t);
+  drawArc(t,C);
+  if(fadeOut<=0)return;
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+  const span=TOWER.base-TOWER.top;
+  for(const [i,j] of TOWER.E){
+    const A=towerVert(TOWER.V[i],t),B=towerVert(TOWER.V[j],t);
+    const h=(TOWER.base-Math.min(TOWER.V[i][1],TOWER.V[j][1]))/span; // строим снизу вверх по долям
+    const t0=CUE.vav+h*BEAT*7, p=sms(t0,t0+BEAT*1.2,t);if(p<=0)continue;
+    const a=proj(A[0],A[1],A[2],C),b=proj(B[0],B[1],B[2],C);if(!a||!b)continue;
+    const bx=lerp(a[0],b[0],p),by=lerp(a[1],b[1],p);
+    ctx.strokeStyle=rgba(COL.orange,.55*fadeOut*(.8+.2*envAt(t)));ctx.lineWidth=1.6;ctx.shadowColor='rgba(255,100,40,.9)';ctx.shadowBlur=10;
+    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(bx,by);ctx.stroke();
+  }
+  ctx.shadowBlur=0;
+  TOWER.V.forEach((v,i)=>{const A=towerVert(v,t),a=proj(A[0],A[1],A[2],C);if(!a)return;
+    const h=(TOWER.base-v[1])/span,t0=CUE.vav+h*BEAT*7,u=t-t0;if(u<0)return;
+    const al=(Math.exp(-u*2.5)*.9+.35)*(1-ss(CUE.end+.3,CUE.end+.9,t));
+    ctx.globalAlpha=al;const s=(14+20*Math.exp(-u*3))*a[3];ctx.drawImage(SPR.white,a[0]-s,a[1]-s,s*2,s*2)});
+  ctx.restore();ctx.globalAlpha=1;
+}
+// финальная «улыбка»-горизонт (мотив шаблона): основание башни выгибается в дугу
+function drawArc(t,C){
+  const k=ss(CUE.end+.25,CUE.end+1.2,t);if(k<=0)return;
+  const fin=1-ss(30.55,31,t);ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle=rgba(COL.orange,.85*fin);ctx.lineWidth=2.2;ctx.shadowColor='rgba(255,90,40,1)';ctx.shadowBlur=16;ctx.beginPath();
+  const n=60,hw=lerp(760,980,k),draw=sms(0,1,k);let pen=false;
+  for(let i=0;i<=n;i++){const u=-1+2*i/n;if(Math.abs(u)>draw){pen=false;continue}
+    const a=proj(u*hw,TOWER.base-60+(-u*u*220+120)*k,4900,C);if(!a){pen=false;continue}
+    if(!pen){ctx.moveTo(a[0],a[1]);pen=true}else ctx.lineTo(a[0],a[1])}
+  ctx.stroke();ctx.restore();
+}
+function drawEclipse(t,C){
+  if(t<CUE.vav-.1)return;
+  const rise=eOutExpo((t-CUE.vav)/2.2), shrink=ss(CUE.end,CUE.end+1.4,t);
+  const a=proj(0,-720-470+lerp(560,0,rise)-shrink*330,6100,C);if(!a)return;
+  const r=520*a[3]*lerp(1,.42,shrink), e=envAt(t), flareK=Math.exp(-Math.max(0,t-24.59)*1.6)*(t>24.59?1:0);
+  ctx.save();ctx.translate(a[0],a[1]);ctx.globalCompositeOperation='lighter';
+  const I=rise*(.75+.25*e+.5*flareK)*(1-shrink*.55);
+  const g=ctx.createRadialGradient(0,0,r*.95,0,0,r*2.6);
+  g.addColorStop(0,`rgba(255,226,180,${.95*I})`);g.addColorStop(.12,`rgba(255,140,60,${.55*I})`);g.addColorStop(.5,`rgba(200,60,20,${.18*I})`);g.addColorStop(1,'rgba(120,20,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r*2.6,0,7);ctx.fill();
+  // лучи короны
+  ctx.rotate(t*.05);
+  for(let i=0;i<90;i++){const an=i/90*Math.PI*2+hash(i)*.05,len=r*(.25+hash(i+7)*.9)*(1+flareK*.6);
+    ctx.strokeStyle=`rgba(255,${170+hash(i+3)*60|0},120,${.12*I*(.5+hash(i+1))})`;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(Math.cos(an)*r*1.02,Math.sin(an)*r*1.02);ctx.lineTo(Math.cos(an)*(r+len),Math.sin(an)*(r+len));ctx.stroke()}
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#050202';ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill();
+  ctx.strokeStyle=`rgba(255,200,150,${.5*I})`;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.restore();
+}
+function wordVav(t,C){
+  if(t<CUE.vav-.05||t>CUE.end+.9)return;
+  const out=ss(CUE.end,CUE.end+.7,t);
+  const track=lerp(16,46,ss(24.6,27.2,t));
+  drawWord(C,ANCH.vav,'ВАВИЛОН',{font:'900 262px PF',track,base:90,fill:'#f4ece2',glow:'rgba(255,110,50,.6)',glowR:34,
+    letter:(k,n)=>{const t0=CUE.vav+k*BEAT*.5,u=t-t0;if(u<-.02)return null;const e=eOutExpo(u/.5);
+      return {a:ss(-.02,.12,u)*(1-out),z:lerp(-720,0,e)+out*(k-3)*-60,b:lerp(10,0,e)+out*12,y:-out*80*(1+Math.abs(k-3)*.2),
+        ca:(1-ss(0,.25,u))*.9,g:1+Math.exp(-Math.max(0,t-24.59)*1.8)*(t>24.59?1:0)}}});
+}
+
+// СЦЕНА 5 — финальная карточка
+function endCard(t,C){
+  if(t<CUE.end+.5)return;
+  const fin=1-ss(30.55,31,t);
+  const base=[ANCH.vav[0],ANCH.vav[1],ANCH.vav[2]];
+  drawWord(C,[base[0],base[1]-40,base[2]],'Miyagi',{font:'italic 400 120px PF',track:2,fill:'#efe6dc',glow:'rgba(255,120,60,.35)',glowR:20,
+    letter:(k)=>{const u=t-(CUE.end+.75+k*.05);const e=eOutExpo(u/1);return {a:ss(0,.5,u)*fin,b:lerp(16,0,e),y:lerp(24,0,e)}}});
+  drawWord(C,[base[0],base[1]+75,base[2]],'ВАВИЛОН',{font:'900 64px PF',track:lerp(60,26,eOutExpo((t-CUE.end-1.1)/1.2)),fill:'#ff6a35',
+    letter:()=>{const u=t-(CUE.end+1.1);return {a:ss(0,.4,u)*fin,b:lerp(8,0,eOutExpo(u/.8))}}});
+  drawWord(C,[base[0],base[1]+150,base[2]],'СЛУШАЙ СЕЙЧАС',{font:'400 20px JB',track:9,fill:'rgba(235,225,215,.7)',
+    letter:(k)=>{const u=t-(CUE.end+1.6+k*.035);return {a:ss(0,.15,u)*fin}}});
+}
+
+/* ---------- фон ---------- */
+const BG={intro:[[3,3,8],[7,6,16],[70,55,140]],son:[[4,3,9],[9,7,20],[95,75,180]],pepel:[[8,3,3],[44,10,4],[255,74,26]],
+  stars:[[2,3,10],[6,10,26],[70,100,200]],vav:[[3,2,3],[16,6,4],[255,110,50]],end:[[4,3,3],[10,5,4],[255,90,40]]};
+function drawBg(t,P_){
+  let top=[0,0,0],bot=[0,0,0],glow=[0,0,0];
+  for(const k in BG){const w=P_[k];top=top.map((v,i)=>v+BG[k][0][i]*w);bot=bot.map((v,i)=>v+BG[k][1][i]*w);glow=glow.map((v,i)=>v+BG[k][2][i]*w)}
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,rgba(top,1));g.addColorStop(1,rgba(bot,1));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const e=envAt(t);
+  // горизонт-накал в сцене «пепел» (как закат в шаблоне), мягкое свечение в остальных
+  const gy=lerp(H*.55,H*1.05,P_.pepel), gi=.10+.28*P_.pepel*(.8+.2*e)+.08*P_.son;
+  const rg=ctx.createRadialGradient(W/2,gy,0,W/2,gy,W*.7);rg.addColorStop(0,rgba(glow,gi));rg.addColorStop(1,rgba(glow,0));
+  ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+}
+
+/* ---------- HUD: углы, таймкоды, такты (как в шаблоне) ---------- */
+const SCN=[[0,'00 — ПРОБУЖДЕНИЕ'],[CUE.son,'01 — СОН'],[CUE.pepel,'02 — ПЕПЕЛ'],[CUE.stars,'03 — ЗВЁЗДЫ'],[CUE.vav,'04 — ВАВИЛОН'],[CUE.end,'05 — ФИНАЛ']];
+const GL='АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ0123456789#/';
+function scramble(str,u){if(u>=1)return str;return [...str].map((c,i)=>c===' '?' ':(i/str.length<u?c:GL[(Math.floor(u*40)+i*7)%GL.length])).join('')}
+function drawHud(t){
+  const on=ss(.2,1.2,t)*(1-ss(30.6,31,t)), A=.62*on;if(on<.01)return;
+  ctx.save();ctx.strokeStyle=`rgba(230,220,210,${A*.7})`;ctx.lineWidth=1.5;
+  const m=34,L=26;
+  for(const [x,y,sx,sy] of [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]]){ctx.beginPath();ctx.moveTo(x,y+sy*L);ctx.lineTo(x,y);ctx.lineTo(x+sx*L,y);ctx.stroke()}
+  ctx.fillStyle=`rgba(235,226,216,${A})`;ctx.textBaseline='top';
+  ctx.font='500 14px JB';ctx.letterSpacing='3px';ctx.fillText('ВАВИЛОН',m+16,m+14);
+  ctx.font='400 12px JB';ctx.fillStyle=`rgba(235,226,216,${A*.6})`;ctx.fillText('MIYAGI · LYRIC CUT',m+16,m+34);
+  // обратный отсчёт «до рассвета» ММ:СС:КК
+  const rem=Math.max(0,DUR-t),fr=Math.floor((rem%1)*FPS),tc=`00:${String(Math.floor(rem)).padStart(2,'0')}:${String(fr).padStart(2,'0')}`;
+  ctx.textAlign='right';ctx.font='400 11px JB';ctx.fillStyle=`rgba(235,226,216,${A*.6})`;ctx.fillText('ДО РАССВЕТА',W-m-16,m+14);
+  ctx.font='500 24px JB';ctx.fillStyle=`rgba(240,232,222,${A*1.2})`;ctx.fillText(tc,W-m-16,m+30);
+  // такты и уровень
+  const bars=Math.ceil(DUR/(BEAT*4)),bar=Math.min(bars,Math.floor(t/(BEAT*4))+1);
+  ctx.textAlign='left';ctx.textBaseline='bottom';ctx.font='500 13px JB';ctx.fillStyle=`rgba(235,226,216,${A})`;
+  ctx.fillText(`BAR ${String(bar).padStart(2,'0')} / ${bars}`,m+16,H-m-34);
+  ctx.font='400 11px JB';ctx.fillStyle=`rgba(235,226,216,${A*.6})`;ctx.fillText(`${BPM.toFixed(1)} BPM · 4/4 · 48K`,m+16,H-m-14);
+  for(let i=0;i<bars;i++){ctx.fillStyle=i<bar?`rgba(255,106,53,${A*1.1})`:`rgba(235,226,216,${A*.25})`;ctx.fillRect(m+150+i*9,H-m-44,6,2)}
+  const e=envAt(t);for(let i=0;i<12;i++){const lv=clamp(e*1.15-i/12+.08);ctx.fillStyle=`rgba(235,226,216,${A*(.18+.8*lv)})`;const h=2+lv*12;ctx.fillRect(m+236+i*5,H-m-14-h,3,h)}
+  // название сцены с «дешифровкой» при смене
+  let cur=SCN[0];for(const s of SCN)if(t>=s[0])cur=s;
+  const u=clamp((t-cur[0])/.35);
+  ctx.textAlign='right';ctx.font='500 13px JB';ctx.fillStyle=`rgba(235,226,216,${A})`;ctx.fillText(scramble(cur[1],u),W-m-16,H-m-34);
+  ctx.font='400 11px JB';ctx.fillStyle=`rgba(235,226,216,${A*.6})`;ctx.fillText(`T+${t.toFixed(2)}s`,W-m-16,H-m-14);
+  ctx.fillStyle=`rgba(255,106,53,${A*1.3})`;ctx.beginPath();ctx.arc(W-m-16-ctx.measureText(`T+${t.toFixed(2)}s`).width-14,H-m-20,3.5,0,7);ctx.fill();
+  ctx.restore();ctx.letterSpacing='0px';
+}
+
+/* ---------- пост-обработка ---------- */
+function postFx(t){
+  const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*1.05);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.72)');
+  ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=.07;ctx.globalCompositeOperation='overlay';const gi=GRAIN[Math.floor(t*FPS)%4],ox=Math.floor(hash(Math.floor(t*FPS))*256);
+  for(let y=-256;y<H;y+=256)for(let x=-256;x<W;x+=256)ctx.drawImage(gi,x+ox,y+ox*.7);
+  ctx.globalAlpha=.035;ctx.globalCompositeOperation='multiply';ctx.fillStyle='#000';for(let y=0;y<H;y+=3)ctx.fillRect(0,y,W,1);
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  const fin=ss(30.6,31,t),start=1-ss(0,.5,t);if(fin+start>0){ctx.fillStyle=`rgba(0,0,0,${Math.max(fin,start)})`;ctx.fillRect(0,0,W,H)}
+}
+
+/* ---------- кадр ---------- */
+function renderAt(t){
+  t=clamp(t,0,DUR);
+  const C=cam(t),Cp=cam(t-1/120),P_=phases(t),focus=focusDepth(t,C);
+  ctx.setTransform(1,0,0,1,0,0);ctx.filter='none';ctx.globalAlpha=1;ctx.shadowBlur=0;
+  drawBg(t,P_);
+  ctx.save();ctx.translate(W/2,H/2);ctx.rotate(C.roll);
+  drawClouds(t,C,P_,false);
+  drawEclipse(t,C);
+  drawParticles(t,C,Cp,focus);
+  drawTower(t,C);
+  wordSon(t,C);wordPepel(t,C);wordStars(t,C);wordVav(t,C);endCard(t,C);
+  drawClouds(t,C,P_,true);
+  ctx.restore();
+  postFx(t);drawHud(t);
+}
+window.renderAt=renderAt;
+
+/* ---------- запуск: превью со звуком + режим отметок T ---------- */
+window.__ready=(async()=>{
+  await Promise.all(['400 100px PF','900 100px PF','italic 400 100px PF','400 20px JB','500 20px JB'].map(f=>document.fonts.load(f,'АВабвёMiyagi')));
+  buildDust();renderAt(0);return true;
+})();
+if(location.search.includes('render')){document.body.classList.add('render')}
+else{
+  const aud=document.getElementById('aud'),seek=document.getElementById('seek'),tc=document.getElementById('tc'),btn=document.getElementById('play'),tp=document.getElementById('taps');
+  let scrubT=0;const taps=[];
+  btn.onclick=()=>{if(aud.paused){aud.play();btn.textContent='❚❚ пауза'}else{aud.pause();btn.textContent='▶ играть'}};
+  seek.oninput=()=>{aud.currentTime=scrubT=+seek.value};
+  addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btn.onclick()}
+    if(e.code==='KeyT'){taps.push(aud.currentTime.toFixed(2));tp.style.display='block';tp.textContent='Отметки (сек):\n'+taps.join(', ')+'\n\nПодставьте нужные в CUE в начале скрипта.'}});
+  window.__ready.then(()=>{(function loop(){const t=aud.paused?scrubT:aud.currentTime;if(!aud.paused){seek.value=t;scrubT=t}
+    tc.textContent=t.toFixed(2);renderAt(t);requestAnimationFrame(loop)})()});
+}
+</script>
+</body>
+</html>
