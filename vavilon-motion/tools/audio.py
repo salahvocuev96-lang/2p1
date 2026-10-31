@@ -154,69 +154,34 @@ def chirp_down(dur, f0, f1):
     return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / (dur * .4))
 
 
+def static(dur):
+    """Телевизионные помехи (как в референсе)."""
+    n = int(dur * SR); y = rng.standard_normal(n)
+    y = y - onepole_lp(y, 1500)
+    u = np.linspace(0, 1, n)
+    return y / (np.abs(y).max() + 1e-9) * np.minimum(1, u * 40) * np.minimum(1, (1 - u) * 40)
+
+
 def build_sfx():
+    """Версия 3: только ключевые акценты, музыка — главная."""
     s = np.zeros((N, 2), np.float64)
     son, pep, st, vav, end = (CUES[k] for k in ("son", "pepel", "stars", "vav", "end"))
-    # ── интро: гул, сердцебиение, моргание
-    place(s, pad(3.4, [55, 82.4, 110]), 0, gain=.16)
-    for t0 in (.55, 1.75):
-        place(s, boom(.35, 60, 40), t0, gain=.22); place(s, boom(.35, 58, 40), t0 + .28, gain=.16)
-    for t0 in (1.38, 2.22, 2.85):
-        place(s, whoosh(.3), t0, gain=.12)
-    place(s, riser(2.0, 180, 4500), son - 2.0, gain=.16)
-    place(s, boom(), son, gain=.42)
-    # ── сон: колыбельный перебор, ветер с перьями, часы
-    box = [1046.5, 1318.5, 1568, 2093, 1568, 1318.5, 1174.7, 1568]
-    for k, f in enumerate(box):
-        place(s, glint(f), son + .05 + k * BEAT * .75, pan=-.5 + (k % 4) * .33, gain=.07)
-    place(s, bed(5.3, 500), son, gain=.07)
-    place(s, glint(784), 5.95, gain=.14)  # «звон» появления часов
-    beat = 0
-    t0 = 5.95
-    while t0 < 8.0:
-        place(s, tick(3400 if beat % 2 else 2500), t0, pan=-.3 if beat % 2 else .3, gain=.22)
-        beat += 1; t0 += BEAT
-    t0, dt = 8.0, BEAT / 2
-    while t0 < 8.75:  # раскрутка стрелок — ускоряющийся трещоток
-        place(s, tick(4200, .012), t0, gain=.16); dt *= .8; t0 += max(dt, .025)
-    place(s, whoosh(.9), 8.15, pan=-.5, gain=.2); place(s, whoosh(.9), 8.22, pan=.5, gain=.2)
-    # ── пепел: фото падает в огонь, вспышки, треск, рёв
-    place(s, whoosh(.5), pep - .45, gain=.18)
-    place(s, boom(1.6, 80, 34), pep, gain=.45)
-    place(s, whoomp(1.4), pep, gain=.42)
-    place(s, crackle(6.2), pep, gain=.16)
-    place(s, crackle(6.0), pep + .1, pan=.6, gain=.10)
-    place(s, bed(6.2, 220, lambda u: .6 + .4 * np.sin(u * 30) ** 2), pep, gain=.22)
-    place(s, whoomp(.9), 12.05, gain=.22)
-    place(s, whoomp(1.6), 13.38, gain=.45); place(s, boom(1.2, 70, 34), 13.38, gain=.3)
-    place(s, crackle(1.4), 13.38, gain=.2)
-    place(s, riser(1.5, 300, 9000), st - 1.5, gain=.2)
-    # ── звёзды: гиперпрыжок, метеоры, созвездие, гул галактики
-    place(s, boom(1.8, 90, 30), st, gain=.42)
-    place(s, chirp_down(2.4, 1800, 120) * .5 + whoosh(2.4) * .6, st, gain=.3)
-    for i, t0 in enumerate([15.83, 16.58, 17.32, 18.06, 18.8, 19.55, 20.29]):
-        place(s, whoosh(.75), t0 - .05, pan=(.7 if i % 2 else -.7), gain=.2)
-        place(s, glint(2637 + 200 * i), t0 + .25, pan=(-.5 if i % 2 else .5), gain=.05)
-    place(s, pad(4.2, [110, 164.8, 220, 329.6], swell=False), 17.0, gain=.14)
-    for k in range(7):
-        place(s, glint([1568, 1760, 2093, 2349, 2637, 3136, 3520][k]), 18.2 + k * BEAT * 2, pan=-.6 + k * .2, gain=.11)
-    place(s, riser(.5, 300, 6000), 21.05, gain=.16)  # «втягивание» в последнюю звезду
-    place(s, glint(1568), 20.9, gain=.12)
-    # ── Вавилон: удар, ярусы-камни по долям, молния, гром
-    place(s, boom(1.8, 76, 32), vav, gain=.45)
-    for k in range(8):
-        place(s, thud(), vav + k * BEAT * .75 + .2, pan=-.4 + (k % 3) * .4, gain=.22)
-    place(s, bed(5.5, 300), vav + .3, gain=.06)  # ветер пустыни
-    place(s, thunder(), 24.59, gain=.4)
-    for k in range(10):
-        place(s, glint(1046.5 * (1.5 if k % 2 else 1)), 25.75 + k * .14, pan=-.6 + k * .13, gain=.035)
-    # ── обрушение и финал
-    place(s, boom(2.2, 60, 28), end, gain=.42)
-    place(s, thunder(2.8), end + .05, gain=.25)
-    for k in range(22):
-        place(s, thud()[: int(.25 * SR)], end + .15 + k * .07 + rng.uniform(0, .05), pan=rng.uniform(-.8, .8), gain=.06)
-    place(s, glint(1046.5), end + 1.2, gain=.1); place(s, glint(1568), end + 1.35, gain=.07)
-    place(s, pad(3.2, [65.4, 98, 130.8], swell=False), end + .4, gain=.12)
+    # помехи перед каждым ударом + удар
+    for c in (son, pep, st, vav, end):
+        place(s, static(.1), c - .1, gain=.07)
+        place(s, boom(1.4, 72, 34), c, gain=.24)
+    place(s, riser(1.8, 200, 4000), son - 1.8, gain=.06)
+    place(s, glint(784), 5.95, gain=.05)                     # появление часов
+    place(s, whoosh(.8), 8.2, gain=.07)                      # пролёт сквозь часы
+    place(s, whoomp(1.2), pep, gain=.18)                     # огонь вспыхнул
+    place(s, crackle(6.0), pep, gain=.035)                   # тихий треск
+    place(s, whoomp(1.2), 13.38, gain=.12)
+    place(s, chirp_down(2.0, 1500, 120), st, gain=.07)       # гиперпрыжок
+    for k in (0, 2, 4, 6):                                   # ярусы башни — через один
+        place(s, thud(), vav + k * BEAT * .75 + .2, gain=.09)
+    place(s, thunder(), 24.59, gain=.16)
+    place(s, thunder(2.4), end + .05, gain=.1)
+    place(s, static(1.0), 30.0, gain=.035)                   # финальные помехи
     return s
 
 
@@ -225,7 +190,7 @@ def main():
         sys.exit(__doc__)
     track = load_track(sys.argv[1])
     sfx = build_sfx()
-    mix = (track * .8 + sfx * 1.9) * 1.15  # эффекты заметно, но под треком
+    mix = track * .95 + sfx  # музыка главная, эффекты — только акценты
     peak = np.abs(mix).max()
     if peak > .98:  # мягкий клиппер: тихие места почти не трогает, пики скругляет
         mix = .93 * np.tanh(mix / .93)

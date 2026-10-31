@@ -3,7 +3,8 @@
 // Нужны: playwright (Chromium), ffmpeg; перед этим: python3 tools/audio.py ВИДЕО_С_ТРЕКОМ
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -13,10 +14,18 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 const FPS = 60, DUR = 31, N = FPS * DUR; // 1860 кадров: t = i/60, i = 0..1859
 const [mode, ...args] = process.argv.slice(2);
 
+// локальный сервер: при file:// браузер запрещает читать пиксели вставленных кадров
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.ttf': 'font/ttf', '.wav': 'audio/wav' };
+const server = http.createServer((req, res) => {
+  const f = path.join(dir, decodeURIComponent(req.url.split('?')[0]));
+  if (!f.startsWith(dir) || !existsSync(f)) { res.writeHead(404); return res.end(); }
+  res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' }); res.end(readFileSync(f));
+}).listen(0);
+const port = server.address().port;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 page.on('pageerror', e => { console.error('PAGE ERROR', e.message); process.exit(1); });
-await page.goto('file://' + path.join(dir, 'index.html') + '?render=1');
+await page.goto(`http://127.0.0.1:${port}/index.html?render=1`);
 await page.evaluate(() => window.__ready);
 const frame = t => page.evaluate(t => { renderAt(t); return document.getElementById('c').toDataURL('image/jpeg', 0.95).slice(23); }, t);
 
@@ -41,3 +50,4 @@ if (mode === 'stills') {
   console.log('done: out/vavilon_31s.mp4');
 }
 await browser.close();
+server.close();
