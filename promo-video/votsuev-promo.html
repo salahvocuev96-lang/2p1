@@ -547,14 +547,15 @@ function scene6(t){
   T('Разработка сайтов для бизнеса',W/2,by+150,36,{w:400,c:'#cfc6ba',al:'center',a:sk,blur:(1-sk)*10,ls:0});
   const ck=eo((t-20.8)/.5);
   if(ck>0){const pw=600,ph=70,px=W/2-pw/2,py=by+200;
-    ctx.save();ctx.globalAlpha=ck*.8;ctx.strokeStyle=ORANGE;ctx.lineWidth=1.5;const per=2*(pw+ph);ctx.setLineDash([per*ck,per]);
-    ctx.beginPath();ctx.roundRect(px,py,pw,ph,35);ctx.stroke();ctx.setLineDash([]);
-    ctx.globalAlpha=ck*.1;ctx.fillStyle=ORANGE;ctx.fill();ctx.restore();
-    const s1='Пиши в Telegram: ',s2='@votsuev',w1=measure(s1,30,{w:400}),w2=measure(s2,30,{w:700}),tw=36+w1+10+w2,sx=W/2-tw/2;
+    // плашка в фирменном синем Telegram
+    ctx.save();const bg=ctx.createLinearGradient(0,py,0,py+ph);bg.addColorStop(0,'#37b6f2');bg.addColorStop(1,'#1f96d3');
+    ctx.globalAlpha=ck;ctx.fillStyle=bg;ctx.shadowColor='rgba(42,171,238,.55)';ctx.shadowBlur=28;ctx.beginPath();ctx.roundRect(px,py,pw,ph,35);ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(160,220,255,.9)';ctx.lineWidth=1.5;const per=2*(pw+ph);ctx.setLineDash([per*ck,per]);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+    const s1='Пиши в Telegram: ',s2='@votsuev',w1=measure(s1,30,{w:500}),w2=measure(s2,30,{w:700}),tw=36+w1+10+w2,sx=W/2-tw/2;
     // иконка-самолётик
-    ctx.save();ctx.globalAlpha=ck;ctx.fillStyle=GOLD;ctx.translate(sx+12,py+ph/2);ctx.beginPath();ctx.moveTo(-12,-1);ctx.lineTo(13,-11);ctx.lineTo(8,12);ctx.lineTo(1,4);ctx.lineTo(-3,9);ctx.lineTo(-3,2);ctx.closePath();ctx.fill();ctx.restore();
-    T(s1,sx+36,py+ph/2+11,30,{w:400,a:ck,c:'#f4efe8',ls:0});
-    T(s2,sx+46+w1,py+ph/2+11,30,{w:700,a:ck,c:ORANGE,ls:0,glow:'rgba(255,110,20,.6)',gb:16});
+    ctx.save();ctx.globalAlpha=ck;ctx.fillStyle='#ffffff';ctx.translate(sx+12,py+ph/2);ctx.beginPath();ctx.moveTo(-12,-1);ctx.lineTo(13,-11);ctx.lineTo(8,12);ctx.lineTo(1,4);ctx.lineTo(-3,9);ctx.lineTo(-3,2);ctx.closePath();ctx.fill();ctx.restore();
+    T(s1,sx+36,py+ph/2+11,30,{w:500,a:ck,c:'#ffffff',ls:0});
+    T(s2,sx+46+w1,py+ph/2+11,30,{w:700,a:ck,c:'#ffffff',ls:0});
   }
   ctx.restore();
 }
