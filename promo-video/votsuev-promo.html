@@ -79,7 +79,7 @@ function focal(t){return 1000-300*bump(8.45,9.4,10.9,t)}
 function camAt(t){
   const k=hermite(t);let pos=[k[0],k[1],k[2]],tg=[k[3],k[4],k[5]];
   // «ручная» микроподвижность + удары камеры на акцентах
-  const w5=sm(16.6,16.95,t);
+  const w5=sm(16.42,16.66,t);
   if(w5>0){const px=panX5(t);tg=L3(tg,[px,10,COLZ],w5);pos=L3(pos,[px-120,-20,COLZ-1000],w5)}
   const shake=6*bump(8.45,8.5,9.1,t)+3*bump(20.72,20.76,21.2,t);
   tg=add(tg,[Math.sin(t*1.3)*6+Math.sin(t*47)*shake,Math.sin(t*1.7+1)*5+Math.cos(t*53)*shake,0]);
@@ -462,8 +462,9 @@ const RES=[{hit:17.0,n:'01',pre:'>',v:'3',suf:'×',tx:'Больше довери
            {hit:19.25,n:'04',pre:'',v:'100',suf:'%',tx:'Сайт принадлежит вам',sub:'РЕЗУЛЬТАТ 04'}];
 const RSP=900,RW=k=>[SITE[0]+k*RSP,SITE[1],COLZ];
 const LY=document.createElement('canvas');LY.width=W;LY.height=H;const lctx=LY.getContext('2d');
-function panX5(t){return SITE[0]+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)+(t-17)*30}
-function progX5(t){return SITE[0]-1500*(1-eo((t-16.55)/.5))+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)}
+// въезд к блоку 01 такой же, как к остальным: камера приходит слева на линию и переезжает к блоку
+function panX5(t){return SITE[0]-RSP+RSP*eio((t-16.63)/.36)+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)+(t-17)*30}
+function progX5(t){return SITE[0]-RSP-900*(1-eo((t-16.45)/.3))+RSP*eio((t-16.63)/.36)+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)}
 function lineW(a,b,col,al,w,dash){ctx.save();ctx.globalAlpha=al;ctx.strokeStyle=col;ctx.lineWidth=w;if(dash)ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function scene5(t,cam){
   if(t<16.5||t>20.8)return;
@@ -554,40 +555,73 @@ function scene6(t){
     const hl=eo5(rk)*W*.55,lg=ctx.createLinearGradient(W/2-hl,0,W/2+hl,0);lg.addColorStop(0,'rgba(255,122,26,0)');lg.addColorStop(.5,'rgba(255,200,130,1)');lg.addColorStop(1,'rgba(255,122,26,0)');
     ctx.globalAlpha=(1-rk)*.9;ctx.fillStyle=lg;ctx.fillRect(W/2-hl,H/2-61,hl*2,2)}
   ctx.restore();
-  // заголовок «Бизнесу нужен сайт.» — буквы вылетают из точки вспышки на свои места
-  const by=H/2-60,HS=116,HL='Бизнесу нужен сайт.',OR=14; // с 14-го символа — оранжевое «сайт.»
-  const hw=measure(HL,HS,{w:600}),hx=W/2-hw/2,hy=by+38;
+  // ---- заголовок «Бизнесу нужен сайт.»: буквы поднимаются из линии света, «сайт.» вспыхивает оранжевым ----
+  const by=H/2-60,HS=116,HL='Бизнесу нужен сайт.',OR=14,IGN=20.35;
+  const hw=measure(HL,HS,{w:600}),hx=W/2-hw/2,hy=by+38,ly=hy+34;
+  // линия света: сначала яркая щель, из которой выходит текст, потом остаётся подчёркиванием
+  const uk=eo5((t-19.76)/.35);
+  if(uk>0){ctx.save();ctx.globalCompositeOperation='lighter';const L=hw/2*uk+120*(1-uk);
+    const ug=ctx.createLinearGradient(W/2-L,0,W/2+L,0);ug.addColorStop(0,'rgba(255,122,26,0)');ug.addColorStop(.5,'rgba(255,200,140,1)');ug.addColorStop(1,'rgba(255,122,26,0)');
+    const hot=1-sm(19.9,20.6,t);ctx.fillStyle=ug;ctx.globalAlpha=.55+.45*hot;ctx.shadowColor='rgba(255,120,30,.9)';ctx.shadowBlur=14+30*hot;
+    ctx.fillRect(W/2-L,ly,L*2,2);if(hot>0){ctx.globalAlpha=hot*.35;ctx.fillRect(W/2-L*.8,ly-6,L*1.6,14)}ctx.restore()}
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,ly);ctx.clip();       // маска: буквы видны только над линией
   for(let i=0;i<HL.length;i++){const ch=HL[i];if(ch===' ')continue;
-    const fx=hx+measure(HL.slice(0,i),HS,{w:600}),cw=measure(ch,HS,{w:600});
-    const lk=clamp((t-19.74-Math.abs(fx+cw/2-W/2)/hw*.36)/.62),e=eo5(lk);if(lk<=0)continue;
-    const x=lerp(W/2-cw/2,fx,e),y=lerp(by+20,hy,e)+Math.sin(lk*Math.PI)*-26*(i%2?1:-1)*(1-e);
-    const sc=lerp(.35,1,e),org=i>=OR;
-    ctx.save();ctx.translate(x+cw/2,y);ctx.scale(sc,sc);
-    T(ch,-cw/2,0,HS,{w:600,c:org?ORANGE:'#f4efe8',a:eo(lk*1.6),blur:(1-e)*16,glow:org?'rgba(255,110,20,.7)':null,gb:36});
-    ctx.restore();}
-  // тонкая линия-подчёркивание, растёт от центра
-  const uk=eio((t-20.15)/.6);
-  if(uk>0){ctx.save();const ug=ctx.createLinearGradient(hx,0,hx+hw,0);ug.addColorStop(0,'rgba(255,122,26,0)');ug.addColorStop(.5,'rgba(255,150,60,.9)');ug.addColorStop(1,'rgba(255,122,26,0)');
-    ctx.fillStyle=ug;ctx.shadowColor='rgba(255,110,20,.8)';ctx.shadowBlur=14;ctx.fillRect(W/2-hw/2*uk,hy+34,hw*uk,2);ctx.restore()}
+    const fx=hx+measure(HL.slice(0,i),HS,{w:600}),cw=measure(ch,HS,{w:600}),st=19.8+i*.028;
+    const lk=clamp((t-st)/.42);if(lk<=0)continue;
+    const org=i>=OR,ig=org?clamp((t-IGN-(i-OR)*.035)/.25):0;
+    const col=org?`rgb(${Math.round(lerp(244,255,ig))},${Math.round(lerp(239,122,ig))},${Math.round(lerp(232,26,ig))})`:'#f4efe8';
+    const draw=(kk,al,bl)=>{const e=back(kk),y=hy+(1-e)*HS*1.05,rot=(1-eo(kk))*.22;
+      ctx.save();ctx.translate(fx+cw/2,y);ctx.rotate(rot);ctx.scale(1,1+(1-eo(kk))*.25);
+      T(ch,-cw/2,0,HS,{w:600,c:col,a:al,blur:bl,glow:ig>0?`rgba(255,110,20,${.75*ig})`:null,gb:36+30*bump(0,.3,1,ig)});ctx.restore()};
+    if(lk<1)for(let j=3;j>=1;j--)draw(clamp(lk-j*.07),.2*(1-j/4),3+j*3);   // вертикальный шлейф движения
+    const sp=bump(st+.3,st+.33,st+.5,t);                                  // RGB-сдвиг на приземлении
+    if(sp>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.translate(-sp*6,0);draw(lk,.45*sp,0);ctx.restore();
+      ctx.save();ctx.globalCompositeOperation='lighter';ctx.filter='hue-rotate(180deg)';ctx.translate(sp*6,0);draw(lk,.3*sp,0);ctx.restore()}
+    draw(lk,eo(lk*2),(1-eo(lk))*8);
+  }
+  ctx.restore();
+  // вспышка за «сайт.» в момент поджига
+  const fl=bump(IGN,IGN+.08,IGN+.7,t);
+  if(fl>0){const sx0=hx+measure(HL.slice(0,OR),HS,{w:600}),sw0=measure(HL.slice(OR),HS,{w:600}),gx=sx0+sw0/2,gy=hy-40;
+    ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(gx,gy,0,gx,gy,260);g.addColorStop(0,`rgba(255,140,40,${.5*fl})`);g.addColorStop(1,'rgba(255,100,20,0)');
+    ctx.fillStyle=g;ctx.fillRect(gx-300,gy-300,600,600);const r=rng(11);
+    for(let i=0;i<26;i++){const an=r()*6.283,d=eo((t-IGN)/.6)*(80+r()*160);ctx.globalAlpha=fl*.9;ctx.strokeStyle=GOLD;ctx.lineWidth=1.4;ctx.beginPath();
+      ctx.moveTo(gx+Math.cos(an)*d*.6,gy+Math.sin(an)*d*.4);ctx.lineTo(gx+Math.cos(an)*d,gy+Math.sin(an)*d*.65);ctx.stroke()}ctx.restore()}
   // блик, пробегающий по заголовку
-  const sh=clamp((t-21.0)/.75);
+  const sh=clamp((t-21.05)/.75);
   if(sh>0&&sh<1){const gx=lerp(hx-200,hx+hw+200,eio(sh)),sg=ctx.createLinearGradient(gx-120,0,gx+120,0);
     sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,'rgba(255,246,230,.75)');sg.addColorStop(1,'rgba(255,255,255,0)');
     ctx.save();ctx.globalCompositeOperation='lighter';T(HL,hx,hy,HS,{w:600,c:sg,a:.6});ctx.restore()}
-  // подзаголовок и CTA
-  const sk=eo((t-20.5)/.5);
-  T('Разработка сайтов для бизнеса',W/2,by+150,36,{w:400,c:'#cfc6ba',al:'center',a:sk,blur:(1-sk)*10,ls:0});
-  const ck=eo((t-20.8)/.5);
-  if(ck>0){const pw=600,ph=70,px=W/2-pw/2,py=by+200;
-    // плашка в фирменном синем Telegram
+  // ---- подзаголовок: слова поднимаются из-под невидимой линии, трекинг собирается ----
+  const SUB=['Разработка','сайтов','для','бизнеса'],SS=36,sy=by+150;
+  { const sp=SS*.28,ws=SUB.map(w=>measure(w,SS,{w:400,ls:0})),tot=ws.reduce((a,b)=>a+b,0)+sp*(SUB.length-1);let cx=W/2-tot/2;
+    ctx.save();ctx.beginPath();ctx.rect(0,0,W,sy+12);ctx.clip();
+    SUB.forEach((w,i)=>{const k=clamp((t-20.28-i*.07)/.45),e=back(k);
+      if(k>0)T(w,cx,sy+(1-e)*SS*1.3,SS,{w:400,c:'#cfc6ba',a:eo(k*1.6),blur:(1-eo(k))*8,ls:(1-eo(k))*6});cx+=ws[i]+sp});
+    ctx.restore();}
+  // ---- CTA: синяя плашка раскрывается из центра, текст выезжает внутри, самолётик влетает ----
+  const ck=t-20.5;
+  if(ck>0){const pw0=600,ph=70,op=eo5(ck/.42),pw=Math.max(ph,pw0*op),px=W/2-pw/2,py=by+200;
     ctx.save();const bg=ctx.createLinearGradient(0,py,0,py+ph);bg.addColorStop(0,'#37b6f2');bg.addColorStop(1,'#1f96d3');
-    ctx.globalAlpha=ck;ctx.fillStyle=bg;ctx.shadowColor='rgba(42,171,238,.55)';ctx.shadowBlur=28;ctx.beginPath();ctx.roundRect(px,py,pw,ph,35);ctx.fill();ctx.shadowBlur=0;
-    ctx.strokeStyle='rgba(160,220,255,.9)';ctx.lineWidth=1.5;const per=2*(pw+ph);ctx.setLineDash([per*ck,per]);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+    ctx.globalAlpha=eo(ck/.15);ctx.fillStyle=bg;ctx.shadowColor='rgba(42,171,238,.6)';ctx.shadowBlur=28+10*Math.sin((t-20.5)*4);
+    ctx.beginPath();ctx.roundRect(px,py,pw,ph,35);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(170,225,255,.9)';ctx.lineWidth=1.5;ctx.stroke();
+    // световые кромки при раскрытии
+    if(op<1){ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(220,245,255,.9)';ctx.fillRect(px+8,py+10,3,ph-20);ctx.fillRect(px+pw-11,py+10,3,ph-20)}
+    ctx.restore();
+    // импульс-кольцо вокруг плашки после раскрытия
+    const pk=clamp((ck-.4)/.7);if(pk>0&&pk<1){ctx.save();ctx.globalAlpha=(1-pk)*.7;ctx.strokeStyle='#7fd0ff';ctx.lineWidth=2;const g=eo(pk)*22;
+      ctx.beginPath();ctx.roundRect(W/2-pw0/2-g,py-g,pw0+2*g,ph+2*g,35+g);ctx.stroke();ctx.restore()}
     const s1='Пиши в Telegram: ',s2='@votsuev',w1=measure(s1,30,{w:500}),w2=measure(s2,30,{w:700}),tw=36+w1+10+w2,sx=W/2-tw/2;
-    // иконка-самолётик
-    ctx.save();ctx.globalAlpha=ck;ctx.fillStyle='#ffffff';ctx.translate(sx+12,py+ph/2);ctx.beginPath();ctx.moveTo(-12,-1);ctx.lineTo(13,-11);ctx.lineTo(8,12);ctx.lineTo(1,4);ctx.lineTo(-3,9);ctx.lineTo(-3,2);ctx.closePath();ctx.fill();ctx.restore();
-    T(s1,sx+36,py+ph/2+11,30,{w:500,a:ck,c:'#ffffff',ls:0});
-    T(s2,sx+46+w1,py+ph/2+11,30,{w:700,a:ck,c:'#ffffff',ls:0});
+    ctx.save();ctx.beginPath();ctx.roundRect(px,py,pw,ph,35);ctx.clip();
+    const tk=clamp((ck-.16)/.36),te=back(tk),ty=py+ph/2+11+(1-te)*ph;
+    // самолётик со шлейфом
+    const ik=eo5(clamp((ck-.2)/.36)),ix=sx+12-(1-ik)*90;
+    for(let j=0;j<4;j++){ctx.save();ctx.globalAlpha=ik*(j?.18*(1-j/4):1);ctx.fillStyle='#ffffff';ctx.translate(ix-j*14*(1-ik),py+ph/2);
+      ctx.beginPath();ctx.moveTo(-12,-1);ctx.lineTo(13,-11);ctx.lineTo(8,12);ctx.lineTo(1,4);ctx.lineTo(-3,9);ctx.lineTo(-3,2);ctx.closePath();ctx.fill();ctx.restore()}
+    T(s1,sx+36,ty,30,{w:500,a:eo(tk*1.5),c:'#ffffff',ls:0,blur:(1-eo(tk))*5});
+    const tk2=clamp((ck-.24)/.36),ty2=py+ph/2+11+(1-back(tk2))*ph;
+    T(s2,sx+46+w1,ty2,30,{w:700,a:eo(tk2*1.5),c:'#ffffff',ls:0,blur:(1-eo(tk2))*5});
+    ctx.restore();
   }
   ctx.restore();
 }
