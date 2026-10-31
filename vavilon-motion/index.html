@@ -278,9 +278,9 @@ function drawEye(t,C){
   }
   lid();ctx.lineWidth=6;ctx.strokeStyle='rgba(185,165,245,.85)';ctx.shadowColor='rgba(150,120,255,.9)';ctx.shadowBlur=24+40*(1-o);ctx.stroke();ctx.shadowBlur=0;
   // ресницы
-  ctx.strokeStyle='rgba(190,170,250,.75)';ctx.lineWidth=4;ctx.lineCap='round';
+  ctx.strokeStyle=`rgba(190,170,250,${.75*ss(.06,.3,o)})`;ctx.lineWidth=4;ctx.lineCap='round';
   for(let i=1;i<26;i++){const u=i/26,x=lerp(-ew,ew,u),y=-2*eh*o*u*(1-u)*2*.5*2;const nx=(u-.5)*1.4,len=40+50*Math.sin(u*Math.PI);
-    ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+nx*len*.3,y-len*.7,x+nx*len,y-len*(o>.1?1:-.2));ctx.stroke()}
+    ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+nx*len*.3,y-len*.7,x+nx*len,y-len);ctx.stroke()}
   ctx.restore();
 }
 

@@ -228,7 +228,7 @@ def main():
     mix = (track * .8 + sfx * 1.9) * 1.15  # эффекты заметно, но под треком
     peak = np.abs(mix).max()
     if peak > .98:  # мягкий клиппер: тихие места почти не трогает, пики скругляет
-        mix = .98 * np.tanh(mix / .98)
+        mix = .93 * np.tanh(mix / .93)
     (ROOT / "audio").mkdir(exist_ok=True)
     pcm = (np.clip(mix, -1, 1) * 32767).astype("<i2")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "2",
