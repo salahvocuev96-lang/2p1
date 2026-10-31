@@ -474,25 +474,29 @@ function scene6(t){
   const rk=clamp(k/.75);if(k>0&&rk<1){const r=rng(5);
     for(let i=0;i<64;i++){const an=i/64*6.283+r()*.05,r1=60+eo(rk)*220*(.6+r()),r2=r1+40+r()*140*(1-rk);
       ctx.globalAlpha=(1-rk)*.8;ctx.strokeStyle=r()<.5?GOLD:'#ffe0b0';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(W/2+Math.cos(an)*r1,H/2-60+Math.sin(an)*r1);ctx.lineTo(W/2+Math.cos(an)*r2,H/2-60+Math.sin(an)*r2);ctx.stroke()}
-    ctx.globalAlpha=(1-rk);ctx.strokeStyle=ORANGE;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(W/2-(80+rk*300),H/2-60-(80+rk*300),2*(80+rk*300),2*(80+rk*300),40+rk*80);ctx.stroke()}
+    const hl=eo5(rk)*W*.55,lg=ctx.createLinearGradient(W/2-hl,0,W/2+hl,0);lg.addColorStop(0,'rgba(255,122,26,0)');lg.addColorStop(.5,'rgba(255,200,130,1)');lg.addColorStop(1,'rgba(255,122,26,0)');
+    ctx.globalAlpha=(1-rk)*.9;ctx.fillStyle=lg;ctx.fillRect(W/2-hl,H/2-61,hl*2,2)}
   ctx.restore();
-  // знак
-  const bk=back(clamp((t-19.7)/.45)),mv=eio((t-20.2)/.6);
-  const wordW=measure('Votsuev',104,{w:700}),total=130+28+wordW,left=W/2-total/2;
-  const bx=lerp(W/2,left+65,mv),by=H/2-60;
-  ctx.save();ctx.translate(bx,by);ctx.rotate((1-bk)*-.5);ctx.scale(bk,bk);
-  ctx.shadowColor='rgba(255,110,20,.85)';ctx.shadowBlur=50;
-  const g=ctx.createLinearGradient(-65,-65,65,65);g.addColorStop(0,'#ffc062');g.addColorStop(1,'#ff6200');
-  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(-65,-65,130,130,30);ctx.fill();ctx.shadowBlur=0;
-  ctx.fillStyle='#160a02';ctx.beginPath();ctx.moveTo(-36,-34);ctx.lineTo(-14,-34);ctx.lineTo(0,10);ctx.lineTo(14,-34);ctx.lineTo(36,-34);ctx.lineTo(11,36);ctx.lineTo(-11,36);ctx.closePath();ctx.fill();
-  // блик
-  const sh=clamp((t-21.05)/.6);if(sh>0&&sh<1){ctx.save();ctx.beginPath();ctx.roundRect(-65,-65,130,130,30);ctx.clip();
-    const gx=lerp(-160,160,eio(sh));const sg=ctx.createLinearGradient(gx-40,0,gx+40,0);sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,'rgba(255,255,255,.55)');sg.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=sg;ctx.rotate(.4);ctx.fillRect(-200,-200,400,400);ctx.restore()}
-  ctx.restore();
-  // словесный знак
-  if(mv>0){ctx.save();ctx.beginPath();ctx.rect(bx+70,by-90,wordW+60,180);ctx.clip();
-    const wx=left+158;T('Votsuev',wx+(1-eo5(mv))*-120,by+37,104,{w:700,a:eo(mv),blur:(1-eo(mv))*10,ls:-3});ctx.restore()}
+  // заголовок «Бизнесу нужен сайт.» — буквы вылетают из точки вспышки на свои места
+  const by=H/2-60,HS=116,HL='Бизнесу нужен сайт.',OR=14; // с 14-го символа — оранжевое «сайт.»
+  const hw=measure(HL,HS,{w:600}),hx=W/2-hw/2,hy=by+38;
+  for(let i=0;i<HL.length;i++){const ch=HL[i];if(ch===' ')continue;
+    const fx=hx+measure(HL.slice(0,i),HS,{w:600}),cw=measure(ch,HS,{w:600});
+    const lk=clamp((t-19.74-Math.abs(fx+cw/2-W/2)/hw*.36)/.62),e=eo5(lk);if(lk<=0)continue;
+    const x=lerp(W/2-cw/2,fx,e),y=lerp(by+20,hy,e)+Math.sin(lk*Math.PI)*-26*(i%2?1:-1)*(1-e);
+    const sc=lerp(.35,1,e),org=i>=OR;
+    ctx.save();ctx.translate(x+cw/2,y);ctx.scale(sc,sc);
+    T(ch,-cw/2,0,HS,{w:600,c:org?ORANGE:'#f4efe8',a:eo(lk*1.6),blur:(1-e)*16,glow:org?'rgba(255,110,20,.7)':null,gb:36});
+    ctx.restore();}
+  // тонкая линия-подчёркивание, растёт от центра
+  const uk=eio((t-20.15)/.6);
+  if(uk>0){ctx.save();const ug=ctx.createLinearGradient(hx,0,hx+hw,0);ug.addColorStop(0,'rgba(255,122,26,0)');ug.addColorStop(.5,'rgba(255,150,60,.9)');ug.addColorStop(1,'rgba(255,122,26,0)');
+    ctx.fillStyle=ug;ctx.shadowColor='rgba(255,110,20,.8)';ctx.shadowBlur=14;ctx.fillRect(W/2-hw/2*uk,hy+34,hw*uk,2);ctx.restore()}
+  // блик, пробегающий по заголовку
+  const sh=clamp((t-21.0)/.75);
+  if(sh>0&&sh<1){const gx=lerp(hx-200,hx+hw+200,eio(sh)),sg=ctx.createLinearGradient(gx-120,0,gx+120,0);
+    sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,'rgba(255,246,230,.75)');sg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.save();ctx.globalCompositeOperation='lighter';T(HL,hx,hy,HS,{w:600,c:sg,a:.6});ctx.restore()}
   // подзаголовок и CTA
   const sk=eo((t-20.5)/.5);
   T('Разработка сайтов для бизнеса',W/2,by+150,36,{w:400,c:'#cfc6ba',al:'center',a:sk,blur:(1-sk)*10,ls:0});
