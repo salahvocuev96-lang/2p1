@@ -202,7 +202,6 @@ function chapter(t,num,label,t0,t1){
   const a=sm(t0,t0+.4,t)*(1-sm(t1-.3,t1,t));if(a<=0)return;
   T(num+' — '+label,120,118,16,{mono:1,c:GOLD,a:a*.9,ls:3,w:500});
   ctx.save();ctx.globalAlpha=a*.35;ctx.fillStyle='#fff';ctx.fillRect(120,134,lerp(0,180,eo((t-t0)/.8)),1);ctx.restore();
-  T(num+' / 06',W-120,118,16,{mono:1,c:'#8d857a',a:a*.8,al:'right',ls:3});
 }
 
 /* ---------- кадр ---------- */
