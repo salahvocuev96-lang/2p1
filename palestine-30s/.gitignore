@@ -1,0 +1,5 @@
+out/stills/
+out/check/
+out/*.log
+out/sheet*.jpg
+audio/*.wav
