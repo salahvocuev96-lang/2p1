@@ -333,19 +333,50 @@ function scene2(t,cam){
 }
 
 /* ---------- СЦЕНА 3 · Решение 8.5–13.5 ---------- */
-const WT=[8.46,8.96,9.46,9.96,10.46],WS=['Создаем','сайты,','которые','реально','продают.'];
+// слова «вылетают» по буквам из точки схода варпа и приземляются ровно на удар бочки (8.5, 9.0 … 10.5)
+const WT=[8.30,8.80,9.30,9.80,10.30],WS=['Создаем','сайты,','которые','реально','продают.'];
+function warpWord(s,t,t0,o){
+  const size=150,w=measure(s,size,{w:600}),n=s.length,org=o.c===ORANGE;
+  const hold=Math.max(0,t-t0-.26),trk=1+hold*.035;           // лёгкое «расползание» трекинга в удержании
+  // вспышка-блик на приземлении
+  const fl=bump(t0+.14,t0+.22,t0+.6,t);
+  if(fl>0){ctx.save();ctx.globalCompositeOperation='lighter';const L=lerp(220,1000,eo((t-t0-.14)/.45));
+    const g=ctx.createLinearGradient(-L,0,L,0);g.addColorStop(0,'rgba(255,140,40,0)');g.addColorStop(.5,org?'rgba(255,190,120,1)':'rgba(255,232,200,1)');g.addColorStop(1,'rgba(255,140,40,0)');
+    ctx.globalAlpha=fl*.85*(o.a??1);ctx.fillStyle=g;ctx.fillRect(-L,-size*.34,2*L,2);ctx.globalAlpha=fl*.35*(o.a??1);ctx.fillRect(-L*.6,-size*.34-5,L*1.2,12);ctx.restore()}
+  for(let i=0;i<n;i++){const ch=s[i];if(ch===' ')continue;
+    const cw=measure(ch,size,{w:600}),fx=(-w/2+measure(s.slice(0,i),size,{w:600})+cw/2)*trk,dc=Math.abs(fx)/(w/2+1);
+    const st=t0+dc*.07,k=clamp((t-st)/.2);if(t<st)continue;
+    const ko=o.out?clamp((t-t0-.44)/.16):0;if(ko>=1)continue;
+    const letter=(kk,al,bl)=>{const e=eo5(kk),sc=lerp(.12,1,e)*(1+.08*Math.sin(clamp(kk)*Math.PI));
+      const z=1+eo(ko)*1.6,x=lerp(0,fx,e)*z*(1+ko*.25),y=lerp(-size*.32,0,e)*z,scO=sc*z;
+      ctx.save();ctx.translate(x,y);ctx.scale(scO*(1+ko*.25),scO);
+      T(ch,-cw/2,size*.0,size,{w:600,c:o.c,a:al*(1-ko),blur:bl+ko*12,glow:org?'rgba(255,110,20,.7)':null,gb:40});ctx.restore()};
+    // след движения (motion trail) пока буква летит
+    if(k<1)for(let j=3;j>=1;j--)letter(clamp(k-j*.09),(o.a??1)*.22*(1-j/4),4+j*3);
+    // RGB-сдвиг в момент приземления
+    const sp=bump(st+.18,st+.2,st+.36,t);
+    if(sp>0){ctx.save();ctx.globalCompositeOperation='lighter';
+      ctx.save();ctx.translate(-sp*7,0);letter(k,(o.a??1)*.5*sp,0);ctx.restore();
+      ctx.restore();ctx.save();ctx.globalCompositeOperation='lighter';ctx.filter='hue-rotate(180deg)';ctx.translate(sp*7,0);letter(k,(o.a??1)*.35*sp,0);ctx.restore()}
+    letter(k,(o.a??1)*eo(k*1.4),(1-eo(k))*10+(o.blur||0));
+  }
+  // блик, пробегающий по слову в удержании
+  const sw=clamp((t-t0-.24)/.3);
+  if(sw>0&&sw<1&&!o.noSweep){const gx=lerp(-w/2-150,w/2+150,sw),g=ctx.createLinearGradient(gx-90,0,gx+90,0);
+    g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,248,235,.8)');g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.save();ctx.globalCompositeOperation='lighter';T(s,-w*trk/2,0,size,{w:600,c:g,a:(o.a??1)*.45,ls:-size*.025+(trk-1)*20});ctx.restore()}
+}
 function scene3(t,cam,camP,fd){
-  if(t<8.4||t>13.75)return;
+  if(t<8.28||t>13.75)return;
   const exit=sm(12.95,13.3,t);
-  // слова в варпе
-  for(let i=0;i<5;i++){const k=(t-WT[i])/.24;if(k<0)continue;
-    const last=i===4,ko=last?0:(t-WT[i]-.36)/.16;if(ko>1)continue;
-    let sc=lerp(2.7,1,eo5(k))*(1+eo(ko)*2.2),a=eo(k)*(1-clamp(ko)),bl=(1-eo(k))*20+clamp(ko)*16;
-    let x=W/2,y=H/2+50,size=150,al='center';
-    if(last){const m=eio((t-10.92)/.55);const w=measure(WS[4],150,{w:600});
-      const fx=lerp(W/2-w/2,140,m),fy=lerp(H/2+50,560,m);sc*=lerp(1,80/150,m);
-      ctx.save();ctx.translate(fx,fy);ctx.scale(sc,sc);T(WS[4],0,0,150,{w:600,c:ORANGE,a:a*(1-exit),blur:bl/sc+m*(1-m)*8,glow:'rgba(255,110,20,.7)',gb:40});ctx.restore();continue}
-    ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);T(WS[i],0,0,size,{w:600,a,blur:bl/sc,al});ctx.restore();
+  for(let i=0;i<5;i++){if(t<WT[i])continue;const last=i===4;
+    if(!last&&t>WT[i]+.7)continue;
+    ctx.save();
+    if(last){const m=eio((t-10.92)/.55),w=measure(WS[4],150,{w:600}),sc=lerp(1,80/150,m);
+      const cx=lerp(W/2,140+w*sc/2,m),cy=lerp(H/2+50,560,m);ctx.translate(cx,cy);ctx.scale(sc,sc);
+      warpWord(WS[4],t,WT[4],{c:ORANGE,out:false,a:1-exit,blur:m*(1-m)*8,noSweep:true});}
+    else{ctx.translate(W/2,H/2+50);warpWord(WS[i],t,WT[i],{c:'#f4efe8',out:true});}
+    ctx.restore();
   }
   // итоговая фраза
   const ea=1-exit,eb=exit*14;
