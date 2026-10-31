@@ -10,7 +10,7 @@ const {chromium}=require('playwright');const {spawn}=require('child_process');co
   const grab=t=>pg.evaluate(t=>{renderAt(t);return document.getElementById('c').toDataURL('image/png').slice(22)},t);
   if(mode==='stills'){const out=process.argv[3];fs.mkdirSync(out,{recursive:true});
     for(const t of process.argv.slice(4).map(Number))fs.writeFileSync(path.join(out,`t${t.toFixed(2)}.png`),Buffer.from(await grab(t),'base64'));}
-  else{const N=22*60,ff=spawn('ffmpeg',['-y','-v','error','-f','image2pipe','-framerate','60','-c:v','png','-i','-','-i',path.join(dir,'votsuev-promo.wav'),
+  else{const N=23*60,ff=spawn('ffmpeg',['-y','-v','error','-f','image2pipe','-framerate','60','-c:v','png','-i','-','-i',path.join(dir,'votsuev-promo.wav'),
       '-map','0:v','-map','1:a','-c:v','libx264','-preset','medium','-crf','17','-pix_fmt','yuv420p','-r','60','-c:a','aac','-b:a','256k','-movflags','+faststart',path.join(dir,'votsuev-promo.mp4')],{stdio:['pipe','inherit','inherit']});
     for(let i=0;i<N;i++){const buf=Buffer.from(await grab(i/60),'base64');if(!ff.stdin.write(buf))await new Promise(r=>ff.stdin.once('drain',r));if(i%120===0)console.log('frame',i)}
     ff.stdin.end();await new Promise(r=>ff.on('close',r));}

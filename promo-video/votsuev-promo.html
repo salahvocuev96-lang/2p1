@@ -14,8 +14,8 @@
 <canvas id="c" width="1920" height="1080"></canvas>
 <div id="hint">клик — play/pause · ← → — перемотка</div>
 <script>
-/* Votsuev — 22 c промо. Детерминированный таймлайн: renderAt(t) рисует кадр строго по времени. */
-const W=1920,H=1080,FPS=60,DUR=22,SH=0.5/60; // SH — выдержка (180°) для motion blur
+/* Votsuev — 23 c промо. Детерминированный таймлайн: renderAt(t) рисует кадр строго по времени. */
+const W=1920,H=1080,FPS=60,DUR=23,SH=0.5/60; // SH — выдержка (180°) для motion blur
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');
 const tmp=document.createElement('canvas');tmp.width=W;tmp.height=H;const tctx=tmp.getContext('2d');
 const SANS="'Inter Display','Inter',sans-serif",MONO="'JetBrains Mono',monospace";
@@ -61,7 +61,7 @@ const KF=[
  [16.45,560,-90,9980,   560,-80,12300, 0],
  [16.95,560,-80,10850,  560,-80,12300, 0],
  [19.4, 560,-82,11090,  560,-80,12300,.004],
- [22.0, 560,-80,11160,  560,-80,12300, 0],
+ [23.0, 560,-80,11160,  560,-80,12300, 0],
 ];
 function hermite(t){
   let i=0;while(i<KF.length-2&&t>=KF[i+1][0])i++;
@@ -81,7 +81,7 @@ function camAt(t){
   // «ручная» микроподвижность + удары камеры на акцентах
   const w5=sm(16.6,16.95,t);
   if(w5>0){const px=panX5(t);tg=L3(tg,[px,10,COLZ],w5);pos=L3(pos,[px-120,-20,COLZ-1000],w5)}
-  const shake=6*bump(8.45,8.5,9.1,t)+3*bump(19.72,19.76,20.2,t);
+  const shake=6*bump(8.45,8.5,9.1,t)+3*bump(20.72,20.76,21.2,t);
   tg=add(tg,[Math.sin(t*1.3)*6+Math.sin(t*47)*shake,Math.sin(t*1.7+1)*5+Math.cos(t*53)*shake,0]);
   const f=norm(sub(tg,pos));let r=norm(cross([0,1,0],f)),dn=cross(f,r);
   const c=Math.cos(k[6]),s=Math.sin(k[6]);
@@ -222,7 +222,7 @@ function renderAt(t){
   for(const p of D){
     const P=[cam.pos[0]+fmod(p.b[0]-cam.pos[0],SX)-SX/2,cam.pos[1]+fmod(p.b[1]-cam.pos[1],SY)-SY/2,cam.pos[2]+fmod(p.b[2]-cam.pos[2],SZ)-300];
     const zr=P[2]-cam.pos[2];const fade=sm(-200,500,zr)*(1-sm(SZ-1600,SZ-400,zr));
-    const a=p.a*fade*(.75+.25*Math.sin(t*2+p.tw))*(t>19.5?.7:1);
+    const a=p.a*fade*(.75+.25*Math.sin(t*2+p.tw))*(t>20.5?.7:1);
     drawP(P,P,cam,camP,p.sz,p.col,a,fd,.75);
   }
   // основные частицы
@@ -230,10 +230,10 @@ function renderAt(t){
     const nb=1+.6*(1-sm(4.2,4.8,t));drawP(mainPos(p,t,camDelta),mainPos(p,t-SH,camDeltaP),cam,camP,p.sz*nb,p.col,Math.min(1,a*nb),fd,1)}
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
 
-  scene1(t,cam);scene2(t,cam);scene3(t,cam,camP,fd);scene4(t,cam);scene5MB(t);scene6(t);
+  scene1(t,cam);scene2(t,cam);scene3(t,cam,camP,fd);scene4(t,cam);scene5MB(t);scene6(t-1); // финал сдвинут на +1 с ради 4-го блока
 
   // пост: радиальный zoom-blur на переходах
-  const zb=.16*bump(4.25,4.6,5.0,t)+.11*bump(8.38,8.55,8.95,t)+.035*bump(8.9,9.6,10.5,t)+.12*bump(16.25,16.55,16.95,t)+.06*bump(19.6,19.76,20.05,t);
+  const zb=.16*bump(4.25,4.6,5.0,t)+.11*bump(8.38,8.55,8.95,t)+.035*bump(8.9,9.6,10.5,t)+.12*bump(16.25,16.55,16.95,t)+.06*bump(20.6,20.76,21.05,t);
   if(zb>.004)zoomBlur(zb);
   if(t>7.78&&t<8.48)glitch(t);
   // виньетка + зерно
@@ -244,7 +244,7 @@ function renderAt(t){
   for(let x=-ox;x<W;x+=256)for(let y=-oy;y<H;y+=256)ctx.drawImage(GR,x,y);
   ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
 }
-function focusAt(t){const K=[[0,1950],[4.1,1550],[4.9,950],[8.4,1150],[9.4,2600],[10.9,1350],[13.2,1250],[13.6,1220],[16.3,1150],[16.9,1000],[22,1000]];
+function focusAt(t){const K=[[0,1950],[4.1,1550],[4.9,950],[8.4,1150],[9.4,2600],[10.9,1350],[13.2,1250],[13.6,1220],[16.3,1150],[16.9,1000],[23,1000]];
   let i=0;while(i<K.length-2&&t>K[i+1][0])i++;return lerp(K[i][1],K[i+1][1],sm(K[i][0],K[i+1][0],t))}
 function drawP(P,Pp,cam,camP,sz,col,a,fd,dofK){
   const q=proj(P,cam);if(!q||q.x<-80||q.x>W+80||q.y<-80||q.y>H+80)return;
@@ -323,7 +323,7 @@ function scene2(t,cam){
     ctx.fillStyle=`rgba(255,70,40,${pulse})`;ctx.beginPath();ctx.arc(q.x,q.y,3.2,0,6.283);ctx.fill();ctx.restore();
     const seed=Math.floor(t*30)+i*7;
     T(scramble(g.lb,(k-.08)/.3,seed),q.x+44,q.y-30,15,{mono:1,c:'#ff9a4a',a,ls:2});
-    const n=Math.floor(clamp((k-.16)/.55)*g.tx.length);let s=g.tx.slice(0,n);
+    const n=Math.floor(clamp((k-.04)/.45)*g.tx.length); /* печать стартует сразу с сигналом */let s=g.tx.slice(0,n);
     if(gk>0)s=scramble(s,1-gk*1.3,seed+3);
     const w=T(s,q.x+44,q.y+24,52,{w:500,a,c:'#f4efe8'});
     if(n<g.tx.length||Math.floor(t*3)%2===0){ctx.save();ctx.globalAlpha=a*(n<g.tx.length?1:.7);ctx.fillStyle=GOLD;ctx.fillRect(q.x+50+w,q.y-16,3,50);ctx.restore()}
@@ -458,23 +458,24 @@ function scene4(t,cam){
 /* ---------- СЦЕНА 5 · Результат 16.5–19.5 (линия-конвейер, как «The machine» в референсе) ---------- */
 const RES=[{hit:17.0,n:'01',pre:'>',v:'3',suf:'×',tx:'Больше доверия от клиентов',sub:'РЕЗУЛЬТАТ 01'},
            {hit:17.75,n:'02',pre:'<',v:'7',suf:'ДНЕЙ',tx:'Разработка под ключ',sub:'РЕЗУЛЬТАТ 02'},
-           {hit:18.5,n:'03',pre:'',v:'100',suf:'%',tx:'Адаптив под телефоны',sub:'РЕЗУЛЬТАТ 03'}];
+           {hit:18.5,n:'03',pre:'',v:'100',suf:'%',tx:'Адаптив под телефоны',sub:'РЕЗУЛЬТАТ 03'},
+           {hit:19.25,n:'04',pre:'',v:'100',suf:'%',tx:'Сайт принадлежит вам',sub:'РЕЗУЛЬТАТ 04'}];
 const RSP=900,RW=k=>[SITE[0]+k*RSP,SITE[1],COLZ];
 const LY=document.createElement('canvas');LY.width=W;LY.height=H;const lctx=LY.getContext('2d');
-function panX5(t){return SITE[0]+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+(t-17)*30}
-function progX5(t){return SITE[0]-1500*(1-eo((t-16.55)/.5))+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)}
+function panX5(t){return SITE[0]+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)+(t-17)*30}
+function progX5(t){return SITE[0]-1500*(1-eo((t-16.55)/.5))+RSP*eio((t-17.38)/.36)+RSP*eio((t-18.13)/.36)+RSP*eio((t-18.88)/.36)}
 function lineW(a,b,col,al,w,dash){ctx.save();ctx.globalAlpha=al;ctx.strokeStyle=col;ctx.lineWidth=w;if(dash)ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function scene5(t,cam){
-  if(t<16.5||t>19.8)return;
-  const col=sm(19.25,19.7,t),A=sm(16.55,16.9,t)*(1-col);
+  if(t<16.5||t>20.8)return;
+  const col=sm(20.25,20.7,t),A=sm(16.55,16.9,t)*(1-col);
   const hits=RES.filter(n=>t>=n.hit).length;
   // шапка: «— РЕЗУЛЬТАТ» и счётчик с полосками
   if(A>0){
     ctx.save();ctx.globalAlpha=A;ctx.fillStyle=ORANGE;ctx.fillRect(120,111,lerp(0,30,eo((t-16.6)/.5)),2);ctx.restore();
     T('РЕЗУЛЬТАТ',166,118,16,{mono:1,c:GOLD,a:A,ls:3});
-    T(`0${Math.max(1,hits)} / 03`,W-350,118,16,{mono:1,c:'#b9ad9c',a:A,al:'right',ls:3});
-    for(let j=0;j<3;j++){const f=j<hits?eo((t-RES[j].hit)/.3):0;ctx.save();ctx.globalAlpha=A*.35;ctx.fillStyle='#8d857a';ctx.fillRect(W-320+j*70,112,60,2);
-      ctx.globalAlpha=A;ctx.fillStyle=ORANGE;ctx.fillRect(W-320+j*70,111,60*f,3);ctx.restore()}
+    T(`0${Math.max(1,hits)} / 04`,W-420,118,16,{mono:1,c:'#b9ad9c',a:A,al:'right',ls:3});
+    for(let j=0;j<4;j++){const f=j<hits?eo((t-RES[j].hit)/.3):0;ctx.save();ctx.globalAlpha=A*.35;ctx.fillStyle='#8d857a';ctx.fillRect(W-390+j*70,112,60,2);
+      ctx.globalAlpha=A;ctx.fillStyle=ORANGE;ctx.fillRect(W-390+j*70,111,60*f,3);ctx.restore()}
   }
   // сжатие всего блока к центру перед финалом
   const sc=1-col*.45;ctx.save();ctx.translate(W/2,H/2);ctx.scale(sc,sc);ctx.translate(-W/2,-H/2);
@@ -524,14 +525,14 @@ function scene5(t,cam){
   ctx.restore();
   // сжатие в точку (искры к центру)
   if(col>0){ctx.save();ctx.globalCompositeOperation='lighter';const r=rng(77);
-    for(let i=0;i<140;i++){const a0=r()*6.283,d0=200+r()*700,e=eio(clamp((t-19.25-r()*.15)/.45));const dd=d0*(1-e);
+    for(let i=0;i<140;i++){const a0=r()*6.283,d0=200+r()*700,e=eio(clamp((t-20.25-r()*.15)/.45));const dd=d0*(1-e);
       const x=W/2+Math.cos(a0)*dd,y=H/2+Math.sin(a0)*dd*.6,x0=W/2+Math.cos(a0)*(dd+60*e),y0=H/2+Math.sin(a0)*(dd+60*e)*.6;
       ctx.globalAlpha=.7*Math.sin(e*3.14);ctx.strokeStyle=GOLD;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x,y);ctx.stroke()}
     ctx.globalAlpha=col;ctx.drawImage(SPR[2][1],W/2-60*col,H/2-60*col,120*col,120*col);ctx.restore()}
 }
 // motion blur на резком переезде камеры: несколько подкадров
 function scene5MB(t){
-  if(t<16.5||t>19.8)return;
+  if(t<16.5||t>20.8)return;
   const n=Math.abs(panX5(t)-panX5(t-1/60))>5?10:1;
   if(n===1){scene5(t,camAt(t));return}
   const m=ctx;m.save();m.globalCompositeOperation='lighter';
