@@ -130,11 +130,19 @@ t = tt(2.9); put(np.sin(2 * np.pi * 110 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 1
 for i, x in enumerate([14.0, 14.75, 15.5]): put(ping(mtof([88, 91, 96][i]), 0.9, 0.09), x, pan=0.4, rev=0.6)
 put(noise_sweep(0.5, 400, 9000, 'up', 0.2), 15.9, rev=0.2)
 put(noise_sweep(0.6, 8000, 300, 'down', 0.22), 16.35, rev=0.3)
-# Сцена 5: цифры
-x = 16.8
-while x < 17.95: put(click(0.03), x, pan=rng.random() * 1.2 - .6); x += 0.03
-for i, x in enumerate([17.5, 17.68, 17.86]): put(ping(mtof([76, 79, 84][i]), 0.35, 0.07), x, pan=[-0.5, 0, 0.5][i], rev=0.3)
-put(noise_sweep(0.55, 3000, 11000, 'down', 0.05), 18.65, pan=0.4, rev=0.4)
+# Сцена 5: результаты на линии-конвейере — «тик-тик-тик» на переключениях (как в референсе)
+def tick(f=3400, amp=0.08):
+    t = tt(0.03); n = rng.standard_normal(len(t)); n = n - lp(n, 2500)
+    return (np.sin(2 * np.pi * f * t) * np.exp(-t * 900) * 0.7 + n * np.exp(-t * 1400) * 0.5) * amp
+for j in range(3): put(tick(3000 + j * 200, 0.08), 16.6 + j * 0.08, pan=-0.4 + j * 0.2, rev=0.15)
+for x0 in (17.38, 18.13):
+    for j in range(5): put(tick(3400 - j * 120, 0.13 * (1 - j * 0.1)), x0 + j * 0.072, pan=-0.3 + j * 0.15, rev=0.15)
+    put(noise_sweep(0.36, 9000, 2500, 'down', 0.045), x0, pan=0.3, rev=0.3)
+for i, x in enumerate((17.0, 17.75, 18.5)):
+    put(tick(2600, 0.14), x, rev=0.2); put(tick(4200, 0.08), x + 0.045)
+    y = x + 0.03
+    while y < x + 0.45: put(click(0.03), y, pan=rng.random() * 1.2 - .6); y += 0.03   # перебор цифр
+    put(ping(mtof([76, 79, 84][i]), 0.35, 0.07), x + 0.45, pan=[-0.5, 0, 0.5][i], rev=0.3)  # фиксация числа
 # Финал: втягивание, удар, колокол
 put(noise_sweep(0.5, 300, 9000, 'up', 0.28), 19.25, rev=0.3)
 put(boom(2.2, 0.75), 19.74, rev=0.6)
