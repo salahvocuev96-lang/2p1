@@ -580,13 +580,6 @@ function scene6(t){
     draw(lk,eo(lk*2),(1-eo(lk))*8);
   }
   ctx.restore();
-  // вспышка за «сайт.» в момент поджига
-  const fl=bump(IGN,IGN+.08,IGN+.7,t);
-  if(fl>0){const sx0=hx+measure(HL.slice(0,OR),HS,{w:600}),sw0=measure(HL.slice(OR),HS,{w:600}),gx=sx0+sw0/2,gy=hy-40;
-    ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(gx,gy,0,gx,gy,260);g.addColorStop(0,`rgba(255,140,40,${.5*fl})`);g.addColorStop(1,'rgba(255,100,20,0)');
-    ctx.fillStyle=g;ctx.fillRect(gx-300,gy-300,600,600);const r=rng(11);
-    for(let i=0;i<26;i++){const an=r()*6.283,d=eo((t-IGN)/.6)*(80+r()*160);ctx.globalAlpha=fl*.9;ctx.strokeStyle=GOLD;ctx.lineWidth=1.4;ctx.beginPath();
-      ctx.moveTo(gx+Math.cos(an)*d*.6,gy+Math.sin(an)*d*.4);ctx.lineTo(gx+Math.cos(an)*d,gy+Math.sin(an)*d*.65);ctx.stroke()}ctx.restore()}
   // блик, пробегающий по заголовку
   const sh=clamp((t-21.05)/.75);
   if(sh>0&&sh<1){const gx=lerp(hx-200,hx+hw+200,eio(sh)),sg=ctx.createLinearGradient(gx-120,0,gx+120,0);
