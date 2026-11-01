@@ -1,0 +1,313 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Claude Spot</title>
+<style>
+@font-face{font-family:IS;font-style:normal;src:url(fonts/fontsource-instrument-serif/files/instrument-serif-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF}
+@font-face{font-family:IS;font-style:normal;src:url(fonts/fontsource-instrument-serif/files/instrument-serif-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-024F}
+@font-face{font-family:IS;font-style:italic;src:url(fonts/fontsource-instrument-serif/files/instrument-serif-latin-400-italic.woff2) format('woff2')}
+@font-face{font-family:IT;font-weight:100 900;src:url(fonts/fontsource-variable-inter-tight/files/inter-tight-latin-wght-normal.woff2) format('woff2')}
+@font-face{font-family:SS;font-weight:500;src:url(fonts/fontsource-source-serif-4/files/source-serif-4-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:SS;font-weight:600;src:url(fonts/fontsource-source-serif-4/files/source-serif-4-latin-600-normal.woff2) format('woff2')}
+:root{--ink:#141413;--or:#D97757;--bl:#3E63DD}
+html,body{margin:0;background:#fff}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#fff}
+.abs{position:absolute;left:0;top:0}
+.ch{display:inline-block;white-space:pre;will-change:transform}
+img{display:block}
+.cover{width:100%;height:100%;object-fit:cover}
+svg{overflow:visible}
+</style></head>
+<body><div id="stage"></div>
+<script>
+const W=1920,H=1080,CX=960,CY=540,OR='#D97757',INK='#141413',BL='#3E63DD',PALE='#EEF0F3';
+const NS='http://www.w3.org/2000/svg';
+const stage=document.getElementById('stage');
+// ---------- math ----------
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const P=(t,a,b)=>clamp((t-a)/(b-a));
+const L=(a,b,p)=>a+(b-a)*p;
+const E={
+ oExpo:p=>p>=1?1:1-Math.pow(2,-10*p),
+ iExpo:p=>p<=0?0:Math.pow(2,10*p-10),
+ ioExpo:p=>p<=0?0:p>=1?1:p<.5?Math.pow(2,20*p-10)/2:(2-Math.pow(2,-20*p+10))/2,
+ oCub:p=>1-Math.pow(1-p,3), iCub:p=>p*p*p,
+ ioCub:p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2,
+ oQuint:p=>1-Math.pow(1-p,5),
+ ioQuint:p=>p<.5?16*p*p*p*p*p:1-Math.pow(-2*p+2,5)/2,
+ oBack:(p,s=1.7)=>p<=0?0:1+(s+1)*Math.pow(p-1,3)+s*Math.pow(p-1,2),
+ spring:p=>p<=0?0:p>=1?1:1-Math.exp(-6.5*p)*Math.cos(13*p)*(1-p)-0*p,
+};
+function rng(s){return()=>{s=(s*16807)%2147483647;return(s-1)/2147483646}}
+// ---------- dom ----------
+function el(tag,parent,css={},cls){const e=tag==='svg'||['path','g','line','circle','rect','ellipse','filter','feTurbulence','feDisplacementMap','defs','clipPath'].includes(tag)?document.createElementNS(NS,tag):document.createElement(tag);
+ if(cls)e.setAttribute('class',cls);Object.assign(e.style,css);(parent||stage).appendChild(e);return e}
+function attr(e,o){for(const k in o)e.setAttribute(k,o[k]);return e}
+function st(e,o){for(const k in o)e.style[k]=o[k]}
+function show(e,on){e.style.display=on?'':'none';return on}
+function img(src,parent,css={}){const i=el('img',parent,css);i.src='a/'+src;return i}
+function layer(css={}){return el('div',stage,Object.assign({position:'absolute',left:0,top:0,width:W+'px',height:H+'px'},css))}
+function svgLayer(parent){const s=el('svg',parent||stage,{position:'absolute',left:0,top:0});attr(s,{width:W,height:H,viewBox:`0 0 ${W} ${H}`});return s}
+// placed image centered at (x,y), height h
+function place(e,x,y,s=1,r=0,o=1){st(e,{transform:`translate(-50%,-50%) translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`,opacity:o})}
+// ---------- painted strokes ----------
+const defsSvg=svgLayer();defsSvg.style.width=0;defsSvg.style.height=0;
+defsSvg.innerHTML=`<defs>
+<filter id="rough" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/></filter>
+<filter id="rough2" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.02 0.05" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7"/></filter>
+</defs>`;
+function wobblyLoop(cx,cy,rx,ry,rot,turns,seed,amp=.035,start=0){const r=rng(seed),a1=r()*6.28,a2=r()*6.28,N=180;let d='';const c=Math.cos(rot*Math.PI/180),s=Math.sin(rot*Math.PI/180);
+ for(let i=0;i<=N;i++){const q=i/N,a=start+turns*2*Math.PI*q,k=1+amp*(Math.sin(3*a+a1)+.6*Math.sin(5*a+a2))+.07*q;const x=rx*k*Math.cos(a),y=ry*k*Math.sin(a);d+=(i?'L':'M')+(cx+x*c-y*s).toFixed(1)+' '+(cy+x*s+y*c).toFixed(1)}return d}
+function stroke(svg,d,color,w,filter='rough'){const p=el('path',svg);attr(p,{d,fill:'none',stroke:color,'stroke-width':w,'stroke-linecap':'round','stroke-linejoin':'round',pathLength:1,'stroke-dasharray':'1 1.001','stroke-dashoffset':1});if(filter)p.setAttribute('filter',`url(#${filter})`);return p}
+function draw(p,q){p.setAttribute('stroke-dashoffset',(1-q).toFixed(4));p.style.opacity=q>0.001?1:0}
+// ---------- spark ----------
+const RAYS=[[0,1],[31,.8],[58,.94],[92,.78],[121,1],[149,.84],[181,.93],[212,.79],[238,1],[271,.85],[299,.95],[331,.8]];
+const RORD=[0,6,3,9,1,7,4,10,2,8,5,11];
+function makeSpark(parent,color=OR){const s=svgLayer(parent);const g=el('g',s);const lines=RAYS.map(()=>{const l=el('line',g);attr(l,{stroke:color,'stroke-linecap':'round'});return l});return{svg:s,g,lines}}
+// grow: function(i)->0..1
+function setSpark(sp,x,y,R,rot,grow,on=true){if(!show(sp.svg,on))return;sp.g.setAttribute('transform',`translate(${x} ${y}) rotate(${rot})`);
+ sp.lines.forEach((l,i)=>{const [a,len]=RAYS[i],g=grow(i),rr=R*len*g,ang=a*Math.PI/180;attr(l,{x1:0,y1:0,x2:(Math.cos(ang)*rr).toFixed(2),y2:(Math.sin(ang)*rr).toFixed(2),'stroke-width':(R*.2*Math.min(1,g*3)).toFixed(2)});l.style.opacity=g>0.002?1:0})}
+// ---------- letters ----------
+function letters(parent,str,css){const box=el('div',parent,Object.assign({position:'absolute',whiteSpace:'pre'},css));const cs=[...str].map(c=>{const s=el('span',box,{},'ch');s.textContent=c;return s});return{box,cs}}
+// rise-in / out letter animation: returns nothing; inp,outp in 0..1
+function riseLetters(lt,t,tin,tout,{dur=.32,stg=.014,dist=1.05,outDur=.16,outStg=.008,ease=E.oExpo}={}){const n=lt.cs.length;
+ lt.cs.forEach((c,i)=>{const pi=ease(P(t,tin+i*stg,tin+i*stg+dur));const po=tout==null?0:E.iCub(P(t,tout+i*outStg,tout+i*outStg+outDur));
+  const y=(1-pi)*dist*100-po*dist*100;st(c,{transform:`translateY(${y}%)`})})}
+
+// =====================================================================
+// SCENE 1 — spark open (0 – 1.05)
+// =====================================================================
+const s1=layer();const sp1=makeSpark(s1);
+function scene1(t){if(!show(s1,t<1.06))return;
+ const zp=P(t,.6,1.04),zoom=E.iExpo(zp);const R=120*L(1,64,zoom);
+ const rot=L(-70,0,E.oExpo(P(t,0,.75)))+E.ioCub(zp)*38;
+ // fly the camera out through the gap between ray 0 and ray 1, beyond the tips -> lands on white
+ const ga=(15.5+rot)*Math.PI/180,dd=R*1.14*E.ioCub(Math.min(1,zp*1.6));
+ const ox=CX-Math.cos(ga)*dd, oy=CY-Math.sin(ga)*dd;
+ setSpark(sp1,ox,oy,R,rot,i=>{const k=RORD.indexOf(i);return E.oBack(P(t,.04+k*.026,.04+k*.026+.34),1.9)});
+}
+// =====================================================================
+// SCENE 2 — "Bring your ___" (0.95 – 5.7)
+// =====================================================================
+const s2=layer();
+const bringBox=el('div',s2,{position:'absolute',left:'150px',top:'285px'});
+const bw=['Bring','your'].map((w,i)=>{const clip=el('div',bringBox,{display:'inline-block',overflow:'hidden',padding:'0 6px 24px 6px',marginRight:'22px',verticalAlign:'top'});return letters(clip,w,{position:'relative',font:'640 150px/1.0 IT',letterSpacing:'-0.045em',color:INK})});
+const WORDS=['questions.','half-ideas.','hunches.','experiments.','big plans.','3am notes.','tools.','wild ideas.'];
+const BEAT=[1.18,1.86,2.44,2.96,3.42,3.84,4.22,4.58,5.42]; // last = end of word section
+const wordClip=el('div',s2,{position:'absolute',left:'138px',top:'440px',width:'960px',height:'250px',overflow:'hidden'});
+const wl=WORDS.map(w=>letters(wordClip,w,{left:'18px',top:'4px',font:'italic 400 214px/1.0 IS',letterSpacing:'-0.02em',color:OR}));
+// right-side visuals
+const vis=[];const vsvg=[];
+for(let k=0;k<8;k++){const d=layer();d.style.pointerEvents='none';vis.push(d)}
+function V(k){return vis[k]}
+// k0 apple
+const v0={c:stroke(svgLayer(V(0)),wobblyLoop(1395,560,330,318,-28,1.12,7),OR,15),i:img('apple.png',V(0),{position:'absolute',height:'540px'}),sp:makeSpark(V(0))};
+V(0).appendChild(v0.c.ownerSVGElement); // circle above apple
+// k1 puzzle
+const v1s=svgLayer(V(1));const v1ring=el('circle',v1s);attr(v1ring,{cx:1390,cy:545,r:300,fill:'none',stroke:INK,'stroke-width':3,'stroke-dasharray':'2 16','stroke-linecap':'round'});
+const v1={i:img('puzzle.png',V(1),{position:'absolute',height:'430px'}),dot:el('div',V(1),{position:'absolute',width:'64px',height:'64px',borderRadius:'50%',background:OR})};
+// k2 compass
+const v2={i:img('compass.png',V(2),{position:'absolute',height:'600px'})};
+const v2s=svgLayer(V(2));v2.orb=stroke(v2s,wobblyLoop(1390,545,440,128,-16,1.0,11,.012,-1.2),OR,11);
+v2.dot=el('circle',v2s);attr(v2.dot,{r:15,fill:INK});
+// k3 experiments
+const v3={bg:el('div',V(3),{position:'absolute',width:'470px',height:'650px',background:BL}),i:img('jar.png',V(3),{position:'absolute',height:'600px'}),b:[0,1,2].map(()=>el('div',V(3),{position:'absolute',borderRadius:'50%',border:`9px solid ${OR}`,boxSizing:'border-box'}))};
+// k4 big plans
+const v4s=svgLayer(V(4));const v4={path:stroke(v4s,'M1010 940 C 1080 700, 1180 860, 1260 700 S 1330 520, 1380 560',INK,5,null),i:img('bird.png',V(4),{position:'absolute',height:'560px'})};
+v4.path.setAttribute('stroke-dasharray','0.012 0.018');
+// k5 notes
+const v5={i:img('brain.png',V(5),{position:'absolute',height:'610px'})};
+const v5s=svgLayer(V(5));v5s.style.mixBlendMode='multiply';
+v5.z=stroke(v5s,'M1180 420 L1600 380 L1190 520 L1610 480 L1200 620 L1600 590 L1230 700',OR,34,'rough2');
+// k6 tools
+const v6={h:img('hammer.png',V(6),{position:'absolute',height:'520px'}),s:img('scales.png',V(6),{position:'absolute',width:'520px'})};
+const v6s=svgLayer(V(6));v6.u=stroke(v6s,'M1060 880 C 1250 860, 1500 905, 1760 868',INK,8);
+// k7 wild ideas (earth handled as hero)
+const v7={sky:el('div',V(7),{position:'absolute',width:'400px',height:'270px',overflow:'hidden'}),lake:el('div',V(7),{position:'absolute',width:'340px',height:'340px',overflow:'hidden'}),stone:img('stone.png',V(7),{position:'absolute',height:'250px'})};
+img('sky.jpg',v7.sky,{}).className='cover';img('lake.jpg',v7.lake,{}).className='cover';
+const v7sp=makeSpark(V(7));
+
+function popIn(u,dur=.42){return E.spring(P(u,0,dur))}
+function scene2(t){if(!show(s2,t>.9&&t<5.75)){vis.forEach(v=>show(v,false));return}
+ // bring your
+ bw.forEach((w,i)=>riseLetters(w,t,.98+i*.07,5.36+i*.03,{dur:.42,stg:.018,outDur:.2}));
+ // words
+ wl.forEach((w,k)=>{const a=BEAT[k],b=k<7?BEAT[k+1]:5.36;const on=show(w.box,t>a-.02&&t<b+.25);if(on)riseLetters(w,t,a,b-.04,{dur:.34,stg:.013,outDur:.15,outStg:.007})});
+ for(let k=0;k<8;k++){const a=BEAT[k],b=BEAT[k+1];const on=show(V(k),t>=a-.01&&t<b+.14);if(!on)continue;
+  const u=t-a,x=E.iCub(P(t,b,b+.13)); // x = exit
+  const ex=1-x*.18,eo=1-x;
+  if(k===0){const s=popIn(u);place(v0.i,1395,560,L(.55,1,s)*ex,L(-14,0,E.oExpo(P(u,0,.4))),eo);draw(v0.c,E.oCub(P(u,.1,.42))*eo);v0.c.style.opacity=eo;
+   setSpark(v0.sp,1660,275,36*ex,L(-90,0,E.oExpo(P(u,.22,.6))),i=>E.oBack(P(u,.22+RORD.indexOf(i)*.008,.5+RORD.indexOf(i)*.008),2));v0.sp.svg.style.opacity=eo}
+  if(k===1){const p=E.oExpo(P(u,0,.4));place(v1.i,L(1720,1390,p),545,ex,L(40,-6,p),eo);attr(v1ring,{'stroke-dashoffset':-u*60});v1ring.style.opacity=E.oCub(P(u,.02,.2))*eo;
+   v1ring.setAttribute('r',L(200,300,E.oExpo(P(u,0,.45))));const dp=E.oBack(P(u,.12,.4),2.2);place(v1.dot,1620,330,dp*ex,0,eo)}
+  if(k===2){const p=E.oExpo(P(u,0,.45));place(v2.i,1390,545,L(1.35,1,p)*ex,L(140,0,p),eo);const q=E.oCub(P(u,.06,.36));draw(v2.orb,q);v2.orb.style.opacity=q>0?eo:0;
+   const a=-1.2+2*Math.PI*q*1.0,c=Math.cos(-16*Math.PI/180),s=Math.sin(-16*Math.PI/180),xx=440*1.07*Math.cos(a),yy=128*1.07*Math.sin(a);attr(v2.dot,{cx:1390+xx*c-yy*s,cy:545+xx*s+yy*c});v2.dot.style.opacity=q>0.02?eo:0}
+  if(k===3){const w=E.oExpo(P(u,0,.3));place(v3.bg,1390,545,ex,4,eo);v3.bg.style.clipPath=`inset(${(1-w)*100}% 0 0 0)`;const p=E.oExpo(P(u,.04,.42));place(v3.i,1390,L(700,560,p),ex,L(-6,0,p),Math.min(eo,P(u,.04,.12)));
+   v3.b.forEach((b,i)=>{const bp=E.oBack(P(u,.14+i*.05,.38+i*.05),2.4),sz=[54,34,24][i];st(b,{width:sz+'px',height:sz+'px'});place(b,[1300,1365,1330][i],[205,150,95][i]-u*40,bp*ex,0,eo)})}
+  if(k===4){const p=E.oExpo(P(u,0,.4));place(v4.i,L(1080,1420,p),L(900,520,p),L(.5,1,p)*ex,L(25,0,p),eo);const q=E.oCub(P(u,0,.32));v4.path.setAttribute('stroke-dasharray',`${0.012} ${0.018}`);v4.path.setAttribute('stroke-dashoffset',0);v4s.style.clipPath=`inset(0 ${(1-q)*100}% 0 0)`;v4.path.style.opacity=eo}
+  if(k===5){const p=E.oExpo(P(u,0,.35));place(v5.i,1395,545,L(.82,1,p)*ex,0,eo);draw(v5.z,E.ioCub(P(u,.06,.32)));v5.z.style.opacity=.92*eo}
+  if(k===6){const a1=popIn(u,.4),a2=popIn(u-.06,.4);place(v6.h,1210,520,L(.4,1,a1)*ex,L(-40,-14,E.oExpo(P(u,0,.4))),eo);place(v6.s,1585,560,L(.4,1,a2)*ex,L(30,6,E.oExpo(P(u,.06,.46))),eo);draw(v6.u,E.oCub(P(u,.1,.32)));v6.u.style.opacity=eo}
+  if(k===7){// exits handled with the grid transition
+   const xo=E.ioQuint(P(t,5.42,5.8));
+   const a1=E.oBack(P(u,.05,.36),1.6),a2=E.oBack(P(u,.1,.41),1.6),a3=E.oBack(P(u,.16,.47),1.6);
+   place(v7.sky,L(1640,2300,xo),L(640,700,xo),a1,6,1);place(v7.lake,L(1150,560,xo),L(760,1400,xo),a2,-4,1);place(v7.stone,L(1560,1640,xo),L(820,-300,xo),a3,0,1);
+   setSpark(v7sp,1785,380,40,L(-120,0,E.oExpo(P(u,.2,.6))),i=>E.oBack(P(u,.2+RORD.indexOf(i)*.008,.46+RORD.indexOf(i)*.008),2),xo<.3);
+   V(7).style.opacity=1}
+ }
+ show(V(7),t>=BEAT[7]-.01&&t<5.85);
+}
+// =====================================================================
+// SCENE 3 — grid of images → zoom into earth (5.4 – 7.6) + hero
+// =====================================================================
+const s3=layer();const grid=el('div',s3,{position:'absolute',left:0,top:0,width:W+'px',height:H+'px',transformOrigin:`${CX}px ${CY}px`});
+const TW=330,TH=230,GAP=24;
+const TILES=[['lake.jpg'],['apple.png',OR],['lighthouse.jpg'],['compass.png',PALE],['moongrid.jpg'],
+ ['brain.png',OR],['stone.png',BL],['HERO'],['puzzle.png',INK],['cyan.jpg'],
+ ['pipette.jpg'],['bird.png',PALE],['ocean.jpg'],['hammer.png',BL],['snow.jpg']];
+const tiles=TILES.map(([src,bg],i)=>{if(src==='HERO')return null;const c=i%5,r=Math.floor(i/5);const d=el('div',grid,{position:'absolute',width:TW+'px',height:TH+'px',overflow:'hidden',borderRadius:'10px',background:bg||'#ddd'});
+ const x=CX+(c-2)*(TW+GAP),y=CY+(r-1)*(TH+GAP);const im=img(src,d,{});if(bg){st(im,{position:'absolute',left:'50%',top:'50%',height:'80%',transform:'translate(-50%,-50%)'})}else im.className='cover';return{d,x,y,c,r}}).filter(Boolean);
+// hero = earth
+const hero=el('div',stage,{position:'absolute',left:0,top:0,overflow:'hidden'});const heroImg=img('earth.jpg',hero,{});heroImg.className='cover';
+const s3svg=svgLayer(s3);s3svg.style.zIndex=5;
+const ring3=stroke(s3svg,wobblyLoop(1010,640,560,190,-8,1.08,21,.02,2.6),OR,16);
+const sp3=makeSpark(s3);sp3.svg.style.zIndex=6;
+function boxAt(e,x,y,w,h,r=0,rad=0,s=1){st(e,{width:w+'px',height:h+'px',transform:`translate(${x-w/2}px,${y-h/2}px) rotate(${r}deg) scale(${s})`,borderRadius:rad+'px'})}
+function zoomAt(t){return L(1,W/TW,E.ioExpo(P(t,6.02,6.72)))}
+function scene3(t){const on=show(s3,t>5.38&&t<7.62);
+ const Z=zoomAt(t);
+ if(on){grid.style.transform=`scale(${Z})`;
+  tiles.forEach((tl,i)=>{const dist=Math.hypot(tl.c-2,tl.r-1);const a=5.44+dist*.05;const p=E.oBack(P(t,a,a+.36),1.4);boxAt(tl.d,tl.x,tl.y,TW,TH,0,10,p);tl.d.style.opacity=P(t,a,a+.05)});
+  const q=E.oCub(P(t,6.8,7.25));draw(ring3,q);
+  setSpark(sp3,1520,470,44,L(-120,0,E.oExpo(P(t,7.0,7.4))),i=>E.oBack(P(t,7.0+RORD.indexOf(i)*.01,7.28+RORD.indexOf(i)*.01),2),t>6.95);
+  s3svg.style.opacity=1-P(t,7.5,7.58);sp3.svg.style.opacity=1-P(t,7.5,7.58);}
+ heroUpdate(t,Z);
+}
+function heroUpdate(t,Z){
+ const on=show(hero,t>=BEAT[7]+.04&&t<7.9);if(!on)return;hero.style.zIndex=on&&t<5.42?0:1;
+ if(t<5.42){const u=t-BEAT[7];const a=E.oBack(P(u,0,.32),1.6);boxAt(hero,1290,400,540,340,-5,10,a);heroImg.style.transform='';return}
+ if(t<6.02){const p=E.ioQuint(P(t,5.42,5.86));boxAt(hero,L(1290,CX,p),L(400,CY,p),L(540,TW,p),L(340,TH,p),L(-5,0,p),10,1);return}
+ if(t<6.72){const zp=E.ioExpo(P(t,6.02,6.72));const h=L(TH,H/(W/TW),zp);// keep 16:9 at end
+   st(hero,{width:TW+'px',height:h+'px',borderRadius:L(10,0,zp)+'px',transformOrigin:'50% 50%',transform:`translate(${CX-TW/2}px,${CY-h/2}px) scale(${Z})`});return}
+ if(t<7.55){const pp=E.oCub(P(t,6.72,7.55));boxAt(hero,CX,CY,W,H,0,0,1);heroImg.style.transform=`scale(${1+.07*pp})`;return}
+ // shrink to card
+ const p=E.ioQuint(P(t,7.55,7.86));boxAt(hero,CX,CY,L(W,CARDW,p),L(H,CARDH,p),0,L(0,18,p),1);heroImg.style.transform=`scale(${L(1.07,1,p)})`;
+}
+// =====================================================================
+// SCENE 4 — 3D ring carousel (7.84 – 9.0)
+// =====================================================================
+const CARDW=380,CARDH=500,NC=14,RR=1010;
+const s4=layer({perspective:'1700px',perspectiveOrigin:'50% 50%'});
+const ring=el('div',s4,{position:'absolute',left:CX+'px',top:CY+'px',width:0,height:0,transformStyle:'preserve-3d'});
+const CARDS=[['earth.jpg'],['lighthouse.jpg'],['apple.png',OR],['ocean.jpg'],['spiral.jpg'],['compass.png',PALE],['nautilus.jpg'],['moongrid.jpg'],['bird.png',PALE],['leafmag.jpg'],['puzzleo.jpg'],['brain.png',OR],['sky.jpg'],['stone.png',BL]];
+const cards=CARDS.map(([src,bg],i)=>{const d=el('div',ring,{position:'absolute',left:-CARDW/2+'px',top:-CARDH/2+'px',width:CARDW+'px',height:CARDH+'px',borderRadius:'18px',overflow:'hidden',backfaceVisibility:'hidden',background:bg||'#ddd'});const im=img(src,d,{});if(bg)st(im,{position:'absolute',left:'50%',top:'50%',width:'78%',transform:'translate(-50%,-50%)'});else im.className='cover';return d});
+function scene4(t){if(!show(s4,t>=7.86&&t<8.92))return;
+ const R=L(0,RR,E.oCub(P(t,7.86,8.22)));const tilt=L(0,-9,E.ioCub(P(t,7.86,8.3)));
+ const spin=-(360+360/NC)*E.ioCub(P(t,7.95,8.92));
+ const col=E.iExpo(P(t,8.6,8.9));const sc=L(1,.0,col);
+ ring.style.transform=`translateZ(${-R}px) rotateX(${tilt}deg) rotateY(${spin+col*-160}deg) scale3d(${sc},${sc},${sc})`;
+ cards.forEach((c,i)=>{c.style.transform=`rotateY(${i*360/NC}deg) translateZ(${R}px)`;c.style.opacity=i===0?1:P(t,7.9+i*.008,8.05+i*.008)});
+}
+// =====================================================================
+// SCENE 5 — morph "from a thought" → "to a thing" (8.86 – 10.8)
+// =====================================================================
+const s5=layer();
+const MF=232, MFONT=`400 ${MF}px IS`;
+let morph=null;
+function buildMorph(){const cv=document.createElement('canvas').getContext('2d');cv.font=MFONT;
+ const lay=(s)=>{const w=cv.measureText(s).width;let x=CX-w/2;const out=[];for(let i=0;i<s.length;i++){const pre=cv.measureText(s.slice(0,i)).width;out.push(x+pre)}return out};
+ const A='from a thought',B='to a thinǥ';
+ const pa=lay('from a thought'),pb=lay('to a thıng');
+ // map: src idx -> tgt idx
+ const map={2:1,5:3,7:5,8:6,11:9,13:0,10:8};
+ const mk=(c)=>{const s=el('span',s5,{position:'absolute',top:'0px',left:'0px',font:MFONT,color:INK,whiteSpace:'pre',lineHeight:1});s.textContent=c;return s};
+ const src=[...'from a thought'].map((c,i)=>({e:mk(c),x0:pa[i],to:map[i]}));
+ const tgtStr='to a thıng';const used=new Set(Object.values(map));
+ const fresh=[...tgtStr].map((c,j)=>used.has(j)||c===' '?null:{e:mk(c),x1:pb[j],j}).filter(Boolean);
+ src.forEach(s=>{if(s.to!=null){s.x1=pb[s.to];// swap glyph if different
+   if(tgtStr[s.to]!==s.e.textContent){s.swap=mk(tgtStr[s.to])}}});
+ // i dot position: measure ı width
+ const iW=cv.measureText('ı').width;
+ const ul=svgLayer(s5);const under=stroke(ul,'',OR,18,'rough2');
+ const gx0=pb[5],gx1=pb[9]+cv.measureText('g').width;
+ under.setAttribute('d',`M${gx0-10} 740 C ${gx0+180} 712, ${gx1-200} 760, ${gx1+20} 722`);
+ const isp=makeSpark(s5);
+ morph={src,fresh,under,isp,ix:pb[7]+iW/2,pb};
+}
+const MY=380; // top of glyph box
+function scene5(t){if(!show(s5,t>8.84&&t<10.95))return;if(!morph)buildMorph();
+ const T0=9.5;
+ const outAll=E.iCub(P(t,10.62,10.8));
+ morph.src.forEach((s,i)=>{const pin=E.oExpo(P(t,8.9+i*.018,8.9+i*.018+.42));let y=(1-pin)*90,o=P(t,8.9+i*.018,8.9+i*.018+.1),x=s.x0,sc=1,r=0;
+  const m0=T0+i*.012,mp=E.ioCub(P(t,m0,m0+.42));
+  if(s.to==null){const e=E.iCub(P(t,m0-.06,m0+.14));y+=e*60;o*=1-e;sc=1-.4*e}
+  else{x=L(s.x0,s.x1,mp);if(i===13){y-=Math.sin(Math.PI*mp)*150;r=-360*E.ioCub(P(t,m0,m0+.42))}}
+  y-=outAll*120;o*=1-outAll;
+  if(s.swap){const k=P(t,m0+.12,m0+.3);st(s.swap,{transform:`translate(${x}px,${MY+y}px) scale(${L(.6,1,E.oBack(k))})`,opacity:k*(1-outAll),transformOrigin:'50% 70%'});o*=1-k}
+  st(s.e,{transform:`translate(${x}px,${MY+y}px) rotate(${r}deg) scale(${sc})`,opacity:o,transformOrigin:'50% 70%'})});
+ morph.fresh.forEach((f,k)=>{const a=T0+.24+k*.05,p=E.oExpo(P(t,a,a+.4));st(f.e,{transform:`translate(${f.x1}px,${MY+(1-p)*80-outAll*120}px)`,opacity:P(t,a,a+.12)*(1-outAll)})});
+ draw(morph.under,E.oCub(P(t,10.02,10.34)));morph.under.style.opacity=1-outAll;
+ const ip=P(t,10.0,10.4);
+ setSpark(morph.isp,morph.ix,MY+0.29*MF-outAll*120,MF*.085,L(-140,0,E.oExpo(ip)),i=>E.oBack(P(t,10.0+RORD.indexOf(i)*.008,10.3+RORD.indexOf(i)*.008),2.2),t>9.99);morph.isp.svg.style.opacity=1-outAll;
+}
+// =====================================================================
+// SCENE 6 — split montage (10.72 – 12.62)
+// =====================================================================
+const s6=layer();
+const MB=[10.74,11.14,11.52,11.88,12.24]; // beat starts, last = collapse start
+const MW=['Write.','Code.','Research.','Create.'];
+const MI=['lighthouse.jpg','moongrid.jpg','pipette.jpg','ocean.jpg'];
+const panel=el('div',s6,{position:'absolute',left:0,top:0,overflow:'hidden',background:OR});
+const pims=MI.map(src=>{const w=el('div',panel,{position:'absolute',inset:0,overflow:'hidden'});const i=img(src,w,{});i.className='cover';return{w,i}});
+const mws=MW.map(w=>{const clip=el('div',s6,{position:'absolute',top:'380px',width:'960px',height:'300px',overflow:'hidden',textAlign:'center'});const lt=letters(clip,w,{position:'relative',font:`640 ${w.length>7?118:180}px/1.15 IT`,letterSpacing:'-0.05em',color:INK,display:'inline-block'});lt.box.style.position='relative';return{clip,lt}});
+const s6svg=svgLayer(s6);
+const mpaint=[stroke(s6svg,'',OR,14),stroke(s6svg,'',OR,14),stroke(s6svg,'',OR,14),stroke(s6svg,'',OR,14)];
+const sp6=makeSpark(s6);
+function scene6(t){if(!show(s6,t>10.72&&t<12.66))return;
+ let b=0;for(let k=0;k<4;k++)if(t>=MB[k])b=k;
+ // panel x: beat0 left(0), 1 right, 2 left, 3 right
+ const sideX=k=>k%2===0?0:960;
+ let px;if(t<MB[1])px=L(-960,0,E.oExpo(P(t,MB[0],MB[0]+.32)));else{px=L(sideX(b-1),sideX(b),E.ioQuint(P(t,MB[b],MB[b]+.3)))}
+ const col=E.ioQuint(P(t,MB[4],12.6));
+ // collapse to center dot
+ const cw=L(960,64,col),ch=L(H,64,col),cx=L(px+480,CX,col),cy=CY;
+ st(panel,{width:cw+'px',height:ch+'px',transform:`translate(${cx-cw/2}px,${cy-ch/2}px)`,borderRadius:L(0,32,E.iCub(col))+'px'});
+ pims.forEach((p,k)=>{const a=MB[k];const on=show(p.w,t>=a&&k<=b);if(!on)return;const dir=k%2===0?1:-1;const w=E.ioQuint(P(t,a,a+.3));
+  p.w.style.clipPath=k===0?'none':(dir>0?`inset(0 ${(1-w)*100}% 0 0)`:`inset(0 0 0 ${(1-w)*100}%)`);
+  p.i.style.transform=`scale(${L(1.25,1.04,E.oCub(P(t,a,a+.5)))})`;p.w.style.opacity=1-E.iCub(P(t,MB[4]+.05,12.5))});
+ mws.forEach((m,k)=>{const a=MB[k],e=k<3?MB[k+1]:MB[4];const on=show(m.clip,t>a-.01&&t<e+.2);if(!on)return;const wx=k%2===0?960:0;m.clip.style.left=wx+'px';riseLetters(m.lt,t,a+.06,e-.04,{dur:.3,stg:.016,outDur:.12})});
+ // paint
+ mpaint.forEach((p,k)=>{const a=MB[k],e=k<3?MB[k+1]:MB[4];if(t<a||t>e+.02){p.style.opacity=0;return}const wx=k%2===0?960:0;
+  const d=[`M${wx+250} 690 C ${wx+400} 668, ${wx+560} 700, ${wx+720} 676`,
+   wobblyLoop(wx+480,520,330,150,-4,1.1,31,.03,2.8),
+   `M${wx+160} 700 C ${wx+420} 680, ${wx+640} 712, ${wx+820} 684`,
+   wobblyLoop(wx+480,520,330,150,4,1.1,41,.03,2.4)][k];if(p.getAttribute('d')!==d)p.setAttribute('d',d);draw(p,E.oCub(P(t,a+.12,a+.34)))});
+ const wx=960;setSpark(sp6,wx+800,380,34,L(-90,0,E.oExpo(P(t,MB[1]+.14,MB[1]+.5))),i=>E.oBack(P(t,MB[1]+.14+RORD.indexOf(i)*.008,MB[1]+.38+RORD.indexOf(i)*.008),2),false);
+}
+// =====================================================================
+// SCENE 7 — logo (12.58 – 15)
+// =====================================================================
+const s7=layer();const sp7=makeSpark(s7);
+const wmClip=el('div',s7,{position:'absolute',overflow:'hidden',height:'260px'});
+const wm=el('div',wmClip,{position:'absolute',left:0,top:0,font:'500 200px/1.3 SS',letterSpacing:'-0.03em',color:INK,whiteSpace:'pre'});wm.textContent='Claude';
+const dot7=el('div',s7,{position:'absolute',width:'64px',height:'64px',borderRadius:'50%',background:OR});
+let wmW=0;
+function scene7(t){if(!show(s7,t>=12.56))return;if(!wmW)wmW=wm.getBoundingClientRect().width;
+ const R=96,gap=54,total=2*R*.98+gap+wmW;const finalSX=CX-total/2+R*.98;
+ const mv=E.ioQuint(P(t,13.02,13.62));
+ const hold=P(t,13.6,15);const gs=1+.02*hold;
+ const sx=L(CX,finalSX,mv);
+ // dot morphs into spark
+ const dp=P(t,12.58,12.7);st(dot7,{transform:`translate(${CX-32}px,${CY-32}px) scale(${L(1,0,E.iCub(dp))})`,opacity:t<12.72?1:0});
+ setSpark(sp7,CX+(sx-CX)*gs,CY,R*gs,L(-150,0,E.oExpo(P(t,12.6,13.4)))+hold*8,i=>E.oBack(P(t,12.6+RORD.indexOf(i)*.014,12.6+RORD.indexOf(i)*.014+.36),1.8));
+ const left=sx+R*.98+gap;
+ st(wmClip,{left:CX+(left-CX)*gs+'px',top:CY-130+'px',width:wmW+40+'px',transform:`scale(${gs})`,transformOrigin:'0 50%'});
+ wm.style.transform=`translateX(${L(-wmW-30,0,E.oExpo(P(t,13.12,13.8)))}px)`;
+ wm.style.top=(260-200*1.3)/2+'px';
+}
+// =====================================================================
+function render(t){scene1(t);scene2(t);scene3(t);scene4(t);scene5(t);scene6(t);scene7(t)}
+window.render=render;
+window.ready=(async()=>{await document.fonts.load('400 100px IS');await document.fonts.load('italic 400 100px IS');await document.fonts.load('600 100px IT');await document.fonts.load('500 100px SS');await document.fonts.load('400 100px IS','ı');
+ await Promise.all([...document.images].map(i=>i.decode().catch(()=>{})));render(0);return true})();
+// preview: ?t=1.2 or autoplay
+const q=new URLSearchParams(location.search);
+if(q.has('play')){window.ready.then(()=>{const s=performance.now();const f=()=>{render(((performance.now()-s)/1000)%15);requestAnimationFrame(f)};f()})}
+</script></body></html>
