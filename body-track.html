@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Body Tracker</title>
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: rgba(10,16,24,0.82);
+    --border: rgba(255,255,255,0.1);
+    --fg: #e2e8f0;
+    --muted: #64748b;
+    --cyan: #00e5ff;
+    --green: #39ff14;
+    --orange: #ff9100;
+    --red: #ff1744;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: system-ui, -apple-system, sans-serif;
+    touch-action: none;
+    user-select: none;
+  }
+  #stage { position: fixed; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #c-video { z-index: 1; }
+  #c-skel  { z-index: 2; pointer-events: none; }
+  video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+  /* ── Status banner ── */
+  #status {
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top, 0px));
+    left: 50%; transform: translateX(-50%);
+    z-index: 10;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 7px 20px;
+    font-size: 14px; color: var(--muted);
+    backdrop-filter: blur(14px);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: calc(100vw - 28px);
+    text-align: center;
+    transition: color .2s, border-color .2s;
+  }
+  #status.active { color: var(--cyan); border-color: rgba(0,229,255,.4); }
+
+  /* ── Counters ── */
+  #counters {
+    position: fixed;
+    top: max(60px, calc(env(safe-area-inset-top,0px) + 52px));
+    left: 12px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .counter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 16px;
+    backdrop-filter: blur(14px);
+    min-width: 110px;
+  }
+  .counter-label { font-size: 11px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+  .counter-value { font-size: 38px; font-weight: 700; line-height: 1.1; }
+  .counter-value.cyan   { color: var(--cyan); text-shadow: 0 0 14px var(--cyan); }
+  .counter-value.orange { color: var(--orange); text-shadow: 0 0 14px var(--orange); }
+  .counter-value.green  { color: var(--green);  text-shadow: 0 0 14px var(--green); }
+
+  /* ── Toolbar ── */
+  #toolbar {
+    position: fixed;
+    bottom: max(18px, env(safe-area-inset-bottom, 0px));
+    left: 50%; transform: translateX(-50%);
+    z-index: 10;
+    display: flex; gap: 10px; align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 18px;
+    backdrop-filter: blur(14px);
+    white-space: nowrap;
+  }
+  .btn {
+    background: rgba(255,255,255,.07);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .btn:hover { background: rgba(255,255,255,.15); color: var(--fg); }
+  .btn.danger { border-color: rgba(255,23,68,.35); color: var(--red); background: rgba(255,23,68,.1); }
+  .btn.danger:hover { background: rgba(255,23,68,.25); }
+
+  /* ── Camera dropdown ── */
+  #cam-menu {
+    position: fixed;
+    bottom: max(74px, calc(env(safe-area-inset-bottom,0px)+64px));
+    left: 50%; transform: translateX(-50%);
+    z-index: 20;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px;
+    backdrop-filter: blur(16px);
+    display: none; flex-direction: column; gap: 4px;
+    min-width: 230px; max-width: calc(100vw - 28px);
+  }
+  #cam-menu.open { display: flex; }
+  .cam-opt {
+    padding: 9px 14px; border-radius: 8px; font-size: 13px; color: var(--fg);
+    cursor: pointer; border: 1px solid transparent; transition: background .12s;
+  }
+  .cam-opt:hover { background: rgba(255,255,255,.1); }
+  .cam-opt.active { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ── Pose feedback flash ── */
+  #feedback {
+    position: fixed;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    z-index: 15;
+    font-size: 72px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  #feedback.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="c-video"></canvas>
+  <canvas id="c-skel"></canvas>
+  <video id="video" playsinline muted autoplay></video>
+</div>
+
+<div id="status">⏳ Загрузка…</div>
+
+<div id="counters">
+  <div class="counter">
+    <div class="counter-label">Приседания</div>
+    <div class="counter-value cyan"  id="cnt-squat">0</div>
+  </div>
+  <div class="counter">
+    <div class="counter-label">Прыжки</div>
+    <div class="counter-value orange" id="cnt-jump">0</div>
+  </div>
+  <div class="counter">
+    <div class="counter-label">Руки вверх</div>
+    <div class="counter-value green"  id="cnt-raise">0</div>
+  </div>
+</div>
+
+<div id="feedback"></div>
+
+<div id="cam-menu"></div>
+
+<div id="toolbar">
+  <button class="btn" id="camBtn">📷 Камера</button>
+  <button class="btn danger" id="resetBtn">↺ Сброс</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.js" crossorigin="anonymous"></script>
+
+<script>
+// ── Canvas setup ──────────────────────────────────────────
+const video   = document.getElementById('video');
+const cVideo  = document.getElementById('c-video');
+const cSkel   = document.getElementById('c-skel');
+const ctxV    = cVideo.getContext('2d');
+const ctxS    = cSkel.getContext('2d');
+const statusEl= document.getElementById('status');
+const feedback= document.getElementById('feedback');
+
+let W, H;
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  [cVideo, cSkel].forEach(c => { c.width = W; c.height = H; });
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Counters ──────────────────────────────────────────────
+let squats = 0, jumps = 0, raises = 0;
+const elSquat = document.getElementById('cnt-squat');
+const elJump  = document.getElementById('cnt-jump');
+const elRaise = document.getElementById('cnt-raise');
+
+function setCount(el, n) { el.textContent = n; }
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  squats = jumps = raises = 0;
+  setCount(elSquat, 0); setCount(elJump, 0); setCount(elRaise, 0);
+  squat_state = 'up'; jump_state = 'ground'; raise_state = 'down';
+  hipBaseline = null; hipSamples = [];
+});
+
+// ── Flash feedback ────────────────────────────────────────
+let fbTimer = null;
+function flash(emoji) {
+  feedback.textContent = emoji;
+  feedback.classList.add('show');
+  clearTimeout(fbTimer);
+  fbTimer = setTimeout(() => feedback.classList.remove('show'), 600);
+}
+
+// ── Angle between 3 points ────────────────────────────────
+function angle(A, B, C) {
+  const ab = { x: A.x - B.x, y: A.y - B.y };
+  const cb = { x: C.x - B.x, y: C.y - B.y };
+  const dot = ab.x*cb.x + ab.y*cb.y;
+  const mag = Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
+  return Math.acos(Math.max(-1, Math.min(1, dot/mag))) * 180 / Math.PI;
+}
+
+// ── Detection state ───────────────────────────────────────
+let squat_state = 'up';       // up | down
+let jump_state  = 'ground';   // ground | air
+let raise_state = 'down';     // down | up
+
+let hipBaseline = null;
+let hipSamples  = [];
+const HIP_SAMPLES = 30;
+
+function detectGestures(lm) {
+  // Landmarks (normalized 0-1, y flips on mirrored draw)
+  const lHip   = lm[23], rHip   = lm[24];
+  const lKnee  = lm[25], rKnee  = lm[26];
+  const lAnkle = lm[27], rAnkle = lm[28];
+  const lShoulder = lm[11], rShoulder = lm[12];
+  const lWrist = lm[15], rWrist = lm[16];
+
+  if (!lHip || !rHip || !lKnee || !rKnee) return;
+
+  const hipY = (lHip.y + rHip.y) / 2;
+
+  // ── Squat (knee angle) ────────────────────────────────
+  const lKneeAngle = angle(lHip, lKnee, lAnkle);
+  const rKneeAngle = angle(rHip, rKnee, rAnkle);
+  const kneeAngle  = (lKneeAngle + rKneeAngle) / 2;
+
+  if (squat_state === 'up' && kneeAngle < 105) {
+    squat_state = 'down';
+  } else if (squat_state === 'down' && kneeAngle > 155) {
+    squat_state = 'up';
+    squats++;
+    setCount(elSquat, squats);
+    flash('🏋️');
+  }
+
+  // ── Jump (hip height vs baseline) ────────────────────
+  hipSamples.push(hipY);
+  if (hipSamples.length > HIP_SAMPLES) hipSamples.shift();
+  if (hipSamples.length === HIP_SAMPLES && hipBaseline === null) {
+    hipBaseline = hipSamples.reduce((a,b)=>a+b,0) / HIP_SAMPLES;
+  }
+
+  if (hipBaseline !== null) {
+    // hipY decreases when person goes UP (0 = top of frame)
+    const delta = hipBaseline - hipY;
+    if (jump_state === 'ground' && delta > 0.07) {
+      jump_state = 'air';
+    } else if (jump_state === 'air' && delta < 0.02) {
+      jump_state = 'ground';
+      jumps++;
+      setCount(elJump, jumps);
+      flash('🦘');
+      // Update baseline slowly
+      hipBaseline = hipBaseline * 0.9 + hipY * 0.1;
+    }
+  }
+
+  // ── Arms raised (wrists above shoulders) ──────────────
+  if (!lShoulder || !rShoulder || !lWrist || !rWrist) return;
+  const armsUp = lWrist.y < lShoulder.y - 0.06 && rWrist.y < rShoulder.y - 0.06;
+
+  if (raise_state === 'down' && armsUp) {
+    raise_state = 'up';
+    raises++;
+    setCount(elRaise, raises);
+    flash('🙌');
+  } else if (raise_state === 'up' && !armsUp) {
+    raise_state = 'down';
+  }
+}
+
+// ── Draw skeleton ─────────────────────────────────────────
+const CYAN   = '#00e5ff';
+const GREEN  = '#39ff14';
+const ORANGE = '#ff9100';
+
+// Custom connections split by body part
+const CONN_TORSO  = [[11,12],[11,23],[12,24],[23,24]];
+const CONN_LARM   = [[11,13],[13,15]];
+const CONN_RARM   = [[12,14],[14,16]];
+const CONN_LLEG   = [[23,25],[25,27]];
+const CONN_RLEG   = [[24,26],[26,28]];
+const CONN_FACE   = [[0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10]];
+
+function drawSkeleton(lm) {
+  ctxS.clearRect(0, 0, W, H);
+
+  function mirrorX(nx) { return (1 - nx) * W; }
+  function scaleY(ny)  { return ny * H; }
+
+  function drawLine(a, b, color, w=3) {
+    if (!lm[a] || !lm[b]) return;
+    if (lm[a].visibility < 0.4 || lm[b].visibility < 0.4) return;
+    ctxS.beginPath();
+    ctxS.moveTo(mirrorX(lm[a].x), scaleY(lm[a].y));
+    ctxS.lineTo(mirrorX(lm[b].x), scaleY(lm[b].y));
+    ctxS.strokeStyle = color;
+    ctxS.lineWidth = w;
+    ctxS.shadowColor = color;
+    ctxS.shadowBlur = 10;
+    ctxS.stroke();
+  }
+
+  function drawDot(i, color, r=6) {
+    if (!lm[i] || lm[i].visibility < 0.4) return;
+    ctxS.beginPath();
+    ctxS.arc(mirrorX(lm[i].x), scaleY(lm[i].y), r, 0, Math.PI*2);
+    ctxS.fillStyle = color;
+    ctxS.shadowColor = color;
+    ctxS.shadowBlur = 14;
+    ctxS.fill();
+  }
+
+  ctxS.shadowBlur = 0;
+
+  CONN_TORSO.forEach(([a,b])  => drawLine(a,b, CYAN,   3.5));
+  CONN_FACE.forEach(([a,b])   => drawLine(a,b, 'rgba(0,229,255,0.4)', 1.5));
+  CONN_LARM.forEach(([a,b])   => drawLine(a,b, GREEN,  3));
+  CONN_RARM.forEach(([a,b])   => drawLine(a,b, GREEN,  3));
+  CONN_LLEG.forEach(([a,b])   => drawLine(a,b, ORANGE, 3));
+  CONN_RLEG.forEach(([a,b])   => drawLine(a,b, ORANGE, 3));
+
+  // Key joints
+  [11,12].forEach(i => drawDot(i, CYAN,   7));
+  [13,14].forEach(i => drawDot(i, GREEN,  6));
+  [15,16].forEach(i => drawDot(i, GREEN,  6));
+  [23,24].forEach(i => drawDot(i, CYAN,   7));
+  [25,26].forEach(i => drawDot(i, ORANGE, 6));
+  [27,28].forEach(i => drawDot(i, ORANGE, 6));
+  drawDot(0, 'rgba(255,255,255,0.7)', 5); // nose
+
+  ctxS.shadowBlur = 0;
+}
+
+// ── MediaPipe Pose ────────────────────────────────────────
+const pose = new Pose({
+  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`
+});
+
+pose.setOptions({
+  modelComplexity: 1,
+  smoothLandmarks: true,
+  enableSegmentation: false,
+  minDetectionConfidence: 0.6,
+  minTrackingConfidence: 0.5,
+});
+
+pose.onResults(results => {
+  // Draw mirrored video
+  ctxV.clearRect(0, 0, W, H);
+  ctxV.save();
+  ctxV.translate(W, 0);
+  ctxV.scale(-1, 1);
+  ctxV.drawImage(results.image, 0, 0, W, H);
+  ctxV.restore();
+
+  if (results.poseLandmarks?.length) {
+    drawSkeleton(results.poseLandmarks);
+    detectGestures(results.poseLandmarks);
+    statusEl.textContent = '🟢 Тело обнаружено';
+    statusEl.className = 'active';
+  } else {
+    ctxS.clearRect(0, 0, W, H);
+    statusEl.textContent = '🚶 Встань перед камерой полностью';
+    statusEl.className = '';
+  }
+});
+
+// ── Camera ────────────────────────────────────────────────
+let currentDeviceId = null;
+let camInstance = null;
+
+async function startCamera(deviceId) {
+  if (camInstance) { camInstance.stop(); camInstance = null; }
+  currentDeviceId = deviceId || null;
+  const constraints = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' };
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: constraints });
+    video.srcObject = stream;
+    await video.play();
+  } catch(e) {
+    statusEl.textContent = `❌ Ошибка камеры: ${e.message}`;
+    return;
+  }
+  camInstance = new Camera(video, {
+    onFrame: async () => { await pose.send({ image: video }); },
+    width: 1280, height: 720,
+  });
+  camInstance.start()
+    .then(() => { statusEl.textContent = '🚶 Встань перед камерой полностью'; })
+    .catch(err => { statusEl.textContent = `❌ ${err.message}`; });
+}
+
+// Camera selector
+const camBtn  = document.getElementById('camBtn');
+const camMenu = document.getElementById('cam-menu');
+
+async function renderCamList() {
+  const devices = await navigator.mediaDevices.enumerateDevices().catch(()=>[]);
+  const cams = devices.filter(d => d.kind === 'videoinput');
+  camMenu.innerHTML = '';
+  if (!cams.length) { camMenu.innerHTML = '<div class="cam-opt">Камеры не найдены</div>'; return; }
+  cams.forEach((cam, i) => {
+    const label = cam.label || `Камера ${i+1}`;
+    const el = document.createElement('div');
+    el.className = 'cam-opt' + (cam.deviceId === currentDeviceId ? ' active' : '');
+    el.textContent = label;
+    el.onclick = () => { camMenu.classList.remove('open'); startCamera(cam.deviceId); };
+    camMenu.appendChild(el);
+  });
+}
+
+camBtn.addEventListener('click', async () => {
+  if (camMenu.classList.contains('open')) { camMenu.classList.remove('open'); return; }
+  await renderCamList();
+  camMenu.classList.add('open');
+});
+
+document.addEventListener('click', e => {
+  if (!camMenu.contains(e.target) && e.target !== camBtn)
+    camMenu.classList.remove('open');
+});
+
+startCamera(null);
+</script>
+</body>
+</html>
