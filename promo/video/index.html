@@ -362,7 +362,7 @@ function hud(t) {
 function sTerm(t) {
   const lt = t; const a = 1 - seg(t, ENTER_T + 0.05, ENTER_T + 0.25);
   // window
-  const wx = W / 2 - 520, wy = H / 2 - 120, ww = 1040, wh = 240;
+  const wx = W / 2 - 640, wy = H / 2 - 150, ww = 1280, wh = 300;
   const appear = eOutX(seg(t, 0.1, 0.7));
   ctx.save(); ctx.globalAlpha = appear * a; ctx.translate(W / 2, H / 2); ctx.scale(lerp(0.92, 1, appear) + t * 0.01, lerp(0.92, 1, appear) + t * 0.01); ctx.translate(-W / 2, -H / 2);
   glass(wx, wy, ww, wh, 22, 0.9);
@@ -370,17 +370,17 @@ function sTerm(t) {
   text('terminal — nk://career', wx + ww / 2, wy + 30, 15, { f: FM, w: 500, c: 'rgba(170,200,255,0.7)' });
   let n = 0; for (const tt of TYPE_T) if (t >= tt) n++;
   const s = CMD.slice(0, n);
-  ctx.font = `600 44px ${FM}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-  const tx = wx + 60, ty = wy + 140;
+  ctx.font = `600 60px ${FM}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const tx = wx + 70, ty = wy + 170;
   ctx.fillStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 16;
   ctx.fillText(s.slice(0, 1), tx, ty); ctx.fillStyle = C.white; ctx.fillText(s.slice(1), tx + ctx.measureText('>').width, ty);
   const cw = ctx.measureText(s).width;
-  if (Math.floor(t * 2.4) % 2 === 0 || (n > 0 && n < CMD.length)) { ctx.fillStyle = C.cyan; ctx.fillRect(tx + cw + 6, ty - 24, 22, 48); }
+  if (Math.floor(t * 2.4) % 2 === 0 || (n > 0 && n < CMD.length)) { ctx.fillStyle = C.cyan; ctx.fillRect(tx + cw + 8, ty - 32, 30, 64); }
   ctx.restore();
 }
 // command chars -> particles -> logo
 function cmdCharPos(i) { // screen position of CMD char i (approx, monospace 44px ~26.4px)
-  return [W / 2 - 520 + 60 + i * 26.4 + 13, H / 2 + 20];
+  return [W / 2 - 640 + 70 + i * 36 + 18, H / 2 + 20];
 }
 const LP = (() => { const r = rng(5); return LOGO_PTS.map((p, i) => ({ tx: p[0], ty: p[1], src: (r() * CMD.length) | 0, ang: r() * 6.283, sp: 200 + r() * 900, del: r() * 0.7, g: GLYPHS[(r() * GLYPHS.length) | 0], zr: (r() - 0.5) * 900 })); })();
 function sLogo(t) {
@@ -694,8 +694,8 @@ function sTeam(t) {
       glass(-380, -260, 760, 520, 40, 1); icon(ic, 0, -80, 1, t); text(l1, 0, 95, 44, { w: 900, grad: true }); text(l2, 0, 165, 54, { w: 900, c: C.cyan });
       ctx.restore(); continue;
     }
-    if (t < t0 - 0.05 || t > t1 + 0.5) continue;
-    const pin = eOutX(seg(t, t0, t0 + 0.45)), pout = eInX(seg(t, t1 - 0.05, t1 + 0.4));
+    if (t < t0 + 0.1 || (i < 4 && t > t1 + 0.1)) continue;
+    const pin = eOutX(seg(t, t0 + 0.1, t0 + 0.5)), pout = eInX(seg(t, t1 - 0.2, t1 + 0.1));
     const [dx, dy] = dirs[i];
     ctx.save();
     const x = W / 2 + dx * (1 - pin) * 1300, y = H / 2 + 20 + dy * (1 - pin) * 900;
@@ -747,7 +747,7 @@ function sBuild(t) {
     ctx.save(); ctx.translate(W / 2, H / 2); const z = 1 + dive * 6; ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
     // title left
     ctx.globalAlpha = 1 - dive;
-    text('100%', 560 - ph * 0, 300, lerp(260, 120, ph), { w: 900, grad: true, glow: 50 });
+    text('100%', 600, 300, lerp(210, 120, ph), { w: 900, grad: true, glow: 50 });
     kinetic('СБОРКА ЗАВЕРШЕНА', 560, 420, 40, 56.15, t, { mode: 'slide', stag: 0.02, w: 800, c: C.cyan, glow: 14 });
     kinetic('ГАРАНТИРОВАННОЕ', 560, 600, 64, 57.4, t, { mode: 'slide', stag: 0.025, gradFill: true, glow: 20 });
     kinetic('ТРУДОУСТРОЙСТВО', 560, 690, 64, 57.6, t, { mode: 'slide', stag: 0.025, gradFill: true, glow: 20 });
@@ -784,7 +784,7 @@ function sCta(t) {
   const lineY = lerp(H / 2, 230, eIOX(seg(t, 60.75, 61.15)));
   ctx.fillStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 14; ctx.fillText(CMD2.slice(0, n) + (Math.floor(t * 3) % 2 ? '▍' : ' '), W / 2, lineY); ctx.shadowBlur = 0;
   // letters
-  kinetic(CTA, W / 2, H / 2 - 20, 240, 61.0, t, { mode: 'drop', stag: 0.25, dur: 0.45, gradFill: true, c2: '#79A6FF', glow: 50 });
+  kinetic(CTA, W / 2, H / 2 - 20, 200, 61.0, t, { mode: 'drop', stag: 0.25, dur: 0.45, gradFill: true, c2: '#79A6FF', glow: 50 });
   // site + QR
   const sp = eOutX(seg(t, 63.2, 63.8));
   ctx.save(); ctx.globalAlpha *= sp; ctx.translate(0, (1 - sp) * 40);
