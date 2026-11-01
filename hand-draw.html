@@ -122,6 +122,50 @@
   }
   .clear-btn:hover { background: rgba(248, 81, 73, 0.28); }
 
+  .cam-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .cam-btn:hover { background: rgba(255,255,255,0.15); color: var(--fg); }
+
+  #cam-select {
+    position: fixed;
+    top: max(60px, calc(env(safe-area-inset-top, 0px) + 54px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 10px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 240px;
+    max-width: calc(100vw - 32px);
+  }
+  #cam-select.open { display: flex; }
+  .cam-option {
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--fg);
+    border: 1px solid transparent;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .cam-option:hover { background: rgba(255,255,255,0.1); }
+  .cam-option.active { border-color: var(--accent); color: var(--accent); }
+
   /* ── Status banner ────────────────────────────────────── */
   #status {
     position: fixed;
@@ -189,7 +233,11 @@
   <div class="hint"><strong>✌️</strong>Стереть</div>
 </div>
 
+<div id="cam-select"></div>
+
 <div id="toolbar">
+  <button class="cam-btn" id="camBtn">📷 Камера</button>
+  <div class="sep"></div>
   <label class="color-swatch" id="swatchBox" title="Цвет">
     <input type="color" id="colorPicker" value="#3fb950">
   </label>
@@ -385,17 +433,79 @@ hands.onResults(results => {
   }
 });
 
-/* ── Camera ──────────────────────────────────────────────── */
-const camera = new Camera(video, {
-  onFrame: async () => { await hands.send({ image: video }); },
-  width: 1280,
-  height: 720
+/* ── Camera selection ────────────────────────────────────── */
+let currentDeviceId = null;
+let camInstance = null;
+const camBtn    = document.getElementById('camBtn');
+const camSelect = document.getElementById('cam-select');
+
+async function listCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter(d => d.kind === 'videoinput');
+  } catch { return []; }
+}
+
+async function startCamera(deviceId) {
+  if (camInstance) { camInstance.stop(); camInstance = null; }
+  currentDeviceId = deviceId || null;
+
+  const constraints = deviceId
+    ? { deviceId: { exact: deviceId } }
+    : { facingMode: 'user' };
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: constraints });
+    video.srcObject = stream;
+    await video.play();
+  } catch(e) {
+    statusEl.textContent = `❌ Ошибка камеры: ${e.message}`;
+    return;
+  }
+
+  camInstance = new Camera(video, {
+    onFrame: async () => { await hands.send({ image: video }); },
+    width: 1280, height: 720
+  });
+  camInstance.start()
+    .then(() => { statusEl.textContent = '✋ Покажи руку перед камерой'; })
+    .catch(err => { statusEl.textContent = `❌ ${err.message}`; });
+}
+
+async function renderCamList() {
+  const cameras = await listCameras();
+  camSelect.innerHTML = '';
+  if (!cameras.length) {
+    camSelect.innerHTML = '<div class="cam-option">Камеры не найдены</div>';
+    return;
+  }
+  cameras.forEach((cam, i) => {
+    const label = cam.label || `Камера ${i + 1}`;
+    const el = document.createElement('div');
+    el.className = 'cam-option' + (cam.deviceId === currentDeviceId ? ' active' : '');
+    el.textContent = label;
+    el.onclick = () => {
+      camSelect.classList.remove('open');
+      startCamera(cam.deviceId);
+    };
+    camSelect.appendChild(el);
+  });
+}
+
+camBtn.addEventListener('click', async () => {
+  if (camSelect.classList.contains('open')) {
+    camSelect.classList.remove('open');
+  } else {
+    await renderCamList();
+    camSelect.classList.add('open');
+  }
 });
 
-camera.start()
-  .then(() => { statusEl.textContent = '✋ Покажи руку перед камерой'; })
-  .catch(err => {
-    statusEl.textContent = `❌ Нет доступа к камере: ${err.message}`;
-    statusEl.style.color = '#f85149';
-  });
+document.addEventListener('click', e => {
+  if (!camSelect.contains(e.target) && e.target !== camBtn)
+    camSelect.classList.remove('open');
+});
+
+/* ── Start default camera ────────────────────────────────── */
+startCamera(null);
 </script>
