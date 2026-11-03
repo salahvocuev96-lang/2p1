@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* Дизайн-токены по гербу колледжа: королевский синий щит + золото лавровых ветвей */
+@theme {
+  --color-brand-950: #061a33;
+  --color-brand-900: #0a2540;
+  --color-brand-800: #12305c;
+  --color-brand-700: #1e3a8a;
+  --color-brand-600: #2747a8;
+  --color-brand-100: #e3e9f7;
+  --color-brand-50: #f1f4fb;
+  --color-gold-600: #d97706;
+  --color-gold-500: #f59e0b;
+  --color-gold-400: #fbbf24;
+  --color-gold-100: #fef3c7;
+  --color-gold-50: #fffbeb;
+  --color-page: #f8fafc;
+  --color-ink: #0f1e36;
+  --color-muted: #5b6b82;
+  --color-line: #e3e8ef;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --shadow-card: 0 1px 2px rgb(10 37 64 / 0.04), 0 4px 16px -6px rgb(10 37 64 / 0.08);
+}
+
+html, body { background: var(--color-page); color: var(--color-ink); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+/* Аккуратные полосы прокрутки в таблицах журнала */
+.scroll-x { overflow-x: auto; scrollbar-width: thin; }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
