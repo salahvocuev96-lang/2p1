@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:pages": "BASE_PATH=/2p1/app next build && rm -rf ../app && cp -r out ../app",
     "start": "npx serve out",
     "lint": "tsc --noEmit"
   },
