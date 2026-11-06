@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useViewer } from "../useViewer";
-import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select, MiniStat, cx } from "@/components/ui";
+import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select, MiniStat, cx, StatGrid } from "@/components/ui";
 import { Modal } from "@/components/feedback";
 import { formatShort, monthPeriod, MONTHS, semesterByNumber, yearPeriod, academicYear, toISO, type Period } from "@/lib/dates";
 import { average, finalGrade, gradesOf } from "@/lib/stats";
@@ -61,12 +61,12 @@ export function StudentGrades() {
           </div>
         }
       />
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <StatGrid className="mb-5 grid-cols-2 lg:grid-cols-4">
         <MiniStat icon="star" tone="gold" label={`Средний · ${period.label}`} value={total === null ? "-" : total.toFixed(2).replace(".", ",")} />
         <MiniStat icon="chart" label="За учебный год" value={yearAvg === null ? "-" : yearAvg.toFixed(2).replace(".", ",")} />
         <MiniStat icon="check" tone="green" label="Оценок за период" value={rows.reduce((a, r) => a + r.list.length, 0)} />
         <MiniStat icon="book" label="Предметов" value={rows.length} />
-      </div>
+      </StatGrid>
       <Card>
         {rows.length === 0 ? <Empty title="Нет предметов" /> : (
           <ul className="divide-y divide-line">
